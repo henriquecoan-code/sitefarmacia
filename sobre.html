@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobre Nós - Farmácia São Benedito</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+  <div id="header-container"></div>
+  <main class="container mx-auto px-4 py-8 min-h-[60vh]">
+    <h1 class="text-3xl font-bold text-blue-900 mb-6 flex items-center"><i class="fas fa-info-circle mr-2"></i>Sobre Nós</h1>
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+      <p class="text-lg text-gray-700 mb-4">
+        A <span class="font-bold text-blue-700">Farmácia São Benedito</span> é referência em saúde, cuidado e confiança em toda a região. Atuando há mais de 20 anos, oferecemos uma ampla variedade de medicamentos, dermocosméticos, vitaminas, produtos de higiene e muito mais, sempre com atendimento humanizado e preços justos.
+      </p>
+      <p class="text-gray-600 mb-2">
+        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Equipe qualificada e pronta para te ajudar
+      </p>
+      <p class="text-gray-600 mb-2">
+        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Entrega rápida e segura para toda a cidade
+      </p>
+      <p class="text-gray-600 mb-2">
+        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Atendimento presencial, online e por telefone
+      </p>
+      <p class="text-gray-600 mb-2">
+        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Promoções exclusivas e programa de fidelidade
+      </p>
+      <p class="text-gray-600 mb-2">
+        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Compromisso com sua saúde e bem-estar
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-xl font-semibold text-blue-800 mb-2">Nossa Missão</h2>
+        <p class="text-gray-700">Promover saúde, bem-estar e qualidade de vida, oferecendo produtos e serviços farmacêuticos com ética, respeito e excelência.</p>
+      </div>
+      <div>
+        <h2 class="text-xl font-semibold text-blue-800 mb-2">Nossa Visão</h2>
+        <p class="text-gray-700">Ser reconhecida como a farmácia mais confiável e inovadora da região, superando as expectativas dos nossos clientes.</p>
+      </div>
+    </div>
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold text-blue-800 mb-2">Nossos Valores</h2>
+      <ul class="list-disc pl-6 text-gray-700">
+        <li>Ética e transparência</li>
+        <li>Respeito ao cliente</li>
+        <li>Inovação e melhoria contínua</li>
+        <li>Compromisso social</li>
+        <li>Responsabilidade ambiental</li>
+      </ul>
+    </div>
+  </main>
+  <div id="footer-container"></div>
+  <script type="module">
+    import { loadHeader } from './js/header-loader.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHeader('header-container', 'authContainerSecondary').then(() => {
+        fetch('partials/footer.html').then(res => res.text()).then(html => {
+          const footer = document.getElementById('footer-container');
+          if (footer) footer.innerHTML = html;
+        });
+      });
+    });
+  </script>
+</body>
+</html>

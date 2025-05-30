@@ -1,0 +1,77 @@
+<!-- partials/footer.html -->
+<footer class="bg-gray-900 text-white pt-12 pb-6">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      
+      <!-- Coluna 1: Sobre -->
+      <div>
+        <h3 class="text-xl font-bold text-blue-400 mb-4">Farmácia São Benedito</h3>
+        <p class="mb-4">Há mais de 20 anos cuidando da saúde da nossa comunidade.</p>
+        <div class="flex space-x-4">
+          <a href="https://wa.me/SEU_NUMERO" class="text-blue-400 hover:text-blue-300 text-xl" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="https://instagram.com/SEU_PERFIL" class="text-blue-400 hover:text-blue-300 text-xl" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Coluna 2: Links -->
+      <div>
+        <h3 class="text-xl font-bold mb-4">Institucional</h3>
+        <ul class="space-y-2">
+          <li><a href="sobre.html" class="hover:text-blue-400">Sobre Nós</a></li>
+          <li><a href="contato.html" class="hover:text-blue-400">Contato</a></li>
+          <li><a href="politica-privacidade.html" class="hover:text-blue-400">Política de Privacidade</a></li>
+          <li><a href="termos-uso.html" class="hover:text-blue-400">Termos de Uso</a></li>
+        </ul>
+      </div>
+      
+      <!-- Coluna 3: Contato -->
+      <div>
+        <h3 class="text-xl font-bold mb-4">Atendimento</h3>
+        <ul class="space-y-2">
+          <li><i class="fas fa-phone-alt mr-2"></i> (48) 3464-3201</li>
+          <li><i class="fas fa-envelope mr-2"></i> fciasaobenedito@gmail.com</li>
+          <li><i class="fas fa-map-marker-alt mr-2"></i> Rua Exemplo, 123 - Centro</li>
+        </ul>
+      </div>
+      
+      <!-- Coluna 4: Pagamentos -->
+      <div>
+        <h3 class="text-xl font-bold mb-4">Pagamentos</h3>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-white p-2 rounded flex justify-center">
+            <img src="img/pix-logo.png" alt="Pix" class="h-6">
+          </div>
+          <div class="bg-white p-2 rounded flex justify-center">
+            <img src="img/visa-logo.png" alt="Visa" class="h-6">
+          </div>
+          <div class="bg-white p-2 rounded flex justify-center">
+            <img src="img/mastercard-logo.png" alt="Mastercard" class="h-6">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Rodapé inferior -->
+    <div class="border-t border-gray-800 pt-6 text-center">
+      <p class="text-gray-400 text-sm">
+        © <span id="current-year"></span> Farmácia São Benedito. Todos os direitos reservados.
+      </p>
+    </div>
+  </div>
+  <div id="authContainer"></div>
+</footer>
+
+<!-- Script para ano atual -->
+<script>
+  const yearElement = document.getElementById('current-year');
+  if (yearElement) {
+    yearElement.textContent = new Date().getFullYear();
+  }
+</script>
+<script type="module">
+    import { auth } from './js/firebase-config.js';
+</script>

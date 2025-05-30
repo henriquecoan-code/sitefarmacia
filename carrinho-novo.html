@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmácia Online - Carrinho</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script>
+        // Inicialização global do Firebase para todos os scripts
+        fetch('./js/firebase-config.js')
+            .then(res => res.text())
+            .then(txt => {
+                // Extrai o objeto firebaseConfig do arquivo
+                const match = txt.match(/firebaseConfig\s*=\s*({[\s\S]*?})/);
+                if (match) {
+                    // eslint-disable-next-line no-eval
+                    const firebaseConfig = eval('(' + match[1] + ')');
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                }
+                // Chama função global após inicialização
+                if (window.onFirebaseReady) window.onFirebaseReady();
+            });
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .skeleton { animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="header-container"></div>
+    <main class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold text-blue-900 mb-8">Meu Carrinho</h2>
+        <div id="cart-list" class="space-y-6"></div>
+        <div id="cart-total" class="text-right mt-8 text-2xl font-bold text-blue-900"></div>
+        <div id="empty-cart" class="text-center text-gray-500 mt-16 hidden">
+            <i class="fas fa-shopping-cart text-5xl mb-4"></i>
+            <p>Seu carrinho está vazio.</p>
+        </div>
+        <div class="mt-12">
+            <h3 class="text-xl font-bold text-blue-900 mb-4">Informações do Pedido</h3>
+            <div id="enderecos-container" class="mb-2">
+                <label for="endereco-select" class="block mb-1 font-semibold">Endereço de Entrega</label>
+                <select id="endereco-select" class="border p-2 w-full rounded"></select>
+            </div>
+            <textarea id="observacoes" placeholder="Observações (opcional)" class="border p-2 w-full mb-2 rounded"></textarea>
+            <select id="pagamento" class="border p-2 w-full mb-4 rounded">
+                <option value="">Forma de Pagamento</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão">Cartão</option>
+                <option value="Dinheiro">Dinheiro</option>
+            </select>
+        </div>
+        <div class="mt-8 flex justify-end gap-4">
+            <button id="limpar-carrinho" class="bg-gray-300 text-gray-800 px-6 py-3 rounded hover:bg-gray-400 transition font-bold">Limpar Carrinho</button>
+            <button id="finalizar-compra" class="bg-blue-700 text-white px-6 py-3 rounded hover:bg-blue-800 transition font-bold" disabled>Finalizar Compra</button>
+        </div>
+    </main>
+    <div id="footer-container"></div>
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        function renderCart() {
+            const cartList = document.getElementById('cart-list');
+            const cartTotal = document.getElementById('cart-total');
+            const emptyCart = document.getElementById('empty-cart');
+            const finalizarBtn = document.getElementById('finalizar-compra');
+            cartList.innerHTML = '';
+            let total = 0;
+            if (cart.length === 0) {
+                emptyCart.classList.remove('hidden');
+                cartTotal.textContent = '';
+                finalizarBtn.disabled = true;
+                return;
+            } else {
+                emptyCart.classList.add('hidden');
+                finalizarBtn.disabled = false;
+            }
+            cart.forEach((item, idx) => {
+                const subtotal = item.quantidade * (item.valorComDesconto || item.precoMaximo || 0);
+                total += subtotal;
+                const el = document.createElement('div');
+                el.className = "flex flex-col md:flex-row items-center bg-white rounded-lg shadow p-4 gap-4";
+                el.innerHTML = `
+                    <img src="http://localhost:3000${(item.fotos && item.fotos.length > 0 && item.fotos[0]) ? item.fotos[0] : '/uploads/medicamento.png'}"
+                        alt="${item.nome}" class="w-24 h-24 object-contain rounded bg-gray-100" 
+                        onerror="this.onerror=null;this.src='http://localhost:3000/uploads/medicamento.png';">
+                    <div class="flex-1 w-full">
+                        <h3 class="font-semibold text-lg">${item.nome}</h3>
+                        <p class="text-gray-500 text-sm mb-2">${item.descricao || ''}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <button class="bg-gray-200 px-2 rounded text-lg font-bold" onclick="updateQty(${idx}, -1)">-</button>
+                            <span class="mx-2">${item.quantidade}</span>
+                            <button class="bg-gray-200 px-2 rounded text-lg font-bold" onclick="updateQty(${idx}, 1)">+</button>
+                            <span class="ml-4 text-blue-700 font-bold">R$ ${(item.valorComDesconto || item.precoMaximo).toFixed(2)}</span>
+                            <button class="ml-6 text-red-600 hover:text-red-800" onclick="removeItem(${idx})">
+                                <i class="fas fa-trash"></i> Remover
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-right font-bold text-lg w-32">
+                        Subtotal:<br>R$ ${subtotal.toFixed(2)}
+                    </div>
+                `;
+                cartList.appendChild(el);
+            });
+            cartTotal.textContent = `Total: R$ ${total.toFixed(2)}`;
+        }
+        function updateQty(idx, delta) {
+            if (cart[idx]) {
+                cart[idx].quantidade += delta;
+                if (cart[idx].quantidade < 1) cart[idx].quantidade = 1;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }
+        }
+        function removeItem(idx) {
+            cart.splice(idx, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+        document.getElementById('finalizar-compra').addEventListener('click', async () => {
+            // Validação obrigatória da forma de pagamento
+            const pagamento = document.getElementById('pagamento').value;
+            if (!['Pix','Cartão','Dinheiro'].includes(pagamento)) {
+                alert('Por favor, selecione a forma de pagamento.');
+                document.getElementById('pagamento').focus();
+                return;
+            }
+            // Aguarda o estado de autenticação estar pronto antes de prosseguir
+            function getCurrentUser() {
+                return new Promise(resolve => {
+                    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+                        unsubscribe();
+                        resolve(user);
+                    });
+                });
+            }
+            const user = await getCurrentUser();
+            if (!user) {
+                alert('Você precisa estar logado para finalizar a compra.');
+                return;
+            }
+            // Carregar endereços e pegar selecionado
+            const enderecoSelect = document.getElementById('endereco-select');
+            let endereco = { rua: '', numero: '', bairro: '', cidade: '', complemento: '' };
+            let enderecoId = enderecoSelect && enderecoSelect.value;
+            if (!enderecoId) {
+                alert('Selecione um endereço de entrega.');
+                return;
+            }
+            const db = firebase.firestore();
+            if (enderecoId === 'principal-doc') {
+                // Buscar campo principal do doc
+                const docUser = await db.collection('usuarios').doc(user.uid).get();
+                if (docUser.exists && docUser.data().endereco) {
+                    endereco = docUser.data().endereco;
+                } else {
+                    alert('Endereço principal não encontrado.');
+                    return;
+                }
+            } else {
+                // Buscar endereço na subcoleção
+                const docEnd = await db.collection('usuarios').doc(user.uid).collection('enderecos').doc(enderecoId).get();
+                if (docEnd.exists) {
+                    endereco = docEnd.data();
+                } else {
+                    alert('Endereço selecionado não encontrado.');
+                    return;
+                }
+            }
+            // Corrigido: buscar nome, telefone e email do usuário autenticado
+            let nomeUsuario = '';
+            let telefone = '';
+            let emailUsuario = '';
+            if (user.displayName) nomeUsuario = user.displayName;
+            if (user.email) emailUsuario = user.email;
+            try {
+                const db = firebase.firestore();
+                const doc = await db.collection('usuarios').doc(user.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.nome) nomeUsuario = data.nome;
+                    if (data.telefone) telefone = data.telefone;
+                }
+            } catch (e) {}
+            const observacoes = document.getElementById('observacoes').value;
+            try {
+                const db = firebase.firestore();
+                const doc = await db.collection('usuarios').doc(user.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.telefone) telefone = data.telefone;
+                }
+            } catch (e) {}
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let total = 0;
+            const produtos = cart.map(item => {
+                const preco = item.valorComDesconto || item.precoMaximo || 0;
+                const subtotal = preco * item.quantidade;
+                total += subtotal;
+                return {
+                    nome: item.nome,
+                    quantidade: item.quantidade,
+                    valor: preco.toFixed(2),
+                    subtotal: subtotal.toFixed(2)
+                };
+            });
+            // Gera número de pedido crescente
+            let lastOrderNumber = parseInt(localStorage.getItem('lastOrderNumber') || '0', 10);
+            lastOrderNumber += 1;
+            localStorage.setItem('lastOrderNumber', lastOrderNumber);
+            const numeroPedido = lastOrderNumber;
+
+            const dataPedido = new Date().toLocaleString('pt-BR');
+
+            // Salva o pedido no Firestore
+            try {
+                const db = firebase.firestore();
+                await db.collection('pedidos').add({
+                    numeroPedido,
+                    dataPedido,
+                    userId: user.uid,
+                    nomeUsuario,
+                    emailUsuario,
+                    telefone,
+                    endereco,
+                    observacoes,
+                    pagamento,
+                    produtos,
+                    total: total.toFixed(2),
+                    status: 'Pendente'
+                });
+            } catch (e) {
+                alert('Erro ao salvar pedido no servidor.');
+                return;
+            }
+
+            let txt = `Nº Pedido: ${numeroPedido} | Data: ${dataPedido}\n`;
+            txt += `Nome: ${nomeUsuario}\n`;
+            if (emailUsuario) txt += `E-mail: ${emailUsuario}\n`;
+            txt += `Telefone: ${telefone}\n`;
+            txt += `Endereço:\n`;
+            txt += `\tRua: ${endereco.rua || ''}\n`;
+            txt += `\tNº: ${endereco.numero || ''}\n`;
+            txt += `\tBairro: ${endereco.bairro || ''}\n`;
+            txt += `\tCidade: ${endereco.cidade || ''}\n`;
+            if (endereco.complemento) txt += `\tComplemento: ${endereco.complemento}\n`;
+            txt += `Observações: ${observacoes || 'Nenhuma'}\n\n`;
+            txt += `Qnt | Produto | Vlr un | Vlr total\n`;
+            produtos.forEach(p => {
+                txt += `${p.quantidade} | ${p.nome} | R$ ${p.valor} | R$ ${p.subtotal}\n`;
+            });
+            txt += `\n\tTotal: R$ ${total.toFixed(2)}\n`;
+            txt += `Forma de pagamento: ${pagamento}\n`;
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `pedido-${numeroPedido}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        document.getElementById('limpar-carrinho').addEventListener('click', () => {
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        });
+        renderCart();
+        window.updateQty = updateQty;
+        window.removeItem = removeItem;
+    </script>
+    <script type="module">
+        import { handleAuthState } from './js/auth-handler.js';
+        fetch('partials/header.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('header-container').innerHTML = html;
+                handleAuthState('authContainerSecondary');
+            });
+        fetch('partials/footer.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('footer-container').innerHTML = html;
+            });
+    </script>
+    <script>
+        // Função para carregar endereços do usuário
+        async function carregarEnderecosUsuario() {
+            const enderecoSelect = document.getElementById('endereco-select');
+            enderecoSelect.innerHTML = '<option value="">Carregando endereços...</option>';
+            let enderecos = [];
+            let principal = null;
+            let user = null;
+            await new Promise(resolve => {
+                const unsub = firebase.auth().onAuthStateChanged(u => { user = u; unsub(); resolve(); });
+            });
+            if (!user) {
+                enderecoSelect.innerHTML = '<option value="">Faça login para selecionar endereço</option>';
+                enderecoSelect.disabled = true;
+                return;
+            }
+            const db = firebase.firestore();
+            // Busca subcoleção de endereços
+            const sub = await db.collection('usuarios').doc(user.uid).collection('enderecos').get();
+            sub.forEach(doc => {
+                const data = doc.data();
+                enderecos.push({ id: doc.id, ...data });
+            });
+            // Busca campo principal do doc, se não houver nenhum endereço principal na subcoleção
+            const docUser = await db.collection('usuarios').doc(user.uid).get();
+            if (docUser.exists && docUser.data().endereco) {
+                principal = docUser.data().endereco;
+            }
+            // Ordena: principal=true primeiro, depois os outros
+            enderecos.sort((a, b) => (b.principal === true) - (a.principal === true));
+            enderecoSelect.innerHTML = '';
+            if (enderecos.length > 0) {
+                enderecos.forEach((e, idx) => {
+                    let txt = `${e.rua || ''}, ${e.numero || ''} - ${e.bairro || ''}, ${e.cidade || ''}${e.complemento ? ' ('+e.complemento+')' : ''}`;
+                    enderecoSelect.innerHTML += `<option value="${e.id}">${e.principal ? '[Principal] ' : ''}${txt}</option>`;
+                });
+            } else if (principal) {
+                let txt = `${principal.rua || ''}, ${principal.numero || ''} - ${principal.bairro || ''}, ${principal.cidade || ''}${principal.complemento ? ' ('+principal.complemento+')' : ''}`;
+                enderecoSelect.innerHTML = `<option value="principal-doc">${txt}</option>`;
+            } else {
+                enderecoSelect.innerHTML = '<option value="">Nenhum endereço cadastrado</option>';
+                enderecoSelect.disabled = true;
+            }
+        }
+        // Só chama após Firebase estar pronto
+        window.onFirebaseReady = function() {
+            carregarEnderecosUsuario();
+        };
+
+        // Habilita/desabilita botão finalizar conforme pagamento
+        const pagamentoSelect = document.getElementById('pagamento');
+        const finalizarBtn = document.getElementById('finalizar-compra');
+        pagamentoSelect.addEventListener('change', () => {
+            finalizarBtn.disabled = !['Pix','Cartão','Dinheiro'].includes(pagamentoSelect.value);
+        });
+    </script>
+</body>
+</html>

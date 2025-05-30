@@ -1,0 +1,6 @@
+id;codigo;nome;descricao;precoMaximo;valorComDesconto;categoria;subcategoria;estoque;fotos;desconto
+1;7,89123E+12;Paracetamol 750mg;Analgésico para dores e febre;2250;1990;Medicamentos;Analgésicos;100;paracetamol750mg.png;12
+2;7,89123E+12;Shampoo Anticaspa;Shampoo para controle de caspa;1800;1500;Higiene Pessoal;Shampoo;50;produto2.jpg;17
+3;7,89123E+12;Vitamina C 1g;Suplemento de vitamina C;3000;2500;Vitaminas;Suplementos;80;produto3.jpg;17
+4;;Sonridor caf c/4;Sonridor Caf 4cp;7000;6000;Medicamentos;Analgésicos;10;;12
+;;;;;;;;;;

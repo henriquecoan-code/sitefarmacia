@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmácia São Benedito</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body>
+  <script type="module">
+    import { auth } from './js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    const authContainer = document.getElementById('authContainerSecondary');
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('Usuário logado:', user);
+        authContainer.innerHTML = `
+          <div class="text-center relative">
+            <a href="#" class="text-gray-700 hover:text-blue-700">
+              <i class="fas fa-user text-xl"></i>
+              <p class="text-xs">${user.displayName || user.email.split('@')[0]}</p>
+            </a>
+            <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50 border border-gray-200">
+              <div class="px-4 py-2 border-b">
+                <p class="text-sm font-medium text-gray-800">${user.displayName || 'Usuário'}</p>
+                <p class="text-xs text-gray-500 truncate">${user.email}</p>
+              </div>
+              <a href="minha-conta.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Minha Conta</a>
+              <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sair</a>
+            </div>
+          </div>
+        `;
+
+        // Adiciona evento de logout
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            await auth.signOut();
+            window.location.reload();
+          } catch (error) {
+            console.error('Erro ao sair:', error);
+          }
+        });
+      } else {
+        console.log('Nenhum usuário logado.');
+        authContainer.innerHTML = `
+          <a href="#" id="loginBtn" class="text-gray-700 hover:text-blue-700">
+            <i class="fas fa-user text-xl"></i>
+            <p class="text-xs">Entrar</p>
+          </a>
+          <a href="#" id="registerBtn" class="text-gray-700 hover:text-blue-700">
+            <p class="text-xs">Cadastrar</p>
+          </a>
+        `;
+      }
+    });
+  </script>
+  <script type="module">
+    import { auth } from '../js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    // Verifica o estado de autenticação
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('Usuário logado:', user);
+        console.log('Usuário atual (auth.currentUser):', auth.currentUser);
+      } else {
+        console.log('Nenhum usuário logado.');
+      }
+    });
+
+    // Tentativa de acessar auth.currentUser diretamente (não recomendado fora de onAuthStateChanged)
+    console.log('Usuário atual fora de onAuthStateChanged:', auth.currentUser);
+  </script>
+  <script type="module">
+    import { auth } from '../js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    const authContainerSecondary = document.getElementById('authContainer');
+    console.log('authContainer:', authContainer);
+
+    // Atualiza a interface do usuário com base no estado de autenticação
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const safeName = user.displayName || 'Usuário';
+        const safeEmail = user.email || 'E-mail não disponível';
+        authContainer.innerHTML = `
+          <div>Bem-vindo, ${safeName} (${safeEmail})</div>
+          <a href="#" id="logoutBtn">Sair</a>
+        `;
+
+        // Adiciona evento de logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            await auth.signOut();
+            alert('Você saiu!');
+          } catch (error) {
+            console.error('Erro ao sair:', error);
+          }
+        });
+      } else {
+        authContainer.innerHTML = `
+          <a href="login.html">Entrar</a>
+          <a href="cadastro.html">Cadastrar</a>
+        `;
+      }
+    });
+  </script>
+  <script type="module">
+    import { auth } from '../js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('Usuário logado:', user);
+        console.log('auth.currentUser:', auth.currentUser);
+      } else {
+        console.log('Nenhum usuário logado.');
+      }
+    });
+  </script>
+  <script type="module">
+    import { auth } from '../js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('authContainer');
+      console.log('authContainer:', authContainer);
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log('Usuário logado:', user);
+          authContainer.innerHTML = `
+            <div>Bem-vindo, ${user.displayName || 'Usuário'} (${user.email})</div>
+            <a href="#" id="logoutBtn">Sair</a>
+          `;
+        } else {
+          console.log('Nenhum usuário logado.');
+          authContainer.innerHTML = `
+            <a href="login.html">Entrar</a>
+            <a href="cadastro.html">Cadastrar</a>
+          `;
+        }
+      });
+    });
+  </script>
+  <script type="module">
+    import { auth } from '../js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('authContainer');
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log('Usuário logado:', user);
+          authContainer.innerHTML = `
+            <div>Bem-vindo, ${user.displayName || 'Usuário'} (${user.email})</div>
+            <a href="#" id="logoutBtn">Sair</a>
+          `;
+
+          document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+              await auth.signOut();
+              console.log('Usuário deslogado com sucesso.');
+              window.location.reload();
+            } catch (error) {
+              console.error('Erro ao deslogar:', error);
+            }
+          });
+        } else {
+          console.log('Nenhum usuário logado.');
+          authContainer.innerHTML = `
+            <a href="login.html">Entrar</a>
+            <a href="cadastro.html">Cadastrar</a>
+          `;
+        }
+      });
+    });
+  </script>
+  <script type="module">
+    import { auth } from './js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('authContainerSecondary');
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log('Usuário logado:', user);
+          authContainer.innerHTML = `
+            <div class="text-center relative">
+              <a href="#" class="text-gray-700 hover:text-blue-700">
+                <i class="fas fa-user text-xl"></i>
+                <p class="text-xs">${user.displayName || user.email.split('@')[0]}</p>
+              </a>
+              <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50 border border-gray-200">
+                <div class="px-4 py-2 border-b">
+                  <p class="text-sm font-medium text-gray-800">${user.displayName || 'Usuário'}</p>
+                  <p class="text-xs text-gray-500 truncate">${user.email}</p>
+                </div>
+                <a href="minha-conta.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Minha Conta</a>
+                <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sair</a>
+              </div>
+            </div>
+          `;
+
+          // Adiciona evento de logout
+          document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+              await auth.signOut();
+              window.location.reload();
+            } catch (error) {
+              console.error('Erro ao sair:', error);
+            }
+          });
+        } else {
+          console.log('Nenhum usuário logado.');
+          authContainer.innerHTML = `
+            <a href="#" id="loginBtn" class="text-gray-700 hover:text-blue-700">
+              <i class="fas fa-user text-xl"></i>
+              <p class="text-xs">Entrar</p>
+            </a>
+            <a href="#" id="registerBtn" class="text-gray-700 hover:text-blue-700">
+              <p class="text-xs">Cadastrar</p>
+            </a>
+          `;
+        }
+      });
+    });
+  </script>
+<!-- Top Bar -->
+<div class="bg-blue-900 text-white py-2 px-4 text-sm">
+  <div class="container mx-auto flex justify-between items-center">
+    <div class="flex space-x-4">
+      <span><i class="fas fa-phone-alt mr-1"></i> (48) 3464-3201</span>
+      <span><i class="fas fa-envelope mr-1"></i> fciasaobenedito@gmail.com</span>
+    </div>
+  </div>
+</div>
+<!-- Faixa de aviso de e-mail não confirmado -->
+<div id="email-warning-bar" class="hidden bg-yellow-400 text-yellow-900 text-center text-sm py-1 w-full">
+  <span><i class="fas fa-exclamation-triangle mr-2"></i>Seu e-mail ainda não foi confirmado. Confirme seu e-mail para finalizar suas compras.</span>
+</div>
+
+<!-- Header Principal -->
+<header class="bg-white shadow-md sticky top-0 z-50">
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+  <script type="module" src="./js/firebase-config.js"></script>
+
+  <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between">
+    <!-- Logo e Nome -->
+    <div class="flex items-center">
+      <img src="img/logo.png" width="75" height="75" alt="Home" />
+      <div class="ml-2.5">
+        <span class="text-2xl font-bold text-blue-900">Farmácia São Benedito</span>
+      </div>
+    </div>
+    <!-- Barra de Busca Centralizada -->
+    <div class="relative w-full md:w-1/3 mx-auto my-4 md:my-0">
+      <input type="text" placeholder="Buscar medicamentos, produtos..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <button class="absolute right-0 top-0 h-full px-4 text-white bg-blue-700 rounded-r-full hover:bg-blue-800">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+    <!-- Sistema de Autenticação, Favoritos e Carrinho -->
+    <div class="flex items-center space-x-6">
+      <!-- Auth/User Info -->
+      <div id="authContainerSecondary" class="text-center relative"></div>
+      <!-- Favoritos -->
+      <div class="text-center">
+        <a href="#" class="text-gray-700 hover:text-blue-700">
+          <i class="fas fa-heart text-xl"></i>
+          <p class="text-xs">Favoritos</p>
+        </a>
+      </div>
+
+      <!-- Carrinho -->
+      <div class="text-center relative group">
+        <a href="./carrinho-novo.html" id="cart-icon" class="text-gray-700 hover:text-blue-700">
+          <i class="fas fa-shopping-cart text-xl"></i>
+          <p class="text-xs">Carrinho</p>
+          <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </a>
+        <div id="mini-cart" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md z-50 p-4 border border-gray-200">
+          <h4 class="font-bold border-b pb-2 text-gray-800">Seu Carrinho</h4>
+          <div id="cart-items" class="py-2 text-sm text-gray-600"></div>
+          <button class="mt-2 w-full bg-blue-700 text-white py-1 rounded hover:bg-blue-800 text-sm">Finalizar Compra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegação -->
+  <nav class="bg-blue-800 text-white">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="dropdown relative py-3 px-4 hover:bg-blue-900 cursor-pointer">
+          <span class="flex items-center">
+            <i class="fas fa-bars mr-2"></i> Categorias
+          </span>
+          <div class="dropdown-menu absolute left-0 mt-2 w-56 bg-white text-gray-800 shadow-lg rounded-md hidden z-50">
+            <a href="./index.html" class="block px-4 py-2 hover:bg-blue-50 border-b border-gray-100">Medicamentos</a>
+            <a href="./produtos.html" class="block px-4 py-2 hover:bg-blue-50 border-b border-gray-100">Dermocosméticos</a>
+            <a href="#" class="block px-4 py-2 hover:bg-blue-50 border-b border-gray-100">Vitaminas e Suplementos</a>
+            <a href="#" class="block px-4 py-2 hover:bg-blue-50 border-b border-gray-100">Mamãe e Bebê</a>
+            <a href="#" class="block px-4 py-2 hover:bg-blue-50">Higiene Pessoal</a>
+          </div>
+        </div>
+
+        <div class="hidden md:flex space-x-1">
+          <a href="./index.html" class="nav-link py-3 px-4 hover:bg-blue-900">Home</a>
+          <a href="./produto.html" class="nav-link py-3 px-4 hover:bg-blue-900">Produtos</a>
+          <a href="./ofertas.html" class="nav-link py-3 px-4 hover:bg-blue-900">Ofertas</a>
+          <a href="./sobre.html" class="nav-link py-3 px-4 hover:bg-blue-900">Sobre Nós</a>
+          <a href="./contato.html" class="nav-link py-3 px-4 hover:bg-blue-900">Contato</a>
+        </div>
+
+        <div class="md:hidden py-3 px-4">
+          <button id="mobile-menu-button" class="text-white focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden bg-blue-900 md:hidden">
+        <a href="./index.html" class="block py-2 px-4 hover:bg-blue-800">Home</a>
+        <a href="./produto.html" class="block py-2 px-4 hover:bg-blue-800">Produtos</a>
+        <a href="#" class="block py-2 px-4 hover:bg-blue-800">Ofertas</a>
+        <a href="./sobre.html" class="block py-2 px-4 hover:bg-blue-800">Sobre Nós</a>
+        <a href="./contato.html" class="block py-2 px-4 hover:bg-blue-800">Contato</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Modal de Login/Cadastro -->
+  <div id="auth-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200">
+    <div id="auth-modal" class="bg-white rounded-lg shadow-xl w-full max-w-md relative p-8">
+      <button id="close-auth-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button>
+      <div id="auth-modal-content"></div>
+    </div>
+  </div>
+  <script>
+  // Modal login/cadastro dinâmico
+  function openAuthModal(type) {
+    const overlay = document.getElementById('auth-modal-overlay');
+    const content = document.getElementById('auth-modal-content');
+    overlay.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    if (type === 'login') {
+      content.innerHTML = `
+        <h2 class='text-xl font-bold mb-4 text-blue-900'>Entrar</h2>
+        <form id='login-form' class='space-y-4'>
+          <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
+          <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
+          <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Entrar</button>
+        </form>
+        <p class='mt-4 text-sm'>Não tem conta? <a href='#' class='text-blue-700 underline' id='open-cadastro-link'>Cadastre-se</a></p>
+      `;
+    } else {
+      content.innerHTML = `
+        <h2 class='text-xl font-bold mb-4 text-blue-900'>Cadastrar</h2>
+        <form id='cadastro-form' class='space-y-4'>
+          <input type='text' placeholder='Nome' class='w-full border rounded px-3 py-2' required />
+          <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
+          <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
+          <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Cadastrar</button>
+        </form>
+        <p class='mt-4 text-sm'>Já tem conta? <a href='#' class='text-blue-700 underline' id='open-login-link'>Entrar</a></p>
+      `;
+    }
+    // Adiciona listeners para alternar entre login/cadastro
+    setTimeout(() => {
+      const cadastroLink = document.getElementById('open-cadastro-link');
+      if (cadastroLink) cadastroLink.onclick = (e) => { e.preventDefault(); openAuthModal('cadastro'); };
+      const loginLink = document.getElementById('open-login-link');
+      if (loginLink) loginLink.onclick = (e) => { e.preventDefault(); openAuthModal('login'); };
+    }, 10);
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    // Abrir modal ao clicar em Entrar/Cadastrar
+    document.body.addEventListener('click', function(e) {
+      if (e.target.id === 'loginBtn') {
+        e.preventDefault();
+        openAuthModal('login');
+      }
+      if (e.target.id === 'registerBtn') {
+        e.preventDefault();
+        openAuthModal('cadastro');
+      }
+    });
+    // Fechar modal
+    document.getElementById('close-auth-modal').onclick = function() {
+      document.getElementById('auth-modal-overlay').classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    };
+    // Fechar ao clicar fora do modal
+    document.getElementById('auth-modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    });
+  });
+  </script>
+
+  <!-- Script de Autenticação -->
+    <div id="authContainer" class="flex space-x-4">
+</body>
+</html>
+
+<script>
+fetch('partials/header.html')
+  .then((response) => response.text())
+  .then((html) => {
+    const headerContainer = document.getElementById('header-container');
+    headerContainer.innerHTML = html;
+
+    // Atualiza o estado de autenticação no header
+    const authContainer = document.getElementById('authContainerSecondary');
+
+    import('./js/firebase-config.js').then(({ auth }) => {
+      import('https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js').then(({ onAuthStateChanged }) => {
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            authContainer.innerHTML = `
+              <div class="text-center relative group">
+                <a href="#" class="text-gray-700 hover:text-blue-700">
+                  <i class="fas fa-user text-xl"></i>
+                  <p class="text-xs">${user.displayName || user.email.split('@')[0]}</p>
+                </a>
+                <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50 border border-gray-200">
+                  <div class="px-4 py-2 border-b">
+                    <p class="text-sm font-medium text-gray-800">${user.displayName || 'Usuário'}</p>
+                    <p class="text-xs text-gray-500 truncate">${user.email}</p>
+                  </div>
+                  <a href="minha-conta.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Minha Conta</a>
+                  <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sair</a>
+                </div>
+              </div>
+            `;
+
+            // Adiciona evento de logout
+            document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+              e.preventDefault();
+              try {
+                await auth.signOut();
+                window.location.reload();
+              } catch (error) {
+                console.error('Erro ao sair:', error);
+              }
+            });
+
+            // Exibe e oculta o dropdown ao passar o mouse
+            const userContainer = authContainer.querySelector('.group');
+            const userDropdown = document.getElementById('userDropdown');
+
+            userContainer.addEventListener('mouseover', () => {
+              userDropdown.classList.remove('hidden');
+            });
+
+            userContainer.addEventListener('mouseout', () => {
+              userDropdown.classList.add('hidden');
+            });
+          } else {
+            authContainer.innerHTML = `
+              <a href="#" id="loginBtn" class="text-gray-700 hover:text-blue-700">
+                <i class="fas fa-user text-xl"></i>
+                <p class="text-xs">Entrar</p>
+              </a>
+              <a href="#" id="registerBtn" class="text-gray-700 hover:text-blue-700">
+                <p class="text-xs">Cadastrar</p>
+              </a>
+            `;
+          }
+        });
+      });
+    });
+  })
+  .catch((error) => console.error('Erro ao carregar o header:', error));
+</script>
+<script type="module">
+import { auth } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+onAuthStateChanged(auth, (user) => {
+  const warningBar = document.getElementById('email-warning-bar');
+  if (user && user.emailVerified === false) {
+    warningBar.classList.remove('hidden');
+  } else {
+    warningBar.classList.add('hidden');
+  }
+});
+</script>

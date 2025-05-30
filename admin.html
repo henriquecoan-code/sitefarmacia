@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração - Farmácia São Benedito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body class="min-h-screen flex flex-col">
+  <div id="header-container"></div>
+  <div class="flex flex-1">
+    <!-- Aside Menu Padronizado -->
+    <aside class="w-64 bg-white shadow-lg min-h-screen">
+      <div class="p-6 border-b">
+        <h2 class="text-xl font-bold text-blue-900">Administração</h2>
+      </div>
+      <nav class="flex flex-col space-y-2 p-6">
+        <a href="admin.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-blue-900 font-bold"><i class="fas fa-user-shield mr-2"></i>Administradores</a>
+        <a href="admin_produtos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-pills mr-2"></i>Produtos</a>
+        <a href="admin-pedidos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-clipboard-list mr-2"></i>Pedidos</a>
+      </nav>
+    </aside>
+    <main class="flex-1 p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-blue-900">Administradores</h1>
+        <button id="btnAddAdmin" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">
+          <i class="fas fa-plus mr-2"></i>Adicionar Administrador
+        </button>
+      </div>
+      <div id="admins-list" class="bg-white rounded shadow p-4">
+        <table class="min-w-full">
+          <thead>
+            <tr>
+              <th class="text-left py-2 px-4">Nome</th>
+              <th class="text-left py-2 px-4">Email</th>
+              <th class="text-left py-2 px-4">Tipo</th>
+              <th class="text-left py-2 px-4">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="admins-tbody">
+            <!-- Os administradores serão carregados via JS -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  <div id="footer-container"></div>
+
+  <!-- Modal de cadastro -->
+  <div id="modalAddAdmin" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="modal-bg absolute inset-0"></div>
+    <div class="bg-white rounded-lg shadow-lg p-8 z-10 w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4 text-blue-900">Tornar Usuário Administrador</h2>
+      <form id="formAddAdmin" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email do Usuário</label>
+          <input type="email" id="adminEmail" class="mt-1 block w-full border rounded px-3 py-2" required>
+        </div>
+        <div class="flex justify-end space-x-2">
+          <button type="button" id="btnCancel" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded bg-blue-700 text-white hover:bg-blue-800">Tornar Admin</button>
+        </div>
+        <div id="adminFeedback" class="text-sm mt-2"></div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, setDoc, doc, collection, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { firebaseConfig } from './js/firebase-config.js';
+    import { loadHeader } from './js/header-loader.js';
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Carregar header/footer e só então carregar admins
+    async function carregarHeaderFooter() {
+      await loadHeader('header-container', 'authContainerSecondary');
+      await fetch('./partials/footer.html').then(r=>r.text()).then(h=>{document.getElementById('footer-container').innerHTML=h});
+    }
+
+    // Função para listar apenas administradores (Firestore)
+    async function carregarAdministradores() {
+      const tbody = document.getElementById('admins-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="4" class="py-2 px-4 text-center text-gray-500">Carregando...</td></tr>`;
+      try {
+        // Busca todos os usuários com role == "admin" no Firestore
+        const q = query(collection(db, "usuarios"), where("role", "==", "admin"));
+        const querySnapshot = await getDocs(q);
+        console.log('QuerySnapshot size:', querySnapshot.size); // <-- LOG
+        let html = "";
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          console.log('Admin encontrado:', data); // <-- LOG
+          html += `
+            <tr>
+              <td class="py-2 px-4">${data.nome || ''}</td>
+              <td class="py-2 px-4">${data.email || ''}</td>
+              <td class="py-2 px-4">Administrador</td>
+              <td class="py-2 px-4"><button class="text-red-600 hover:underline" data-uid="${docSnap.id}" data-email="${data.email}">Remover</button></td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html || `<tr><td colspan="4" class="py-2 px-4 text-center text-gray-500">Nenhum administrador encontrado.</td></tr>`;
+      } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-2 px-4 text-center text-red-600">Erro ao carregar administradores.</td></tr>`;
+        console.error('Erro ao carregar administradores:', error); // <-- LOG
+      }
+    }
+
+    // Inicialização única
+    async function initAdminPage() {
+      await carregarHeaderFooter();
+      const auth = getAuth();
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          // Força atualização do token para garantir custom claims
+          await user.getIdToken(true);
+          carregarAdministradores();
+        } else {
+          const tbody = document.getElementById('admins-tbody');
+          if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="py-2 px-4 text-center text-red-600">Faça login como administrador para ver os administradores.</td></tr>`;
+        }
+      });
+
+      // Modal lógica
+      const btnAddAdmin = document.getElementById('btnAddAdmin');
+      const modal = document.getElementById('modalAddAdmin');
+      const btnCancel = document.getElementById('btnCancel');
+      btnAddAdmin.onclick = () => { modal.classList.remove('hidden'); };
+      btnCancel.onclick = () => { modal.classList.add('hidden'); };
+      modal.querySelector('.modal-bg').onclick = () => { modal.classList.add('hidden'); };
+
+      // Tornar usuário admin (alterar role no Firestore)
+      document.getElementById('formAddAdmin').onsubmit = async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('adminEmail').value.trim();
+        const feedback = document.getElementById('adminFeedback');
+        feedback.textContent = '';
+        feedback.className = 'text-sm mt-2';
+
+        if (!email) {
+          feedback.textContent = "Informe o email do usuário.";
+          feedback.className += " text-red-600";
+          return;
+        }
+
+        try {
+          // Buscar usuário pelo email
+          const q = query(collection(db, "usuarios"), where("email", "==", email));
+          const querySnapshot = await getDocs(q);
+          if (querySnapshot.empty) {
+            feedback.textContent = "Usuário não encontrado.";
+            feedback.className += " text-red-600";
+            return;
+          }
+          // Atualizar role para admin
+          const userDoc = querySnapshot.docs[0];
+          await updateDoc(doc(db, "usuarios", userDoc.id), { role: "admin" });
+
+          feedback.textContent = "Usuário promovido a administrador!";
+          feedback.className += " text-green-600";
+          this.reset();
+          setTimeout(() => {
+            modal.classList.add('hidden');
+            feedback.textContent = '';
+            carregarAdministradores(); // Atualiza a lista após promoção
+          }, 1200);
+        } catch (error) {
+          feedback.textContent = "Erro: " + (error.message || error);
+          feedback.className += " text-red-600";
+        }
+      };
+
+      // Remover admin (atualiza role para user no Firestore)
+      document.getElementById('admins-tbody').onclick = async function(e) {
+        if (e.target.tagName === 'BUTTON') {
+          const uid = e.target.getAttribute('data-uid');
+          if (!uid) return;
+          try {
+            await updateDoc(doc(db, "usuarios", uid), { role: "user" });
+            carregarAdministradores();
+          } catch (error) {
+            alert("Erro ao remover administrador: " + (error.message || error));
+          }
+        }
+      };
+    }
+
+    // Chama inicialização ao carregar página
+    window.addEventListener('DOMContentLoaded', initAdminPage);
+  </script>
+</body>
+</html>

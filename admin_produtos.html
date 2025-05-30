@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração de Produtos - Farmácia São Benedito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body class="min-h-screen flex flex-col">
+  <div id="header-container"></div>
+  <div class="flex flex-1">
+    <!-- Aside Menu Padronizado -->
+    <aside class="w-64 bg-white shadow-lg min-h-screen">
+      <div class="p-6 border-b">
+        <h2 class="text-xl font-bold text-blue-900">Administração</h2>
+      </div>
+      <nav class="flex flex-col space-y-2 p-6">
+        <a href="admin.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-user-shield mr-2"></i>Administradores</a>
+        <a href="admin_produtos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-blue-900 font-bold"><i class="fas fa-pills mr-2"></i>Produtos</a>
+        <a href="admin-pedidos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-clipboard-list mr-2"></i>Pedidos</a>
+      </nav>
+    </aside>
+    <main class="flex-1 p-8">
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">
+            <div class="flex items-center">
+                <i id="toast-icon" class="mr-2"></i>
+                <span id="toast-message"></span>
+            </div>
+        </div>
+
+        <div class="w-full max-w-2xl mx-auto">
+            <div class="bg-white rounded-xl form-card overflow-hidden p-8">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-pills text-blue-600 text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">Cadastrar Novo Produto</h1>
+                    <p class="text-gray-600 mt-2">Preencha os campos abaixo para adicionar um produto ou faça upload em massa via CSV.</p>
+                </div>
+                <!-- Upload de CSV -->
+                <form id="formUploadCSV" class="mb-8" enctype="multipart/form-data">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Importar produtos via CSV</label>
+                    <input type="file" id="csvFile" name="csv" accept=".csv" class="mb-2" required>
+                    <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">Enviar CSV</button>
+                    <a href="produtos-modelo.csv" download class="ml-4 text-blue-600 underline text-sm">Baixar modelo CSV</a>
+                    <span id="csv-status" class="ml-4 text-sm"></span>
+                </form>
+                <!-- Formulário manual existente -->
+                <form id="formAdicionarProduto" class="space-y-4">
+                    <!-- Nome do Produto -->
+                    <div>
+                        <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+                        <input type="text" id="nome" name="nome" class="w-full rounded-lg border-gray-300" placeholder="Ex: Paracetamol 750mg" required>
+                    </div>
+                    
+                    <!-- Descrição -->
+                    <div>
+                        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                        <textarea id="descricao" name="descricao" rows="3" class="w-full rounded-lg border-gray-300" placeholder="Ex: Caixa com 20 comprimidos, indicado para dores e febre." required></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Preço Máximo -->
+                        <div>
+                            <label for="precoMaximo" class="block text-sm font-medium text-gray-700 mb-1">Preço Máximo (R$)</label>
+                            <input type="number" id="precoMaximo" name="precoMaximo" step="0.01" min="0" class="w-full rounded-lg border-gray-300" placeholder="Ex: 22.50" required>
+                        </div>
+                        
+                        <!-- Desconto (% de 0 a 1) -->
+                        <div>
+                            <label for="desconto" class="block text-sm font-medium text-gray-700 mb-1">Desconto (Ex: 0.1 para 10%)</label>
+                            <input type="number" id="desconto" name="desconto" step="0.01" min="0" max="1" class="w-full rounded-lg border-gray-300" placeholder="Ex: 0.10" required>
+                        </div>
+                    </div>
+
+                    <!-- Quantidade -->
+                    <div>
+                        <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade em Estoque</label>
+                        <input type="number" id="quantidade" name="quantidade" min="0" class="w-full rounded-lg border-gray-300" placeholder="Ex: 150" required>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <div>
+                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags (separadas por vírgula)</label>
+                        <input type="text" id="tags" name="tags" class="w-full rounded-lg border-gray-300" placeholder="Ex: analgésico, febre, dor de cabeça">
+                    </div>
+                    
+                    <!-- Fotos -->
+                    <div>
+                        <label for="fotos" class="block text-sm font-medium text-gray-700 mb-1">Fotos do Produto (múltiplas)</label>
+                        <input type="file" id="fotos" name="fotos" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" multiple>
+                    </div>
+                    
+                    <!-- Botão de Envio -->
+                    <div class="pt-4">
+                        <button type="submit" id="submitButton" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                            <i class="fas fa-plus-circle mr-2"></i> Adicionar Produto
+                        </button>
+                    </div>
+                </form>
+                <div id="produtos-lista" class="mt-10">
+                    <h2 class="text-xl font-bold mb-4">Produtos Cadastrados</h2>
+                    <div id="produtos-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+  </div>
+
+    <script>
+        // Aguarda DOM pronto antes de adicionar event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar header e footer
+            fetch('./partials/header.html')
+                .then(response => response.text())
+                .then(data => {
+                    const header = document.getElementById('header-container');
+                    if (header) header.innerHTML = data;
+                });
+            fetch('./partials/footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    const footer = document.getElementById('footer-container');
+                    if (footer) footer.innerHTML = data;
+                });
+            // Upload de CSV
+            const formUploadCSV = document.getElementById('formUploadCSV');
+            if (formUploadCSV) {
+                formUploadCSV.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const fileInput = document.getElementById('csvFile');
+                    const status = document.getElementById('csv-status');
+                    if (!fileInput || !fileInput.files.length) return;
+                    const formData = new FormData();
+                    formData.append('csv', fileInput.files[0]);
+                    if (status) status.textContent = 'Enviando...';
+                    try {
+                        const resp = await fetch('http://localhost:3000/produtos/upload-csv', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            if (status) status.textContent = `Importação concluída (${data.count} produtos)`;
+                            carregarProdutos();
+                        } else {
+                            if (status) status.textContent = data.error || 'Erro ao importar CSV';
+                        }
+                    } catch (err) {
+                        if (status) status.textContent = 'Erro ao enviar arquivo.';
+                    }
+                });
+            }
+            // Cadastro manual de produto
+            const formAdicionarProduto = document.getElementById('formAdicionarProduto');
+            if (formAdicionarProduto) {
+                formAdicionarProduto.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    const fotosInput = document.getElementById('fotos');
+                    for (let i = 0; fotosInput && i < fotosInput.files.length; i++) {
+                        formData.append('fotos', fotosInput.files[i]);
+                    }
+                    const submitBtn = document.getElementById('submitButton');
+                    if (submitBtn) submitBtn.disabled = true;
+                    try {
+                        const resp = await fetch('http://localhost:3000/produtos', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await resp.json();
+                        if (resp.ok) {
+                            mostrarToast('Produto cadastrado com sucesso!', true);
+                            form.reset();
+                            carregarProdutos();
+                        } else {
+                            mostrarToast(data.error || 'Erro ao cadastrar produto.', false);
+                        }
+                    } catch (err) {
+                        mostrarToast('Erro ao cadastrar produto.', false);
+                    }
+                    if (submitBtn) submitBtn.disabled = false;
+                });
+            }
+            // Toast helper
+            function mostrarToast(msg, sucesso) {
+                const toast = document.getElementById('toast');
+                const icon = document.getElementById('toast-icon');
+                const message = document.getElementById('toast-message');
+                if (message && icon && toast) {
+                    message.textContent = msg;
+                    icon.className = sucesso ? 'fas fa-check-circle text-green-600 mr-2' : 'fas fa-times-circle text-red-600 mr-2';
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                }
+            }
+            // Carregar produtos cadastrados
+            async function carregarProdutos() {
+                const container = document.getElementById('produtos-container');
+                if (!container) return;
+                container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
+                try {
+                    const resp = await fetch('http://localhost:3000/produtos');
+                    const produtos = await resp.json();
+                    if (!Array.isArray(produtos) || produtos.length === 0) {
+                        container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    produtos.forEach(prod => {
+                        const el = document.createElement('div');
+                        el.className = 'bg-gray-50 rounded-lg shadow p-4 mb-4 flex flex-col';
+                        // Usa imagem local do frontend se não houver foto
+                        let fotoSrc = (prod.fotos && prod.fotos[0]) ? prod.fotos[0] : '/img/medicamento.png';
+                        // Se for caminho do backend, mantém, senão usa local
+                        if (fotoSrc && !fotoSrc.startsWith('/uploads/') && !fotoSrc.startsWith('http')) {
+                            fotoSrc = '/img/medicamento.png';
+                        }
+                        el.innerHTML = `
+                            <div class='flex items-center gap-4'>
+                                <img src="${fotoSrc}" alt="${prod.nome}" class="w-16 h-16 object-contain rounded bg-white border" onerror="this.onerror=null;this.src='/img/medicamento.png';">
+                                <div>
+                                    <div class='font-bold text-blue-900'>${prod.nome}</div>
+                                    <div class='text-sm text-gray-600'>${prod.categoria || ''} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
+                                    <div class='text-xs text-gray-400'>Estoque: ${prod.quantidade || 0}</div>
+                                </div>
+                            </div>
+                            <div class='mt-2 text-sm text-gray-700'>${prod.descricao || ''}</div>
+                            <div class='mt-2 text-blue-700 font-bold'>R$ ${Number(prod.valorComDesconto || prod.precoMaximo).toFixed(2)}</div>
+                        `;
+                        container.appendChild(el);
+                    });
+                } catch (err) {
+                    container.innerHTML = '<div class="text-red-500">Erro ao carregar produtos.</div>';
+                }
+            }
+            // Inicializa lista ao abrir
+            carregarProdutos();
+        });
+    </script>
+</body>
+</html>

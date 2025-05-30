@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Farmácia São Benedito - Produtos farmacêuticos com atendimento personalizado e preços competitivos.">
+  <title>Farmácia São Benedito - Sua saúde em primeiro lugar</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+  <div id="header-container"></div>
+
+  <!-- Conteúdo principal -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white">
+      <div class="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2 mb-8 md:mb-0">
+          <h2 class="text-4xl md:text-5xl font-bold mb-4">Cuidando da sua saúde com excelência</h2>
+          <p class="text-xl mb-6">Na Farmácia São Benedito, você encontra os melhores produtos farmacêuticos com atendimento personalizado.</p>
+          <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+            <button class="bg-white text-blue-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300">
+              <i class="fas fa-shopping-basket mr-2"></i> Compre agora
+            </button>
+            <button class="border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-900 transition duration-300">
+              <i class="fas fa-info-circle mr-2"></i> Saiba mais
+            </button>
+          </div>
+        </div>
+        <div class="md:w-1/2 flex justify-center">
+          <img src="img/frente.jpg" alt="Farmacêutica" class="w-full max-w-md floating-button">
+        </div>
+      </div>
+    </section>
+
+    <!-- Produtos em Destaque -->
+    <section class="bg-gray-50 py-12">
+      <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-3xl font-bold text-blue-900">Produtos em Destaque</h2>
+          <a href="#" class="text-blue-700 hover:text-blue-900 font-semibold flex items-center">
+            Ver todos <i class="fas fa-chevron-right ml-2"></i>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <!-- Produto 1 -->
+          <div class="bg-white product-card rounded-lg overflow-hidden shadow-md transition duration-300">
+            <div class="relative">
+              <img src="img/produtos/produto1.jpg" alt="Paracetamol" class="w-full h-48 object-contain">
+              <span class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">-20%</span>
+            </div>
+            <div class="p-4">
+              <h3 class="font-semibold text-lg text-gray-800 mb-1">Paracetamol 750mg</h3>
+              <p class="text-gray-500 text-sm mb-2">Genérico - 10 comprimidos</p>
+              <div class="flex items-center mb-2">
+                <div class="flex text-yellow-400">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star-half-alt"></i>
+                </div>
+                <span class="text-gray-500 text-xs ml-1">(42)</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-gray-500 line-through text-sm">R$ 12,90</span>
+                  <p class="text-blue-700 font-bold text-xl">R$ 10,32</p>
+                </div>
+                <button class="bg-blue-700 text-white p-2 rounded-full hover:bg-blue-800">
+                  <i class="fas fa-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Outros produtos podem ser adicionados aqui -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer-container"></div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { loadHeader } from './js/header-loader.js';
+    // Carrega o header e gerencia a autenticação
+    loadHeader('header-container', 'authContainerSecondary');
+    // Carrega o footer
+    fetch('partials/footer.html').then(res => res.text()).then(html => {
+      document.getElementById('footer-container').innerHTML = html;
+    });
+  </script>
+</body>
+</html>
