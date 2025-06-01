@@ -141,7 +141,7 @@
           let msgEmpresa = '';
           let msgCliente = '';
           if (order.status === 'Pendente') {
-            msgEmpresa = `Pedido recebido!\n\n*Pedido #${order.numeroPedido}*\nCliente: ${order.nomeUsuario || ''}\n${order.emailUsuario ? 'Email: ' + order.emailUsuario + '\n' : ''}Telefone: ${order.telefone || ''}\nEndereço: Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''}${endereco.complemento ? ', ' + endereco.complemento : ''}\nForma de pagamento: ${order.pagamento || ''}\nObservações: ${order.observacoes || 'Nenhuma'}\n\nProdutos:\n${order.produtos.map(p => `- ${p.quantidade}x ${p.nome} (R$ ${p.valor})`).join('\n')}\n\nTotal: R$ ${order.total}`;
+            msgEmpresa = `Pedido recebido!%0A%0A*Pedido #${order.numeroPedido}*%0ACliente: ${order.nomeUsuario || ''}%0A${order.emailUsuario ? 'Email: ' + order.emailUsuario + '%0A' : ''}Telefone: ${order.telefone || ''}%0AEndereço: Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''}${endereco.complemento ? ', ' + endereco.complemento : ''}%0AForma de pagamento: ${order.pagamento || ''}%0AObservações: ${order.observacoes || 'Nenhuma'}%0A%0AProdutos:%0A${order.produtos.map(p => `- ${p.quantidade}x ${p.nome} (R$ ${p.valor})`).join('%0A')}%0A%0ATotal: R$ ${order.total}`;
             msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido foi recebido e está entrando em separação. Em breve entraremos em contato para entrega. Obrigado!`;
           } else if (order.status === 'Em Separação') {
             msgEmpresa = '';
@@ -162,11 +162,7 @@
           const waClienteBtn = msgCliente && telCliente.length >= 10 ? `<a href="https://wa.me/55${telCliente}?text=${encodeURIComponent(msgCliente)}" target="_blank" class="whatsapp-btn flex items-center justify-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" style="min-width:40px; min-height:32px;"><i class='fab fa-whatsapp'></i></a>` : '';
 
           // Botões lado a lado, separados por barra vertical
-          // Agora inclui a barra entre imprimir e WhatsApp, e alinhamento melhorado
-          let actionBtns = printBtn;
-          if (waEmpresaBtn || waClienteBtn) {
-            actionBtns += '<span class="mx-2 border-l h-6 border-gray-300"></span>' + whatsappBtns;
-          }
+          const whatsappBtns = `<div class='flex items-center gap-2 mt-2'>${waEmpresaBtn}${waEmpresaBtn && waClienteBtn ? '<span class="mx-1 border-l h-6 border-gray-300"></span>' : ''}${waClienteBtn}</div>`;
 
           const html = [
             '<div class="bg-white rounded-lg shadow p-4 border-2 ',
@@ -184,7 +180,8 @@
             novoBadge,
             '</div>',
             '<div class="flex items-center gap-2">',
-            actionBtns,
+            printBtn,
+            whatsappBtns,
             '<button type="button" aria-label="Ver detalhes" class="ml-2 focus:outline-none">',
             '<i id="arrow-', detailsId, '" class="fas fa-chevron-down transition-transform duration-200"></i>',
             '</button>',
