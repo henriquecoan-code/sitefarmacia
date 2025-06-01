@@ -128,6 +128,7 @@
           const statusSelect = `<select class="status-select border rounded px-2 py-1 text-sm" data-pedido-id="${pedidoDocId || ''}" style="min-width:120px;" ${!hasValidId ? 'disabled' : ''}>${statusOptions.map(opt => `<option value="${opt}"${order.status === opt ? ' selected' : ''}>${opt}</option>`).join('')}</select>`;
           const confirmBtn = hasValidId ? `<button class="ml-2 px-2 py-1 bg-blue-600 text-white rounded confirm-status-btn" data-pedido-id="${pedidoDocId}" data-current-status="${order.status}" style="font-size:0.9em;">Confirmar</button>` : `<button class="ml-2 px-2 py-1 bg-gray-400 text-white rounded cursor-not-allowed" disabled style="font-size:0.9em;">Confirmar</button><span class='ml-2 text-xs text-red-600'>ID do pedido inválido, não é possível atualizar o status.</span>`;
           const printBtn = `<button class="ml-2 px-2 py-1 bg-gray-200 text-blue-900 rounded print-pedido-btn" data-details-id="${detailsId}" data-pedido-id="${pedidoDocId}" title="Imprimir Pedido"><i class="fas fa-print"></i></button>`;
+<<<<<<< Updated upstream
 
           // WhatsApp buttons (empresa e cliente)
           // Telefones (ajuste para o número real da farmácia)
@@ -163,6 +164,9 @@
             <div>${waClienteBtn}</div>
           </div>`;
 
+=======
+          const novoBadge = isNovo ? '<span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded">Novo</span>' : '';
+>>>>>>> Stashed changes
           const html = [
             '<div class="bg-white rounded-lg shadow p-4 border-2 ',
             (isNovo ? 'border-green-500' : 'border-transparent'), '">',
@@ -180,7 +184,10 @@
             '</div>',
             '<div class="flex items-center gap-2">',
             printBtn,
+<<<<<<< Updated upstream
             whatsappBtns,
+=======
+>>>>>>> Stashed changes
             '<button type="button" aria-label="Ver detalhes" class="ml-2 focus:outline-none">',
             '<i id="arrow-', detailsId, '" class="fas fa-chevron-down transition-transform duration-200"></i>',
             '</button>',
@@ -370,8 +377,12 @@
         });
       });
 
+<<<<<<< Updated upstream
       // Chama busca de pedidos ao carregar
       fetchAllOrders();
+=======
+      checkAdminAndFetchOrders();
+>>>>>>> Stashed changes
     });
   </script>
   <script type="module">
