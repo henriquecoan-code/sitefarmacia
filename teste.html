@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração - Farmácia São Benedito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/estilo.css">
+    <!-- Firebase compat scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script type="module">
+      import { firebaseConfig } from './js/firebase-config.js';
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col">
+  <div id="header-container"></div>
+  <div class="flex flex-1">
+    <!-- Aside Menu Padronizado -->
+    <aside class="w-64 bg-white shadow-lg min-h-screen">
+      <div class="p-6 border-b">
+        <h2 class="text-xl font-bold text-blue-900">Administração</h2>
+      </div>
+      <nav class="flex flex-col space-y-2 p-6">
+        <a href="admin.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-user-shield mr-2"></i>Administradores</a>
+        <a href="admin_produtos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-pills mr-2"></i>Produtos</a>
+        <a href="admin-pedidos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-blue-900 font-bold"><i class="fas fa-clipboard-list mr-2"></i>Pedidos</a>
+      </nav>
+    </aside>
+    <main class="flex-1 p-8">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-blue-900 mb-8">Pedidos (Admin)</h1>
+        <div class="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+          <input id="filtro-busca" type="text" placeholder="Buscar por nome, email, telefone ou número do pedido..." class="border rounded px-3 py-2 w-full md:w-1/2" />
+          <select id="filtro-status" class="border rounded px-3 py-2 w-full md:w-48">
+            <option value="">Todos os Status</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Em Separação">Em Separação</option>
+            <option value="Enviado">Enviado</option>
+            <option value="Entregue">Entregue</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+          <input id="filtro-data" type="date" class="border rounded px-3 py-2 w-full md:w-48" />
+        </div>
+        <div id="loading" class="text-center text-gray-600">Carregando pedidos...</div>
+        <div id="error-message" class="bg-red-100 text-red-700 p-4 rounded mb-4 hidden"></div>
+        <div id="no-orders" class="text-center text-gray-500 mt-12 hidden">
+          <i class="fas fa-box-open text-5xl mb-4"></i>
+          <p>Nenhum pedido encontrado.</p>
+        </div>
+        <div id="orders-list" class="space-y-8"></div>
+        <div id="paginacao" class="flex justify-center items-center gap-2 mt-8"></div>
+      </div>
+    </main>
+  </div>
+  <div id="footer-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loading = document.getElementById('loading');
+      const errorMessage = document.getElementById('error-message');
+      const noOrders = document.getElementById('no-orders');
+      const ordersList = document.getElementById('orders-list');
+
+      let allOrders = [];
+      let currentPage = 1;
+      const pageSize = 8;
+      let pedidosVisualizados = JSON.parse(localStorage.getItem('pedidosVisualizados') || '{}');
+
+      // Função para verificar se o usuário é admin
+      function checkAdminAndFetchOrders() {
+        firebase.auth().onAuthStateChanged(async function(user) {
+          if (!user) {
+            showError('Faça login como administrador para ver os pedidos.');
+            return;
+          }
+          try {
+            const db = firebase.firestore();
+            const doc = await db.collection('usuarios').doc(user.uid).get();
+            if (!doc.exists || doc.data().role !== 'admin') {
+              showError('Acesso restrito: apenas administradores podem ver os pedidos.');
+              return;
+            }
+            fetchAllOrders();
+          } catch (e) {
+            showError('Erro ao verificar permissão de administrador.');
+          }
+        });
+      }
+
+      function showError(msg) {
+        if (loading) loading.classList.add('hidden');
+        if (errorMessage) {
+          errorMessage.textContent = msg;
+          errorMessage.classList.remove('hidden');
+        }
+      }
+
+      function renderOrders(orders) {
+        ordersList.innerHTML = '';
+        if (!orders.length) {
+          noOrders.classList.remove('hidden');
+          document.getElementById('paginacao').innerHTML = '';
+          return;
+        }
+        noOrders.classList.add('hidden');
+        // Paginação
+        const totalPages = Math.ceil(orders.length / pageSize);
+        if (currentPage > totalPages) currentPage = 1;
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pagedOrders = orders.slice(start, end);
+        // Renderiza pedidos
+        pagedOrders.forEach((order, idx) => {
+          const isNovo = order.status === 'Pendente' && !pedidosVisualizados[order.__docId];
+          const produtosHtml = order.produtos.map(p =>
+            `<tr><td class="px-2 py-1 text-center">${p.quantidade}</td><td class="px-2 py-1">${p.nome}</td><td class="px-2 py-1 text-right">R$ ${p.valor}</td><td class="px-2 py-1 text-right">R$ ${p.subtotal}</td></tr>`
+          ).join('');
+          const endereco = order.endereco || {};
+          const detailsId = `order-details-${start + idx}`;
+          const pedidoDocId = order.__docId;
+          const hasValidId = pedidoDocId && typeof pedidoDocId === 'string' && pedidoDocId.length > 0;
+          const statusOptions = [ 'Pendente', 'Em Separação', 'Enviado', 'Entregue', 'Cancelado' ];
+          const statusSelect = `<select class="status-select border rounded px-2 py-1 text-sm" data-pedido-id="${pedidoDocId || ''}" style="min-width:120px;" ${!hasValidId ? 'disabled' : ''}>${statusOptions.map(opt => `<option value="${opt}"${order.status === opt ? ' selected' : ''}>${opt}</option>`).join('')}</select>`;
+          const confirmBtn = hasValidId ? `<button class="ml-2 px-2 py-1 bg-blue-600 text-white rounded confirm-status-btn" data-pedido-id="${pedidoDocId}" data-current-status="${order.status}" style="font-size:0.9em;">Confirmar</button>` : `<button class="ml-2 px-2 py-1 bg-gray-400 text-white rounded cursor-not-allowed" disabled style="font-size:0.9em;">Confirmar</button><span class='ml-2 text-xs text-red-600'>ID do pedido inválido, não é possível atualizar o status.</span>`;
+          const printBtn = `<button class="ml-2 px-2 py-1 bg-gray-200 text-blue-900 rounded print-pedido-btn" data-details-id="${detailsId}" data-pedido-id="${pedidoDocId}" title="Imprimir Pedido"><i class="fas fa-print"></i></button>`;
+          const novoBadge = isNovo ? '<span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded">Novo</span>' : '';
+          const html = [
+            '<div class="bg-white rounded-lg shadow p-4 border-2 ',
+            (isNovo ? 'border-green-500' : 'border-transparent'), '">',
+            '<div class="flex items-center justify-between cursor-pointer" onclick="toggleOrderDetails(\'', detailsId, '\', \'', pedidoDocId, '\')">',
+            '<div>',
+            '<span class="font-bold text-blue-800">Pedido #', order.numeroPedido, '</span>',
+            '<span class="ml-4 text-gray-700 font-semibold">', order.nomeUsuario || 'Cliente', '</span>',
+            '<span class="ml-4 text-gray-500 text-sm">', order.dataPedido || '', '</span>',
+            '<span class="ml-4 px-3 py-1 rounded-full text-sm font-semibold ',
+            (order.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Cancelado' ? 'bg-red-100 text-red-700' : order.status === 'Entregue' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'), '">',
+            statusSelect,
+            confirmBtn,
+            '</span>',
+            novoBadge,
+            '</div>',
+            '<div class="flex items-center gap-2">',
+            printBtn,
+            '<button type="button" aria-label="Ver detalhes" class="ml-2 focus:outline-none">',
+            '<i id="arrow-', detailsId, '" class="fas fa-chevron-down transition-transform duration-200"></i>',
+            '</button>',
+            '</div>',
+            '</div>',
+            '<div id="', detailsId, '" class="hidden mt-4 print-area">',
+            '<div class="mb-2">',
+            '<span class="font-semibold">Nome:</span> ', order.nomeUsuario || '',
+            (order.emailUsuario ? '<span class="ml-4 font-semibold">Email:</span> ' + order.emailUsuario : ''),
+            '<span class="ml-4 font-semibold">Telefone:</span> ', order.telefone || '',
+            '</div>',
+            '<div class="mb-2">',
+            '<span class="font-semibold">Endereço:</span> Rua ', endereco.rua || '', ', Nº ', endereco.numero || '', ', ', endereco.bairro || '', ', ', endereco.cidade || '', (endereco.complemento ? ', ' + endereco.complemento : ''),
+            '</div>',
+            '<div class="mb-2">',
+            '<span class="font-semibold">Forma de pagamento:</span> ', order.pagamento || '',
+            '</div>',
+            '<div class="mb-2">',
+            '<span class="font-semibold">Observações:</span> ', order.observacoes || 'Nenhuma',
+            '</div>',
+            '<div class="overflow-x-auto mt-4">',
+            '<table class="min-w-full text-sm border">',
+            '<thead>',
+            '<tr class="bg-gray-100">',
+            '<th class="px-2 py-1">Qnt</th>',
+            '<th class="px-2 py-1">Produto</th>',
+            '<th class="px-2 py-1 text-right">Vlr un</th>',
+            '<th class="px-2 py-1 text-right">Vlr total</th>',
+            '</tr>',
+            '</thead>',
+            '<tbody>',
+            produtosHtml,
+            '</tbody>',
+            '</table>',
+            '</div>',
+            '<div class="text-right mt-4 text-xl font-bold text-blue-900">',
+            'Total: R$ ', order.total,
+            '</div>',
+            '</div>',
+            '</div>'
+          ].join('');
+          ordersList.insertAdjacentHTML('beforeend', html);
+        });
+        // Paginação
+        renderPaginacao(totalPages);
+        // Função global para toggle
+        window.toggleOrderDetails = function(id, pedidoDocId) {
+          const details = document.getElementById(id);
+          const arrow = document.getElementById('arrow-' + id);
+          if (details.classList.contains('hidden')) {
+            details.classList.remove('hidden');
+            if (arrow) arrow.classList.add('rotate-180');
+            // Marca como visualizado
+            if (pedidoDocId && !pedidosVisualizados[pedidoDocId]) {
+              pedidosVisualizados[pedidoDocId] = true;
+              localStorage.setItem('pedidosVisualizados', JSON.stringify(pedidosVisualizados));
+              // Atualiza visual
+              details.parentElement.classList.remove('border-green-500');
+              const badge = details.parentElement.querySelector('.bg-green-500');
+              if (badge) badge.remove();
+            }
+          } else {
+            details.classList.add('hidden');
+            if (arrow) arrow.classList.remove('rotate-180');
+          }
+        };
+        // Handler de alteração de status com botão Confirmar
+        document.querySelectorAll('.confirm-status-btn').forEach(btn => {
+          btn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            const pedidoDocId = this.getAttribute('data-pedido-id');
+            if (!pedidoDocId || typeof pedidoDocId !== 'string' || pedidoDocId.length === 0) {
+              alert('ID do pedido inválido. Não é possível atualizar o status.');
+              return;
+            }
+            const select = document.querySelector(`.status-select[data-pedido-id="${pedidoDocId}"]`);
+            const novoStatus = select.value;
+            if (novoStatus === this.getAttribute('data-current-status')) {
+              this.classList.add('bg-yellow-200');
+              setTimeout(() => this.classList.remove('bg-yellow-200'), 1000);
+              return;
+            }
+            try {
+              const db = firebase.firestore();
+              await db.collection('pedidos').doc(pedidoDocId).update({ status: novoStatus });
+              this.classList.add('bg-green-600');
+              setTimeout(() => this.classList.remove('bg-green-600'), 1200);
+              this.setAttribute('data-current-status', novoStatus);
+            } catch (err) {
+              this.classList.add('bg-red-600');
+              setTimeout(() => this.classList.remove('bg-red-600'), 1200);
+              alert('Erro ao atualizar status do pedido.');
+            }
+          });
+        });
+        // Handler de impressão
+        document.querySelectorAll('.print-pedido-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const detailsId = this.getAttribute('data-details-id');
+            const details = document.getElementById(detailsId);
+            if (details) {
+              const printWindow = window.open('', '', 'width=800,height=600');
+              printWindow.document.write('<html><head><title>Imprimir Pedido</title>');
+              printWindow.document.write('<link rel="stylesheet" href="https://cdn.tailwindcss.com">');
+              printWindow.document.write('</head><body>');
+              printWindow.document.write(details.innerHTML);
+              printWindow.document.write('</body></html>');
+              printWindow.document.close();
+              setTimeout(() => printWindow.print(), 300);
+            }
+          });
+        });
+      }
+
+      function renderPaginacao(totalPages) {
+        const paginacao = document.getElementById('paginacao');
+        if (!paginacao) return;
+        paginacao.innerHTML = '';
+        if (totalPages <= 1) return;
+        for (let i = 1; i <= totalPages; i++) {
+          const btn = document.createElement('button');
+          btn.textContent = i;
+          btn.className = 'px-3 py-1 rounded border ' + (i === currentPage ? 'bg-blue-700 text-white' : 'bg-white text-blue-700 hover:bg-blue-100');
+          btn.addEventListener('click', () => {
+            currentPage = i;
+            filtrarPedidos();
+          });
+          paginacao.appendChild(btn);
+        }
+      }
+
+      function filtrarPedidos() {
+        let filtrados = allOrders;
+        const busca = document.getElementById('filtro-busca').value.trim().toLowerCase();
+        const status = document.getElementById('filtro-status').value;
+        const data = document.getElementById('filtro-data').value;
+        if (busca) {
+          filtrados = filtrados.filter(p =>
+            (p.nomeUsuario && p.nomeUsuario.toLowerCase().includes(busca)) ||
+            (p.emailUsuario && p.emailUsuario.toLowerCase().includes(busca)) ||
+            (p.telefone && p.telefone.toLowerCase().includes(busca)) ||
+            (p.numeroPedido && String(p.numeroPedido).includes(busca))
+          );
+        }
+        if (status) {
+          filtrados = filtrados.filter(p => p.status === status);
+        }
+        if (data) {
+          filtrados = filtrados.filter(p => (p.dataPedido || '').slice(0, 10) === data.split('-').reverse().join('/'));
+        }
+        renderOrders(filtrados);
+      }
+
+      // Firebase Auth & Firestore
+      const db = firebase.firestore();
+
+      // Busca todos os pedidos (admin)
+      async function fetchAllOrders() {
+        try {
+          let snapshot;
+          try {
+            snapshot = await db.collection('pedidos').orderBy('numeroPedido', 'desc').get();
+          } catch (err) {
+            snapshot = await db.collection('pedidos').get();
+          }
+          const pedidos = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            data.__docId = doc.id;
+            pedidos.push(data);
+          });
+          pedidos.sort((a, b) => (b.numeroPedido || 0) - (a.numeroPedido || 0));
+          if (loading) loading.classList.add('hidden');
+          allOrders = pedidos;
+          filtrarPedidos();
+        } catch (e) {
+          showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
+        }
+      }
+
+      // Eventos de filtro
+      ['filtro-busca','filtro-status','filtro-data'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+          currentPage = 1;
+          filtrarPedidos();
+        });
+      });
+
+      checkAdminAndFetchOrders();
+    });
+  </script>
+  <script type="module">
+    import { loadHeader } from './js/header-loader.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHeader('header-container', 'authContainerSecondary').then(() => {
+        fetch('partials/footer.html').then(res => res.text()).then(html => {
+          const footer = document.getElementById('footer-container');
+          if (footer) footer.innerHTML = html;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
