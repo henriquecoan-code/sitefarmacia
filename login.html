@@ -102,6 +102,15 @@
         showToast('Por favor, insira um e-mail válido.', 'error');
         return;
       }
+        // Permite apenas domínios tradicionais
+        const allowedDomains = [
+          'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'bol.com.br', 'uol.com.br', 'live.com'
+        ];
+        const emailDomain = email.split('@')[1].toLowerCase();
+        if (!allowedDomains.includes(emailDomain)) {
+          showToast('Apenas e-mails tradicionais são permitidos.', 'error');
+          return;
+        }
 
       const user = await loginUser(email, password);
       if (user) {
