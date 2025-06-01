@@ -240,30 +240,20 @@
                 return;
             }
 
-            let txt = `Nº Pedido: ${numeroPedido} | Data: ${dataPedido}\n`;
-            txt += `Nome: ${nomeUsuario}\n`;
-            if (emailUsuario) txt += `E-mail: ${emailUsuario}\n`;
-            txt += `Telefone: ${telefone}\n`;
-            txt += `Endereço:\n`;
-            txt += `\tRua: ${endereco.rua || ''}\n`;
-            txt += `\tNº: ${endereco.numero || ''}\n`;
-            txt += `\tBairro: ${endereco.bairro || ''}\n`;
-            txt += `\tCidade: ${endereco.cidade || ''}\n`;
-            if (endereco.complemento) txt += `\tComplemento: ${endereco.complemento}\n`;
-            txt += `Observações: ${observacoes || 'Nenhuma'}\n\n`;
-            txt += `Qnt | Produto | Vlr un | Vlr total\n`;
-            produtos.forEach(p => {
-                txt += `${p.quantidade} | ${p.nome} | R$ ${p.valor} | R$ ${p.subtotal}\n`;
-            });
-            txt += `\n\tTotal: R$ ${total.toFixed(2)}\n`;
-            txt += `Forma de pagamento: ${pagamento}\n`;
-            const blob = new Blob([txt], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `pedido-${numeroPedido}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // Remove geração e download do arquivo .txt
+            // Exibe mensagem de pedido concluído
+            const main = document.querySelector('main');
+            main.innerHTML = `
+                <div class="flex flex-col items-center justify-center min-h-[60vh]">
+                    <i class="fas fa-check-circle text-green-500 text-6xl mb-6"></i>
+                    <h2 class="text-3xl font-bold text-green-700 mb-4">Pedido realizado com sucesso!</h2>
+                    <p class="text-lg text-gray-700 mb-2">Seu pedido foi enviado para a farmácia e está sendo processado.</p>
+                    <p class="text-md text-gray-600 mb-6">Você receberá atualizações pelo WhatsApp ou poderá acompanhar pelo painel de pedidos.</p>
+                    <a href="index.html" class="mt-4 px-6 py-3 bg-blue-700 text-white rounded font-bold hover:bg-blue-800 transition">Voltar para a Home</a>
+                </div>
+            `;
+            // Limpa o carrinho
+            localStorage.removeItem('cart');
         });
         document.getElementById('limpar-carrinho').addEventListener('click', () => {
             cart = [];
