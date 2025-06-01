@@ -3,7 +3,18 @@ import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/fir
 import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 // Configuração do Firebase
-
+<script>
+      // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
+      authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
+      databaseURL: "https://farmaciasaobenedito-bcb2c-default-rtdb.firebaseio.com",
+      projectId: "farmaciasaobenedito-bcb2c",
+      storageBucket: "farmaciasaobenedito-bcb2c.appspot.com",
+      messagingSenderId: "789057690355",
+      appId: "1:789057690355:web:e01ee3616df2679fe2f586",
+      measurementId: "G-DHFR7WKVWS"
+    };
 // Inicialização do Firebase
 const app = initializeApp(firebaseConfig);
 console.log('Firebase inicializado:', app);
