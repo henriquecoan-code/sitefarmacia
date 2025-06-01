@@ -13,6 +13,7 @@ const firebaseConfig = {
   appId: "1:789057690355:web:e01ee3616df2679fe2f586",
   measurementId: "G-DHFR7WKVWS"
 };
+
 /**
  * Gerencia os dados da conta do usuário
  * Responsável por carregar, exibir e atualizar os dados pessoais e endereço
