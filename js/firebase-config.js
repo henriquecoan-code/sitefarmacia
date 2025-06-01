@@ -1,8 +1,7 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js';
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
-import { firebaseConfig } from './firebase-config.js'; // ajuste o caminho conforme necessário
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 // Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
@@ -15,32 +14,29 @@ const firebaseConfig = {
     measurementId: "G-DHFR7WKVWS"
 };
 
-
 // Inicialização do Firebase
 const app = initializeApp(firebaseConfig);
 console.log('Firebase inicializado:', app);
-
 export const auth = getAuth(app);
 console.log('Auth inicializado:', auth);
 export const database = getDatabase(app);
-export { signInWithEmailAndPassword };
-
-// Função utilitária para escapar HTML
-function escapeHTML(str) {
-    return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
+export { signInWithEmailAndPassword }; // Exporte a função
 
 // Atualiza a interface do usuário
 function updateAuthUI() {
     const authContainer = document.getElementById('authContainer');
     if (!authContainer) return;
 
-    onAuthStateChanged(auth, (user) => {
+    auth.onAuthStateChanged((user) => {
+        // Função para escapar HTML e evitar XSS
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
         if (user) {
             const safeName = escapeHTML(user.displayName || 'Usuário');
             const safeEmail = escapeHTML(user.email || 'E-mail não disponível');
@@ -65,3 +61,4 @@ function initAuth() {
     }
 }
 initAuth();
+export { firebaseConfig };
