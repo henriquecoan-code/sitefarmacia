@@ -3,319 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farmácia Online - Produtos</title>
+    <title>Administração de Produtos - Farmácia São Benedito</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/estilo.css">
 </head>
-
-<body class="bg-gray-50">
-    <!-- Header -->
-<div id="header-container" class="relative z-30"></div>
-    <!-- Menu Lateral Esquerdo -->
-    <div class="flex flex-col md:flex-row">
-         <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
-            <nav class="flex flex-col space-y-4 px-6 mt-8">
-                <a href="#" class="text-blue-900 font-bold hover:text-blue-700 transition" id="aside-todos">Todos os Produtos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="medicamentos">Medicamentos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="dermocosmeticos">Dermocosméticos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="higiene">Higiene Pessoal</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="vitaminas">Vitaminas</a>
-            </nav>
-        </aside>
-        
-    <!-- Main Content -->
-    <div class="flex flex-col md:flex-row"> 
-        <!-- Espaço para o menu lateral já existente -->
-        <div class="hidden md:block w-8"></div>
-        <!-- Conteúdo principal -->
-        <main class="flex-1 container px-4 py-6 mx-auto">
-            <section class="mb-12">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                    <h2 class="text-3xl font-bold text-blue-900 mr-4 mb-4 md:mb-0">Nossos Produtos</h2>
-                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
-                        <div class="relative w-full sm:w-auto">
-                            <select id="filtro-categoria" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
-                                <option value="">Todas as categorias</option>
-                                <option value="medicamentos">Medicamentos</option>
-                                <option value="dermocosmeticos">Dermocosméticos</option>
-                                <option value="higiene">Higiene Pessoal</option>
-                                <option value="vitaminas">Vitaminas</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="relative w-full sm:w-auto">
-                            <select id="filtro-subcategoria" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto ml-0 mt-2 sm:ml-2 sm:mt-0">
-                                <option value="">Todas as subcategorias</option>
-                            </select>
-                        </div>
-                        <div class="relative w-full sm:w-auto">
-                            <input 
-                                type="text" 
-                                id="busca-produto" 
-                                placeholder="Buscar produtos..." 
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
-                            >
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Loading Skeleton -->
-                <div id="loading-skeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
-                        <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
-                        <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
-                        <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
-                        <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lista de Produtos -->
-                <div id="lista-produtos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Os produtos serão inseridos via Firebase -->
-                </div>
-
-                <!-- Empty State -->
-                <div id="empty-state" class="hidden text-center py-12">
-                    <i class="fas fa-search text-5xl text-gray-300 mb-4"></i>
-                    <h3 class="text-xl font-medium text-gray-500">Nenhum produto encontrado</h3>
-                    <p class="text-gray-400 mt-2">Tente ajustar sua busca ou filtro</p>
-                </div>
-            </section>
-        </main>
+<body class="min-h-screen flex flex-col">
+  <div id="header-container"></div>
+  <div class="flex flex-1">
+    <!-- Aside Menu Padronizado -->
+    <aside class="w-64 bg-white shadow-lg min-h-screen">
+      <div class="p-6 border-b">
+        <h2 class="text-xl font-bold text-blue-900">Administração</h2>
+      </div>
+      <nav class="flex flex-col space-y-2 p-6">
+        <a href="admin.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-user-shield mr-2"></i>Administradores</a>
+        <a href="admin_produtos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-blue-900 font-bold"><i class="fas fa-pills mr-2"></i>Produtos</a>
+        <a href="admin-pedidos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-clipboard-list mr-2"></i>Pedidos</a>
+      </nav>
+    </aside>
+    <main class="flex-1 p-8">
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">
+            <div class="flex items-center">
+                <i id="toast-icon" class="mr-2"></i>
+                <span id="toast-message"></span>
+            </div>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <div id="footer-container"></div>
-    <!-- Scripts -->        
+        <div class="w-full max-w-2xl mx-auto">
+            <div class="bg-white rounded-xl form-card overflow-hidden p-8">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-pills text-blue-600 text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">Cadastrar Novo Produto</h1>
+                    <p class="text-gray-600 mt-2">Preencha os campos abaixo para adicionar um produto ou faça upload em massa via CSV.</p>
+                </div>
+                <!-- Upload de CSV -->
+                <form id="formUploadCSV" class="mb-8" enctype="multipart/form-data">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Importar produtos via CSV</label>
+                    <input type="file" id="csvFile" name="csv" accept=".csv" class="mb-2" required>
+                    <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">Enviar CSV</button>
+                    <a href="produtos-modelo.csv" download class="ml-4 text-blue-600 underline text-sm">Baixar modelo CSV</a>
+                    <span id="csv-status" class="ml-4 text-sm"></span>
+                </form>
+                <!-- Formulário manual existente -->
+                <form id="formAdicionarProduto" class="space-y-4">
+                    <!-- Nome do Produto -->
+                    <div>
+                        <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+                        <input type="text" id="nome" name="nome" class="w-full rounded-lg border-gray-300" placeholder="Ex: Paracetamol 750mg" required>
+                    </div>
+                    
+                    <!-- Descrição -->
+                    <div>
+                        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                        <textarea id="descricao" name="descricao" rows="3" class="w-full rounded-lg border-gray-300" placeholder="Ex: Caixa com 20 comprimidos, indicado para dores e febre." required></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Preço Máximo -->
+                        <div>
+                            <label for="precoMaximo" class="block text-sm font-medium text-gray-700 mb-1">Preço Máximo (R$)</label>
+                            <input type="number" id="precoMaximo" name="precoMaximo" step="0.01" min="0" class="w-full rounded-lg border-gray-300" placeholder="Ex: 22.50" required>
+                        </div>
+                        
+                        <!-- Desconto (% de 0 a 1) -->
+                        <div>
+                            <label for="desconto" class="block text-sm font-medium text-gray-700 mb-1">Desconto (Ex: 0.1 para 10%)</label>
+                            <input type="number" id="desconto" name="desconto" step="0.01" min="0" max="1" class="w-full rounded-lg border-gray-300" placeholder="Ex: 0.10" required>
+                        </div>
+                    </div>
 
-    <script type="module">
-    import { loadHeader } from './js/header-loader.js';
+                    <!-- Quantidade -->
+                    <div>
+                        <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade em Estoque</label>
+                        <input type="number" id="quantidade" name="quantidade" min="0" class="w-full rounded-lg border-gray-300" placeholder="Ex: 150" required>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <div>
+                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags (separadas por vírgula)</label>
+                        <input type="text" id="tags" name="tags" class="w-full rounded-lg border-gray-300" placeholder="Ex: analgésico, febre, dor de cabeça">
+                    </div>
+                    
+                    <!-- Fotos -->
+                    <div>
+                        <label for="fotos" class="block text-sm font-medium text-gray-700 mb-1">Fotos do Produto (múltiplas)</label>
+                        <input type="file" id="fotos" name="fotos" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" multiple>
+                    </div>
+                    
+                    <!-- Botão de Envio -->
+                    <div class="pt-4">
+                        <button type="submit" id="submitButton" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                            <i class="fas fa-plus-circle mr-2"></i> Adicionar Produto
+                        </button>
+                    </div>
+                </form>
+                <div id="produtos-lista" class="mt-10">
+                    <h2 class="text-xl font-bold mb-4">Produtos Cadastrados</h2>
+                    <div id="produtos-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+  </div>
 
-    // Carrega o header e só depois executa o restante do JS
-    document.addEventListener('DOMContentLoaded', () => {
-        loadHeader('header-container', 'authContainerSecondary').then(() => {
-            // DOM Elements
-            const productsContainer = document.getElementById('lista-produtos');
-            const searchInput = document.getElementById('busca-produto');
-            const categoryFilter = document.getElementById('filtro-categoria');
-            const subcategoryFilter = document.getElementById('filtro-subcategoria');
-            const loadingSkeleton = document.getElementById('loading-skeleton');
-            const emptyState = document.getElementById('empty-state');
-            const cartCount = document.getElementById('cart-count');
-
-            // Inicializar o carrinho
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            let allProducts = [];
-            updateCartCount();
-
-            // Buscar produtos do backend
-            async function fetchProducts() {
-                loadingSkeleton.classList.remove('hidden');
-                productsContainer.innerHTML = '';
-
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+<script type="module">
+import { firebaseConfig } from './js/firebase-config.js';
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+// Aguarda DOM pronto antes de adicionar event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar header e footer
+            fetch('./partials/header.html')
+                .then(response => response.text())
+                .then(data => {
+                    const header = document.getElementById('header-container');
+                    if (header) header.innerHTML = data;
+                });
+            fetch('./partials/footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    const footer = document.getElementById('footer-container');
+                    if (footer) footer.innerHTML = data;
+                });
+            // Upload de CSV
+            const formUploadCSV = document.getElementById('formUploadCSV');
+            if (formUploadCSV) {
+                formUploadCSV.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const fileInput = document.getElementById('csvFile');
+                    const status = document.getElementById('csv-status');
+                    if (!fileInput || !fileInput.files.length) return;
+                    const formData = new FormData();
+                    formData.append('csv', fileInput.files[0]);
+                    if (status) status.textContent = 'Enviando...';
+                    try {
+                        const resp = await fetch('http://localhost:3000/produtos/upload-csv', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            if (status) status.textContent = `Importação concluída (${data.count} produtos)`;
+                            carregarProdutos();
+                        } else {
+                            if (status) status.textContent = data.error || 'Erro ao importar CSV';
+                        }
+                    } catch (err) {
+                        if (status) status.textContent = 'Erro ao enviar arquivo.';
+                    }
+                });
+            }
+            // Cadastro manual de produto
+            const formAdicionarProduto = document.getElementById('formAdicionarProduto');
+            if (formAdicionarProduto) {
+                formAdicionarProduto.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    const fotosInput = document.getElementById('fotos');
+                    for (let i = 0; fotosInput && i < fotosInput.files.length; i++) {
+                        formData.append('fotos', fotosInput.files[i]);
+                    }
+                    const submitBtn = document.getElementById('submitButton');
+                    if (submitBtn) submitBtn.disabled = true;
+                    try {
+                        const resp = await fetch('http://localhost:3000/produtos', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await resp.json();
+                        if (resp.ok) {
+                            mostrarToast('Produto cadastrado com sucesso!', true);
+                            form.reset();
+                            carregarProdutos();
+                        } else {
+                            mostrarToast(data.error || 'Erro ao cadastrar produto.', false);
+                        }
+                    } catch (err) {
+                        mostrarToast('Erro ao cadastrar produto.', false);
+                    }
+                    if (submitBtn) submitBtn.disabled = false;
+                });
+            }
+            // Toast helper
+            function mostrarToast(msg, sucesso) {
+                const toast = document.getElementById('toast');
+                const icon = document.getElementById('toast-icon');
+                const message = document.getElementById('toast-message');
+                if (message && icon && toast) {
+                    message.textContent = msg;
+                    icon.className = sucesso ? 'fas fa-check-circle text-green-600 mr-2' : 'fas fa-times-circle text-red-600 mr-2';
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                }
+            }
+            // Carregar produtos cadastrados
+            async function carregarProdutos() {
+                const container = document.getElementById('produtos-container');
+                if (!container) return;
+                container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
                 try {
-                    const response = await fetch('http://localhost:3000/produtos');
-                    const produtos = await response.json();
-
-                    loadingSkeleton.classList.add('hidden');
-
+                    const snapshot = await firebase.firestore().collection('produtos').get();
+                    const produtos = [];
+                    snapshot.forEach(doc => {
+                        const prod = doc.data();
+                        prod.id = doc.id;
+                        if (typeof prod.valorComDesconto === 'undefined' && typeof prod.precoMaximo === 'number' && typeof prod.desconto === 'number') {
+                            prod.valorComDesconto = prod.precoMaximo * (1 - prod.desconto);
+                        }
+                        produtos.push(prod);
+                    });
                     if (!Array.isArray(produtos) || produtos.length === 0) {
-                        emptyState.classList.remove('hidden');
+                        container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
                         return;
                     }
-
-                    emptyState.classList.add('hidden');
-                    allProducts = produtos;
-                    atualizarFiltroSubcategoria();
-                    renderProducts(produtos);
-                } catch (error) {
-                    console.error("Erro ao buscar produtos:", error);
-                    loadingSkeleton.classList.add('hidden');
-                    emptyState.classList.remove('hidden');
-                }
-            }
-
-            // Renderizar produtos na tela
-            function renderProducts(produtos) {
-                productsContainer.innerHTML = '';
-                produtos.forEach(product => {
-                    let fotoSrc = '/uploads/medicamento.png';
-                    if (Array.isArray(product.fotos) && product.fotos.length > 0) {
-                        fotoSrc = product.fotos[0] || '/uploads/medicamento.png';
-                    }
-                    const productElement = document.createElement('div');
-                    productElement.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition';
-                    productElement.innerHTML = `
-                        <div class="flex justify-center">
-                            <div class="relative">
-                                <div class="flex justify-center items-center w-48 h-48 bg-gray-100 rounded">
-                                    <img 
-                                        src="http://localhost:3000${fotoSrc}" 
-                                        alt="Imagem do Produto" 
-                                        class="w-32 h-32 object-contain mb-2 rounded"
-                                        onerror="this.onerror=null;this.src='/img/medicamento.png';"
-                                    />         
-                                    ${product.desconto ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">${Math.round(product.desconto * 100)}% OFF</span>` : ''}
+                    container.innerHTML = '';
+                    produtos.forEach(prod => {
+                        const el = document.createElement('div');
+                        el.className = 'bg-gray-50 rounded-lg shadow p-4 mb-4 flex flex-col';
+                        // Usa imagem local do frontend se não houver foto
+                        let fotoSrc = (prod.fotos && prod.fotos[0]) ? prod.fotos[0] : 'img/medicamento.png';
+                        if (fotoSrc && !fotoSrc.startsWith('http') && !fotoSrc.startsWith('img/')) {
+                            fotoSrc = 'img/medicamento.png';
+                        }
+                        el.innerHTML = `
+                            <div class='flex items-center gap-4'>
+                                <img src="${fotoSrc}" alt="${prod.nome}" class="w-16 h-16 object-contain rounded bg-white border" onerror="this.onerror=null;this.src='img/medicamento.png';">
+                                <div>
+                                    <div class='font-bold text-blue-900'>${prod.nome}</div>
+                                    <div class='text-sm text-gray-600'>${prod.categoria || ''} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
+                                    <div class='text-xs text-gray-400'>Estoque: ${prod.quantidade || 0}</div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="p-4 flex flex-col h-48">
-                            <h3 class="font-semibold text-lg mb-1 truncate-2-lines" title="${product.nome}">${product.nome}</h3>
-                            <p class="text-gray-500 text-sm mb-2 truncate-2-lines" title="${product.descricao || ''}">${product.descricao || ''}</p>
-                            <div class="flex justify-between mt-auto">
-                                <a class="text-blue-700 font-bold text-xl">R$ ${Number(product.precoMaximo).toFixed(2)}</a>
-                                <span class="text-blue-700 font-bold text-sm ml-auto mt-1.5">Desc.</span>
-                                <a class="text-blue-700 font-bold text-xl">R$ ${Number(product.valorComDesconto).toFixed(2)}</a>
-                            </div>
-                            <button class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full transition flex items-center justify-center">
-                                <i class="fas fa-cart-plus mr-2"></i> Adicionar ao Carrinho
-                            </button>
-                        </div>
-                    `;
-                    productsContainer.appendChild(productElement);
-
-                    // Adiciona o evento ao botão
-                    const btn = productElement.querySelector('button');
-                    btn.addEventListener('click', () => addToCart(product));
-                });
-            }
-
-            // Filtro por categoria e subcategoria
-            categoryFilter.addEventListener('change', () => {
-                atualizarFiltroSubcategoria();
-                filtrarProdutos();
-            });
-            subcategoryFilter.addEventListener('change', filtrarProdutos);
-
-            function atualizarFiltroSubcategoria() {
-                const categoria = categoryFilter.value;
-                const subcats = Array.from(new Set(allProducts
-                    .filter(p => !categoria || (p.categoria || '').toLowerCase() === categoria.toLowerCase())
-                    .map(p => p.subcategoria).filter(Boolean)));
-                subcategoryFilter.innerHTML = '<option value="">Todas as subcategorias</option>';
-                subcats.forEach(sub => {
-                    subcategoryFilter.innerHTML += `<option value="${sub}">${sub}</option>`;
-                });
-            }
-
-            function filtrarProdutos() {
-                const categoria = categoryFilter.value;
-                const subcategoria = subcategoryFilter.value;
-                let filtrados = allProducts;
-                if (categoria) {
-                    filtrados = filtrados.filter(p => (p.categoria || '').toLowerCase() === categoria.toLowerCase());
-                }
-                if (subcategoria) {
-                    filtrados = filtrados.filter(p => (p.subcategoria || '').toLowerCase() === subcategoria.toLowerCase());
-                }
-                renderProducts(filtrados);
-            }
-
-            // Busca por nome/descrição
-            searchInput.addEventListener('input', () => {
-                const termo = searchInput.value.toLowerCase();
-                const filtrados = allProducts.filter(p =>
-                    p.nome.toLowerCase().includes(termo) ||
-                    (p.descricao && p.descricao.toLowerCase().includes(termo))
-                );
-                renderProducts(filtrados);
-            });
-
-            // Adicionar ao carrinho
-            function addToCart(product) {
-                const index = cart.findIndex(item => item.id === product.id);
-                if (index > -1) {
-                    cart[index].quantidade += 1;
-                } else {
-                    cart.push({ ...product, quantidade: 1 });
-                }
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCartCount();
-            }
-
-            // Atualizar contador do carrinho
-            function updateCartCount() {
-                if (cartCount) {
-                    const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-                    cartCount.textContent = total;
+                            <div class='mt-2 text-sm text-gray-700'>${prod.descricao || ''}</div>
+                            <div class='mt-2 text-blue-700 font-bold'>R$ ${Number(prod.valorComDesconto || prod.precoMaximo).toFixed(2)}</div>
+                        `;
+                        container.appendChild(el);
+                    });
+                } catch (err) {
+                    container.innerHTML = '<div class="text-red-500">Erro ao carregar produtos.</div>';
                 }
             }
-
-            // ASIDE: Filtro por categoria via menu lateral
-            document.querySelectorAll('aside [data-categoria]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const categoria = this.getAttribute('data-categoria');
-                    categoryFilter.value = categoria;
-                    categoryFilter.dispatchEvent(new Event('change'));
-                });
-            });
-            // Botão 'Todos os Produtos'
-            const asideTodos = document.getElementById('aside-todos');
-            if (asideTodos) {
-                asideTodos.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    categoryFilter.value = '';
-                    categoryFilter.dispatchEvent(new Event('change'));
-                });
-            }
-
-            // Inicialização
-            fetchProducts();
-
-            // Carrega o footer externo de partials/footer.html após garantir que o DOM e o header estão prontos
-            fetch('partials/footer.html')
-                .then(res => res.text())
-                .then(html => {
-                    const footer = document.getElementById('footer-container');
-                    if (footer) {
-                        footer.innerHTML = html;
-                    }
-                })
-                .catch(err => {
-                    const footer = document.getElementById('footer-container');
-                    if (footer) {
-                        footer.innerHTML = '<div class="text-red-500">Erro ao carregar o footer.</div>';
-                    }
-                });
-        }); // fecha o then do loadHeader
-    }); // fecha o DOMContentLoaded
+            // Inicializa lista ao abrir
+            carregarProdutos();
+        });
     </script>
-    
 </body>
 </html>
