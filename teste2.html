@@ -141,7 +141,7 @@
           let msgEmpresa = '';
           let msgCliente = '';
           if (order.status === 'Pendente') {
-            msgEmpresa = `Pedido: ${order.numeroPedido || ''}Pedido recebido \nCliente: ${order.nomeUsuario || ''}\nTelefone: ${order.telefone || ''}\nAEndereço: Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''}${endereco.complemento ? ', ' + endereco.complemento : ''}\nForma de pagamento: ${order.pagamento || ''}\nObservações: ${order.observacoes || 'Nenhuma'}\n\nProdutos:\n${order.produtos.map(p => `- ${p.quantidade}x ${p.nome} (R$ ${p.valor})`).join('\n')}\n\nTotal: R$ ${order.total}`;
+            msgEmpresa = `Pedido: ${order.numeroPedido || ''} || Pedido recebido \nCliente: ${order.nomeUsuario || ''}Pedido: ${order.numeroPedido || ''}\nTelefone: ${order.telefone || ''}\nAEndereço: Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''}${endereco.complemento ? ', ' + endereco.complemento : ''}\nForma de pagamento: ${order.pagamento || ''}\nObservações: ${order.observacoes || 'Nenhuma'}\n\nProdutos:\n${order.produtos.map(p => `- ${p.quantidade}x ${p.nome} (R$ ${p.valor})`).join('\n')}\n\nTotal: R$ ${order.total}`;
             msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido foi recebido e está entrando em separação. Em breve entraremos em contato para entrega. Obrigado!`;
           } else if (order.status === 'Em Separação') {
             msgEmpresa = '';
