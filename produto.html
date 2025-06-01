@@ -125,8 +125,13 @@
 
     <script type="module">
     import { loadHeader } from './js/header-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
 
-    // Carrega o header e só depois executa o restante do JS
+    // Inicializa Firebase se necessário
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         loadHeader('header-container', 'authContainerSecondary').then(() => {
             // DOM Elements
@@ -143,22 +148,27 @@
             let allProducts = [];
             updateCartCount();
 
-            // Buscar produtos do backend
+            // Buscar produtos do Firestore
             async function fetchProducts() {
                 loadingSkeleton.classList.remove('hidden');
                 productsContainer.innerHTML = '';
-
                 try {
-                    const response = await fetch('http://localhost:3000/produtos');
-                    const produtos = await response.json();
-
+                    const snapshot = await firebase.firestore().collection('produtos').get();
+                    const produtos = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        data.id = doc.id;
+                        // Calcula valorComDesconto se não existir
+                        if (typeof data.valorComDesconto === 'undefined' && typeof data.precoMaximo === 'number' && typeof data.desconto === 'number') {
+                            data.valorComDesconto = data.precoMaximo * (1 - data.desconto);
+                        }
+                        produtos.push(data);
+                    });
                     loadingSkeleton.classList.add('hidden');
-
                     if (!Array.isArray(produtos) || produtos.length === 0) {
                         emptyState.classList.remove('hidden');
                         return;
                     }
-
                     emptyState.classList.add('hidden');
                     allProducts = produtos;
                     atualizarFiltroSubcategoria();
@@ -174,9 +184,9 @@
             function renderProducts(produtos) {
                 productsContainer.innerHTML = '';
                 produtos.forEach(product => {
-                    let fotoSrc = '/uploads/medicamento.png';
+                    let fotoSrc = 'img/medicamento.png';
                     if (Array.isArray(product.fotos) && product.fotos.length > 0) {
-                        fotoSrc = product.fotos[0] || '/uploads/medicamento.png';
+                        fotoSrc = product.fotos[0] || 'img/medicamento.png';
                     }
                     const productElement = document.createElement('div');
                     productElement.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition';
@@ -185,10 +195,10 @@
                             <div class="relative">
                                 <div class="flex justify-center items-center w-48 h-48 bg-gray-100 rounded">
                                     <img 
-                                        src="http://localhost:3000${fotoSrc}" 
+                                        src="${fotoSrc}" 
                                         alt="Imagem do Produto" 
                                         class="w-32 h-32 object-contain mb-2 rounded"
-                                        onerror="this.onerror=null;this.src='/img/medicamento.png';"
+                                        onerror="this.onerror=null;this.src='img/medicamento.png';"
                                     />         
                                     ${product.desconto ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">${Math.round(product.desconto * 100)}% OFF</span>` : ''}
                                 </div>
