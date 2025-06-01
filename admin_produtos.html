@@ -110,8 +110,14 @@
     </main>
   </div>
 
-    <script>
-        // Aguarda DOM pronto antes de adicionar event listeners
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+<script type="module">
+import { firebaseConfig } from './js/firebase-config.js';
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+// Aguarda DOM pronto antes de adicionar event listeners
         document.addEventListener('DOMContentLoaded', function() {
             // Carregar header e footer
             fetch('./partials/header.html')
@@ -204,8 +210,16 @@
                 if (!container) return;
                 container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
                 try {
-                    const resp = await fetch('http://localhost:3000/produtos');
-                    const produtos = await resp.json();
+                    const snapshot = await firebase.firestore().collection('produtos').get();
+                    const produtos = [];
+                    snapshot.forEach(doc => {
+                        const prod = doc.data();
+                        prod.id = doc.id;
+                        if (typeof prod.valorComDesconto === 'undefined' && typeof prod.precoMaximo === 'number' && typeof prod.desconto === 'number') {
+                            prod.valorComDesconto = prod.precoMaximo * (1 - prod.desconto);
+                        }
+                        produtos.push(prod);
+                    });
                     if (!Array.isArray(produtos) || produtos.length === 0) {
                         container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
                         return;
@@ -215,14 +229,13 @@
                         const el = document.createElement('div');
                         el.className = 'bg-gray-50 rounded-lg shadow p-4 mb-4 flex flex-col';
                         // Usa imagem local do frontend se não houver foto
-                        let fotoSrc = (prod.fotos && prod.fotos[0]) ? prod.fotos[0] : '/img/medicamento.png';
-                        // Se for caminho do backend, mantém, senão usa local
-                        if (fotoSrc && !fotoSrc.startsWith('/uploads/') && !fotoSrc.startsWith('http')) {
-                            fotoSrc = '/img/medicamento.png';
+                        let fotoSrc = (prod.fotos && prod.fotos[0]) ? prod.fotos[0] : 'img/medicamento.png';
+                        if (fotoSrc && !fotoSrc.startsWith('http') && !fotoSrc.startsWith('img/')) {
+                            fotoSrc = 'img/medicamento.png';
                         }
                         el.innerHTML = `
                             <div class='flex items-center gap-4'>
-                                <img src="${fotoSrc}" alt="${prod.nome}" class="w-16 h-16 object-contain rounded bg-white border" onerror="this.onerror=null;this.src='/img/medicamento.png';">
+                                <img src="${fotoSrc}" alt="${prod.nome}" class="w-16 h-16 object-contain rounded bg-white border" onerror="this.onerror=null;this.src='img/medicamento.png';">
                                 <div>
                                     <div class='font-bold text-blue-900'>${prod.nome}</div>
                                     <div class='text-sm text-gray-600'>${prod.categoria || ''} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
