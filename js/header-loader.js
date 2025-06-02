@@ -13,6 +13,9 @@ export function loadHeader(headerContainerId, authContainerId) {
 
       // Atualiza o estado de autenticação no header
       handleAuthState(authContainerId);
+
+      // Garante que o menu mobile funcione após o carregamento dinâmico
+      if (window.setupMobileMenu) window.setupMobileMenu();
     })
     .catch((error) => console.error('Erro ao carregar o header:', error));
 }
