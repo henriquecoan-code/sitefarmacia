@@ -510,15 +510,9 @@
       if (!container) return;
       if (user) {
         container.innerHTML = `
-          <div class="text-left relative">
-            <div class="flex items-center space-x-2">
-              <i class='fas fa-user text-blue-900 text-xl'></i>
-              <span class="font-medium text-blue-900">${user.displayName || user.email.split('@')[0]}</span>
-            </div>
-            <div class="mt-2 text-sm text-gray-700">
-              <a href="minha-conta.html" class="block py-1 hover:underline">Minha Conta</a>
-              <a href="#" id="logoutBtnMobileMenu" class="block py-1 hover:underline">Sair</a>
-            </div>
+          <div class="flex flex-col space-y-1">
+            <a href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>
+            <a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>
           </div>
         `;
         const logoutBtn = document.getElementById('logoutBtnMobileMenu');
