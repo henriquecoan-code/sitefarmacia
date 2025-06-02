@@ -277,14 +277,14 @@
     <div class="flex items-center space-x-6">
       <!-- Auth/User Info -->
       <div id="authContainerSecondary" class="text-center relative"></div>
-      <!-- Favoritos -->
+      <!-- Favoritos
       <div class="text-center">
         <a href="#" class="text-gray-700 hover:text-blue-700">
           <i class="fas fa-heart text-xl"></i>
           <p class="text-xs">Favoritos</p>
         </a>
       </div>
-
+       -->
       <!-- Carrinho -->
       <div class="text-center relative group">
         <a href="./carrinho-novo.html" id="cart-icon" class="text-gray-700 hover:text-blue-700">
@@ -387,11 +387,13 @@
 </header>
 <!-- Menu Mobile Off-canvas Alpine.js -->
 <div x-data="{ mobileMenuOpen: false }" class="md:hidden">
-  <!-- Botão do menu mobile -->
-  <div class="flex items-center px-4 py-2">
-    <button @click="mobileMenuOpen = true" class="text-blue-900 text-2xl focus:outline-none">
+  <div class="flex items-center justify-between px-4 py-2">
+    <!-- Botão do menu mobile à esquerda -->
+    <button @click="mobileMenuOpen = true" class="text-blue-900 text-2xl focus:outline-none mr-2">
       <i class="fas fa-bars"></i>
     </button>
+    <!-- Usuário (avatar/entrar) -->
+    <div id="authContainerSecondaryMobile" class="text-center flex-1 flex justify-end"></div>
   </div>
   <!-- Overlay -->
   <div 
