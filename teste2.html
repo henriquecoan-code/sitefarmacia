@@ -162,7 +162,7 @@
           const waClienteBtn = msgCliente && telCliente.length >= 10 ? `<a href="https://wa.me/55${telCliente}?text=${encodeURIComponent(msgCliente)}" target="_blank" class="whatsapp-btn flex items-center justify-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" style="min-width:40px; min-height:32px;"><i class='fab fa-whatsapp'></i></a>` : '';
 
           // Botões lado a lado, separados por barra vertical
-          const whatsappBtns = `<div class='flex items-center gap-2 mt-2'>${printBtn}${waEmpresaBtn}${waEmpresaBtn && waClienteBtn ? '<span class="mx-1 border-l h-6 border-gray-300"></span>' : ''}${waClienteBtn}</div>`;
+          const whatsappBtns = `<div class='flex items-center gap-2 mt-2'>${printBtn}${waEmpresaBtn}${waEmpresaBtn && waClienteBtn && printBtn ? '<span class="mx-1 border-l h-6 border-gray-300"></span>' : ''}${waClienteBtn}</div>`;
 
           const html = [
             '<div class="bg-white rounded-lg shadow p-4 border-2 ',
@@ -180,7 +180,6 @@
             novoBadge,
             '</div>',
             '<div class="flex items-center gap-2">',
-            printBtn,
             whatsappBtns,
             '<button type="button" aria-label="Ver detalhes" class="ml-2 focus:outline-none">',
             '<i id="arrow-', detailsId, '" class="fas fa-chevron-down transition-transform duration-200"></i>',
