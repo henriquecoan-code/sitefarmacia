@@ -1,0 +1,59 @@
+      <!-- Mobile Side Drawer Menu -->
+      <div>
+        <!-- Botão do menu mobile ao lado da logo -->
+        <button id="mobile-menu-button" class="md:hidden text-blue-900 focus:outline-none ml-4">
+          <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <!-- Drawer lateral -->
+        <div id="mobile-menu-drawer" class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform -translate-x-full transition-transform duration-300 md:hidden flex flex-col">
+          <div class="flex items-center justify-between px-4 py-4 border-b">
+        <span class="text-xl font-bold text-blue-900">Menu</span>
+        <button id="close-mobile-menu" class="text-gray-600 hover:text-blue-700 text-2xl focus:outline-none">
+          <i class="fas fa-times"></i>
+        </button>
+          </div>
+          <nav class="flex flex-col mt-2">
+        <a href="./index.html" class="block py-3 px-6 hover:bg-blue-100 text-blue-900">Home</a>
+        <a href="./produto.html" class="block py-3 px-6 hover:bg-blue-100 text-blue-900">Produtos</a>
+        <a href="./ofertas.html" class="block py-3 px-6 hover:bg-blue-100 text-blue-900">Ofertas</a>
+        <a href="./sobre.html" class="block py-3 px-6 hover:bg-blue-100 text-blue-900">Sobre Nós</a>
+        <a href="./contato.html" class="block py-3 px-6 hover:bg-blue-100 text-blue-900">Contato</a>
+          </nav>
+        </div>
+        <!-- Overlay para fechar o menu ao clicar fora -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 hidden md:hidden"></div>
+      </div>
+      <script>
+        // Side drawer mobile menu
+        document.addEventListener('DOMContentLoaded', function() {
+          const menuBtn = document.getElementById('mobile-menu-button');
+          const drawer = document.getElementById('mobile-menu-drawer');
+          const overlay = document.getElementById('mobile-menu-overlay');
+          const closeBtn = document.getElementById('close-mobile-menu');
+          if (menuBtn && drawer && overlay && closeBtn) {
+        menuBtn.addEventListener('click', function() {
+          drawer.classList.remove('-translate-x-full');
+          overlay.classList.remove('hidden');
+          document.body.classList.add('overflow-hidden');
+        });
+        closeBtn.addEventListener('click', function() {
+          drawer.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+          document.body.classList.remove('overflow-hidden');
+        });
+        overlay.addEventListener('click', function() {
+          drawer.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+          document.body.classList.remove('overflow-hidden');
+        });
+        // Fecha o menu ao clicar em um link
+        drawer.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            drawer.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+          });
+        });
+          }
+        });
+      </script>
