@@ -6,7 +6,8 @@
   <title>Farmácia São Benedito</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
-
+  <!-- Alpine.js para menu mobile moderno -->
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 <body>
   <script type="module">
@@ -312,19 +313,19 @@
           <a href="./sobre.html" class="nav-link py-3 px-4 hover:bg-blue-900">Sobre Nós</a>
           <a href="./contato.html" class="nav-link py-3 px-4 hover:bg-blue-900">Contato</a>
         </div>
-        <div class="md:hidden py-3 px-4">
-          <button id="mobile-menu-button" class="text-white focus:outline-none">
+        <!-- Alpine.js Mobile Menu -->
+        <div class="md:hidden py-3 px-4 w-full" x-data="{ open: false }">
+          <button @click="open = !open" class="text-white focus:outline-none">
             <i class="fas fa-bars text-xl"></i>
           </button>
+          <div x-show="open" @click.away="open = false" class="bg-blue-900 flex flex-col mt-2 rounded shadow-lg z-50">
+            <a href="./index.html" class="block py-2 px-4 hover:bg-blue-800" @click="open = false">Home</a>
+            <a href="./produto.html" class="block py-2 px-4 hover:bg-blue-800" @click="open = false">Produtos</a>
+            <a href="./ofertas.html" class="block py-2 px-4 hover:bg-blue-800" @click="open = false">Ofertas</a>
+            <a href="./sobre.html" class="block py-2 px-4 hover:bg-blue-800" @click="open = false">Sobre Nós</a>
+            <a href="./contato.html" class="block py-2 px-4 hover:bg-blue-800" @click="open = false">Contato</a>
+          </div>
         </div>
-      </div>
-      <!-- Mobile Menu -->
-      <div id="mobile-menu" class="hidden bg-blue-900 md:hidden flex-col">
-        <a href="./index.html" class="block py-2 px-4 hover:bg-blue-800">Home</a>
-        <a href="./produto.html" class="block py-2 px-4 hover:bg-blue-800">Produtos</a>
-        <a href="./ofertas.html" class="block py-2 px-4 hover:bg-blue-800">Ofertas</a>
-        <a href="./sobre.html" class="block py-2 px-4 hover:bg-blue-800">Sobre Nós</a>
-        <a href="./contato.html" class="block py-2 px-4 hover:bg-blue-800">Contato</a>
       </div>
     </div>
   </nav>
@@ -398,34 +399,5 @@
   });
   </script>
 </header>
-<script>
-// Script do menu mobile - deve ser chamado sempre que o header for carregado (inclusive dinamicamente)
-function setupMobileMenu() {
-  var btn = document.getElementById('mobile-menu-button');
-  var menu = document.getElementById('mobile-menu');
-  if(btn && menu) {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      menu.classList.toggle('hidden');
-    });
-    menu.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        menu.classList.add('hidden');
-      });
-    });
-    document.addEventListener('click', function(e) {
-      if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-        menu.classList.add('hidden');
-      }
-    });
-  } else {
-    console.error('Menu mobile não encontrado. Button:', btn, 'Menu:', menu);
-  }
-}
-// Se o header é carregado dinamicamente, chame setupMobileMenu() após o carregamento
-if (window.setupMobileMenu) window.setupMobileMenu = setupMobileMenu;
-document.addEventListener('DOMContentLoaded', setupMobileMenu);
-</script>
-<script src="./js/menu-mobile.js"></script>
 </body>
 </html>
