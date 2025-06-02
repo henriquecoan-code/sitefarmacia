@@ -508,9 +508,14 @@
     function renderAuthMobileMenu(user) {
       const container = document.getElementById('authContainerSecondaryMobileMenu');
       if (!container) return;
-      // Remove qualquer display:none herdado do Alpine.js
-      container.classList.remove('hidden');
-      container.style.display = '';
+      // Remove display:none e hidden do container e de todos os pais até o <aside>
+      let el = container;
+      while (el && el !== document.body) {
+        el.classList.remove('hidden');
+        el.style.display = '';
+        if (el.tagName === 'ASIDE') break;
+        el = el.parentElement;
+      }
       if (user) {
         container.innerHTML = `
           <div class="flex flex-col space-y-1">
