@@ -508,6 +508,8 @@
     function renderAuthMobileMenu(user) {
       const container = document.getElementById('authContainerSecondaryMobileMenu');
       if (!container) return;
+      // Força o container a ficar visível
+      container.style.display = 'block';
       if (user) {
         container.innerHTML = `
           <div class="flex flex-col space-y-1">
