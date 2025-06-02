@@ -237,202 +237,332 @@
       });
     });
   </script>
-<!-- Top Bar -->
-<div class="bg-blue-900 text-white py-2 px-4 text-sm">
-  <div class="container mx-auto flex justify-between items-center">
-    <div class="flex space-x-4">
-      <span><i class="fas fa-phone-alt mr-1"></i> (48) 3464-3201</span>
-      <span><i class="fas fa-envelope mr-1"></i> fciasaobenedito@gmail.com</span>
-    </div>
+  <!-- Faixa de aviso de e-mail não confirmado -->
+  <div id="email-warning-bar" class="hidden bg-yellow-400 text-yellow-900 text-center text-sm py-1 w-full">
+    <span><i class="fas fa-exclamation-triangle mr-2"></i>Seu e-mail ainda não foi confirmado. Confirme seu e-mail para finalizar suas compras.</span>
   </div>
-</div>
-<!-- Faixa de aviso de e-mail não confirmado -->
-<div id="email-warning-bar" class="hidden bg-yellow-400 text-yellow-900 text-center text-sm py-1 w-full">
-  <span><i class="fas fa-exclamation-triangle mr-2"></i>Seu e-mail ainda não foi confirmado. Confirme seu e-mail para finalizar suas compras.</span>
-</div>
 
-<!-- Header Principal -->
-<header class="bg-white shadow-md sticky top-0 z-50">
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-  <script type="module" src="./js/firebase-config.js"></script>
+  <!-- Header Principal -->
+  <header class="bg-white shadow-md sticky top-0 z-50 hidden md:block">
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script type="module" src="./js/firebase-config.js"></script>
 
-  <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between">
-    <!-- Logo e Nome -->
-    <div class="flex items-center">
-      <img src="img/logo.png" width="75" height="75" alt="Home" />
-      <div class="ml-2.5">
-        <span class="text-2xl font-bold text-blue-900">Farmácia São Benedito</span>
+    <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between">
+      <!-- Logo e Nome -->
+      <div class="flex items-center">
+        <img src="img/logo.png" width="75" height="75" alt="Home" />
+        <div class="ml-2.5">
+          <span class="text-2xl font-bold text-blue-900">Farmácia São Benedito</span>
+        </div>
       </div>
-    </div>
-    <!-- Barra de Busca Centralizada -->
-    <div class="relative w-full md:w-1/3 mx-auto my-4 md:my-0">
-      <input type="text" placeholder="Buscar medicamentos, produtos..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <button class="absolute right-0 top-0 h-full px-4 text-white bg-blue-700 rounded-r-full hover:bg-blue-800">
-        <i class="fas fa-search"></i>
-      </button>
-    </div>
-    <!-- Sistema de Autenticação, Favoritos e Carrinho -->
-    <div class="flex items-center space-x-6">
-      <!-- Auth/User Info -->
-      <div id="authContainerSecondary" class="text-center relative"></div>
-      <!-- Favoritos
-      <div class="text-center">
-        <a href="#" class="text-gray-700 hover:text-blue-700">
-          <i class="fas fa-heart text-xl"></i>
-          <p class="text-xs">Favoritos</p>
-        </a>
+      <!-- Barra de Busca Centralizada -->
+      <div class="relative w-full md:w-1/3 mx-auto my-4 md:my-0">
+        <input type="text" placeholder="Buscar medicamentos, produtos..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button class="absolute right-0 top-0 h-full px-4 text-white bg-blue-700 rounded-r-full hover:bg-blue-800">
+          <i class="fas fa-search"></i>
+        </button>
       </div>
-       -->
-      <!-- Carrinho -->
-      <div class="text-center relative group">
-        <a href="./carrinho-novo.html" id="cart-icon" class="text-gray-700 hover:text-blue-700">
-          <i class="fas fa-shopping-cart text-xl"></i>
-          <p class="text-xs">Carrinho</p>
-          <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-        </a>
-        <div id="mini-cart" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md z-50 p-4 border border-gray-200">
-          <h4 class="font-bold border-b pb-2 text-gray-800">Seu Carrinho</h4>
-          <div id="cart-items" class="py-2 text-sm text-gray-600"></div>
-          <button class="mt-2 w-full bg-blue-700 text-white py-1 rounded hover:bg-blue-800 text-sm">Finalizar Compra</button>
+      <!-- Sistema de Autenticação, Favoritos e Carrinho -->
+      <div class="flex items-center space-x-6">
+        <!-- Auth/User Info -->
+        <div id="authContainerSecondary" class="text-center relative"></div>
+        <!-- Favoritos
+        <div class="text-center">
+          <a href="#" class="text-gray-700 hover:text-blue-700">
+            <i class="fas fa-heart text-xl"></i>
+            <p class="text-xs">Favoritos</p>
+          </a>
+        </div>
+         -->
+        <!-- Carrinho -->
+        <div class="text-center relative group">
+          <a href="./carrinho-novo.html" id="cart-icon" class="text-gray-700 hover:text-blue-700">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            <p class="text-xs">Carrinho</p>
+            <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+          </a>
+          <div id="mini-cart" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md z-50 p-4 border border-gray-200">
+            <h4 class="font-bold border-b pb-2 text-gray-800">Seu Carrinho</h4>
+            <div id="cart-items" class="py-2 text-sm text-gray-600"></div>
+            <button class="mt-2 w-full bg-blue-700 text-white py-1 rounded hover:bg-blue-800 text-sm">Finalizar Compra</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Navegação -->
-  <nav class="bg-blue-800 text-white">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row justify-center items-center">
-        <div class="hidden md:flex space-x-1">
-          <a href="./index.html" class="nav-link py-3 px-4 hover:bg-blue-900">Home</a>
-          <a href="./produto.html" class="nav-link py-3 px-4 hover:bg-blue-900">Produtos</a>
-          <a href="./ofertas.html" class="nav-link py-3 px-4 hover:bg-blue-900">Ofertas</a>
-          <a href="./sobre.html" class="nav-link py-3 px-4 hover:bg-blue-900">Sobre Nós</a>
-          <a href="./contato.html" class="nav-link py-3 px-4 hover:bg-blue-900">Contato</a>
+    <!-- Navegação -->
+    <nav class="bg-blue-800 text-white">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-center items-center">
+          <div class="hidden md:flex space-x-1">
+            <a href="./index.html" class="nav-link py-3 px-4 hover:bg-blue-900">Home</a>
+            <a href="./produto.html" class="nav-link py-3 px-4 hover:bg-blue-900">Produtos</a>
+            <a href="./ofertas.html" class="nav-link py-3 px-4 hover:bg-blue-900">Ofertas</a>
+            <a href="./sobre.html" class="nav-link py-3 px-4 hover:bg-blue-900">Sobre Nós</a>
+            <a href="./contato.html" class="nav-link py-3 px-4 hover:bg-blue-900">Contato</a>
+          </div>
         </div>
       </div>
-    </div>
-  </nav>
-  <!-- Modal de Login/Cadastro -->
-  <div id="auth-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200">
-    <div id="auth-modal" class="bg-white rounded-lg shadow-xl w-full max-w-md relative p-8">
-      <button id="close-auth-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button>
-      <div id="auth-modal-content"></div>
-    </div>
-  </div>
-  <script>
-  // Modal login/cadastro dinâmico
-  function openAuthModal(type) {
-    const overlay = document.getElementById('auth-modal-overlay');
-    const content = document.getElementById('auth-modal-content');
-    overlay.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-    if (type === 'login') {
-      content.innerHTML = `
-        <h2 class='text-xl font-bold mb-4 text-blue-900'>Entrar</h2>
-        <form id='login-form' class='space-y-4'>
-          <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
-          <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
-          <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Entrar</button>
-        </form>
-        <p class='mt-4 text-sm text-center'>
-          Não tem uma conta? <a href='#' onclick='openAuthModal("register")' class='text-blue-600 hover:underline'>Cadastre-se</a>
-        </p>
-      `;
-    } else {
-      content.innerHTML = `
-        <h2 class='text-xl font-bold mb-4 text-blue-900'>Cadastrar</h2>
-        <form id='register-form' class='space-y-4'>
-          <input type='text' placeholder='Nome completo' class='w-full border rounded px-3 py-2' required />
-          <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
-          <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
-          <input type='password' placeholder='Confirmar senha' class='w-full border rounded px-3 py-2' required />
-          <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Cadastrar</button>
-        </form>
-        <p class='mt-4 text-sm text-center'>
-          Já tem uma conta? <a href='#' onclick='openAuthModal("login")' class='text-blue-600 hover:underline'>Entrar</a>
-        </p>
-      `;
-    }
-    document.getElementById('close-auth-modal').addEventListener('click', closeAuthModal);
-  }
-
-  function closeAuthModal() {
-    const overlay = document.getElementById('auth-modal-overlay');
-    overlay.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    
-    if (loginBtn) {
-      loginBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        openAuthModal('login');
-      });
-    }
-    
-    if (registerBtn) {
-      registerBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        openAuthModal('register');
-      });
-    }
-  });
-  </script>
-</header>
-<!-- Menu Mobile Off-canvas Alpine.js -->
-<div x-data="{ mobileMenuOpen: false }" class="md:hidden">
-  <div class="flex items-center justify-between px-4 py-2">
-    <!-- Botão do menu mobile à esquerda -->
-    <button @click="mobileMenuOpen = true" class="text-blue-900 text-2xl focus:outline-none mr-2">
-      <i class="fas fa-bars"></i>
-    </button>
-    <!-- Usuário (avatar/entrar) -->
-    <div id="authContainerSecondaryMobile" class="text-center flex-1 flex justify-end"></div>
-  </div>
-  <!-- Overlay -->
-  <div 
-    x-show="mobileMenuOpen"
-    @click="mobileMenuOpen = false"
-    class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200"
-    x-transition.opacity
-    x-cloak
-    style="display: none;"
-  ></div>
-  <!-- Menu lateral -->
-  <aside
-    x-show="mobileMenuOpen"
-    @keydown.escape.window="mobileMenuOpen = false"
-    class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-200"
-    x-transition:enter="transition transform duration-200"
-    x-transition:enter-start="-translate-x-full"
-    x-transition:enter-end="translate-x-0"
-    x-transition:leave="transition transform duration-200"
-    x-transition:leave-start="translate-x-0"
-    x-transition:leave-end="-translate-x-full"
-    x-cloak
-    tabindex="-1"
-    style="display: none;"
-  >
-    <div class="flex items-center justify-between px-4 py-4 border-b">
-      <span class="font-bold text-blue-900 text-lg">Menu</span>
-      <button @click="mobileMenuOpen = false" class="text-gray-700 text-2xl focus:outline-none">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <nav class="flex flex-col mt-2">
-      <a href="./index.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Home</a>
-      <a href="./produto.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Produtos</a>
-      <a href="./ofertas.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Ofertas</a>
-      <a href="./sobre.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Sobre Nós</a>
-      <a href="./contato.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Contato</a>
     </nav>
-  </aside>
-</div>
+    <!-- Modal de Login/Cadastro -->
+    <div id="auth-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200">
+      <div id="auth-modal" class="bg-white rounded-lg shadow-xl w-full max-w-md relative p-8">
+        <button id="close-auth-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button>
+        <div id="auth-modal-content"></div>
+      </div>
+    </div>
+    <script>
+    // Modal login/cadastro dinâmico
+    function openAuthModal(type) {
+      const overlay = document.getElementById('auth-modal-overlay');
+      const content = document.getElementById('auth-modal-content');
+      overlay.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+      if (type === 'login') {
+        content.innerHTML = `
+          <h2 class='text-xl font-bold mb-4 text-blue-900'>Entrar</h2>
+          <form id='login-form' class='space-y-4'>
+            <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
+            <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
+            <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Entrar</button>
+          </form>
+          <p class='mt-4 text-sm text-center'>
+            Não tem uma conta? <a href='#' onclick='openAuthModal("register")' class='text-blue-600 hover:underline'>Cadastre-se</a>
+          </p>
+        `;
+      } else {
+        content.innerHTML = `
+          <h2 class='text-xl font-bold mb-4 text-blue-900'>Cadastrar</h2>
+          <form id='register-form' class='space-y-4'>
+            <input type='text' placeholder='Nome completo' class='w-full border rounded px-3 py-2' required />
+            <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
+            <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
+            <input type='password' placeholder='Confirmar senha' class='w-full border rounded px-3 py-2' required />
+            <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Cadastrar</button>
+          </form>
+          <p class='mt-4 text-sm text-center'>
+            Já tem uma conta? <a href='#' onclick='openAuthModal("login")' class='text-blue-600 hover:underline'>Entrar</a>
+          </p>
+        `;
+      }
+      document.getElementById('close-auth-modal').addEventListener('click', closeAuthModal);
+    }
+
+    function closeAuthModal() {
+      const overlay = document.getElementById('auth-modal-overlay');
+      overlay.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginBtn = document.getElementById('loginBtn');
+      const registerBtn = document.getElementById('registerBtn');
+      
+      if (loginBtn) {
+        loginBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          openAuthModal('login');
+        });
+      }
+      
+      if (registerBtn) {
+        registerBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          openAuthModal('register');
+        });
+      }
+    });
+    </script>
+  </header>
+  <!-- Menu Mobile Off-canvas Alpine.js -->
+  <div x-data="{ mobileMenuOpen: false }" class="md:hidden bg-white shadow-sm sticky top-0 z-50">
+    <div class="flex items-center justify-between px-2 py-1">
+      <!-- 5. Botão do menu mobile à esquerda (maior) -->
+      <button @click="mobileMenuOpen = true" class="text-blue-900 text-3xl focus:outline-none mr-3 flex-shrink-0">
+        <i class="fas fa-bars"></i>
+      </button>
+      <!-- 2. Logo centralizado, maior -->
+      <div class="flex-1 flex justify-center items-center">
+        <img src="img/logo.png" width="52" height="52" alt="Home" class="block" />
+        <span class="ml-2 text-xl font-bold text-blue-900 hidden xs:inline md:inline">Farmácia</span>
+      </div>
+      <!-- 6. Usuário (avatar/entrar) à direita -->
+      <div id="authContainerSecondaryMobile" class="flex-shrink-0 flex justify-end items-center min-w-[48px]"></div>
+      <!-- Carrinho à direita no mobile (maior) -->
+      <a href="./carrinho-novo.html" id="cart-icon-mobile" class="ml-3 text-blue-900 text-3xl flex items-center relative">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-count-mobile" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+      </a>
+    </div>
+    <!-- 4. Barra de busca menor -->
+    <div class="px-2 pb-1">
+      <div class="relative w-full">
+        <input type="text" placeholder="Buscar..." class="w-full px-3 py-1.5 rounded-full border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button class="absolute right-0 top-0 h-full px-3 text-white bg-blue-700 rounded-r-full hover:bg-blue-800 text-sm">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Overlay -->
+    <div 
+      x-show="mobileMenuOpen"
+      @click="mobileMenuOpen = false"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200"
+      x-transition.opacity
+      x-cloak
+      style="display: none;"
+    ></div>
+    <!-- Menu lateral -->
+    <aside
+      x-show="mobileMenuOpen"
+      @keydown.escape.window="mobileMenuOpen = false"
+      class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-200"
+      x-transition:enter="transition transform duration-200"
+      x-transition:enter-start="-translate-x-full"
+      x-transition:enter-end="translate-x-0"
+      x-transition:leave="transition transform duration-200"
+      x-transition:leave-start="translate-x-0"
+      x-transition:leave-end="-translate-x-full"
+      x-cloak
+      tabindex="-1"
+      style="display: none;"
+    >
+      <div class="flex items-center justify-between px-4 py-4 border-b">
+        <span class="font-bold text-blue-900 text-lg">Menu</span>
+        <button @click="mobileMenuOpen = false" class="text-gray-700 text-2xl focus:outline-none">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <!-- Auth/User Info Mobile -->
+      <div id="authContainerSecondaryMobileMenu" class="px-6 py-2 border-b"></div>
+      <nav class="flex flex-col mt-2">
+        <a href="./index.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Home</a>
+        <a href="./produto.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Produtos</a>
+        <a href="./ofertas.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Ofertas</a>
+        <a href="./sobre.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Sobre Nós</a>
+        <a href="./contato.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Contato</a>
+      </nav>
+    </aside>
+  </div>
+  <!-- Script de autenticação para containers mobile -->
+  <script type="module">
+    import { auth } from './js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+
+    function renderMobileAuth(user) {
+      const container = document.getElementById('authContainerSecondaryMobile');
+      if (!container) return;
+      if (user) {
+        container.innerHTML = `
+          <div class="relative group">
+            <button id="mobileUserBtn" class="text-blue-900 hover:text-blue-700 focus:outline-none flex flex-col items-center">
+              <i class="fas fa-user-circle text-3xl"></i>
+              <span class="text-xs">${user.displayName || user.email.split('@')[0]}</span>
+            </button>
+            <div id="mobileUserDropdown" class="hidden absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-md z-50 border border-gray-200">
+              <div class="px-4 py-2 border-b">
+                <p class="text-sm font-medium text-gray-800">${user.displayName || 'Usuário'}</p>
+                <p class="text-xs text-gray-500 truncate">${user.email}</p>
+              </div>
+              <a href="minha-conta.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Minha Conta</a>
+              <a href="#" id="mobileLogoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sair</a>
+            </div>
+          </div>
+        `;
+        // Dropdown toggle
+        const btn = document.getElementById('mobileUserBtn');
+        const dropdown = document.getElementById('mobileUserDropdown');
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+          if (!btn.contains(e.target)) dropdown.classList.add('hidden');
+        });
+        // Logout
+        document.getElementById('mobileLogoutBtn').addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            await auth.signOut();
+            window.location.reload();
+          } catch (error) {
+            console.error('Erro ao sair:', error);
+          }
+        });
+      } else {
+        container.innerHTML = `
+          <button id="mobileLoginBtn" class="text-blue-900 hover:text-blue-700 focus:outline-none flex flex-col items-center">
+            <i class="fas fa-user-circle text-3xl"></i>
+            <span class="text-xs">Entrar</span>
+          </button>
+        `;
+        document.getElementById('mobileLoginBtn').addEventListener('click', (e) => {
+          e.preventDefault();
+          if (typeof openAuthModal === 'function') openAuthModal('login');
+        });
+      }
+    }
+
+    function renderAuthMobileMenu(user) {
+      const container = document.getElementById('authContainerSecondaryMobileMenu');
+      if (!container) return;
+      if (user) {
+        container.innerHTML = `
+          <div class="text-left relative">
+            <div class="flex items-center space-x-2">
+              <i class='fas fa-user text-blue-900 text-xl'></i>
+              <span class="font-medium text-blue-900">${user.displayName || user.email.split('@')[0]}</span>
+            </div>
+            <div class="mt-2 text-sm text-gray-700">
+              <a href="minha-conta.html" class="block py-1 hover:underline">Minha Conta</a>
+              <a href="#" id="logoutBtnMobileMenu" class="block py-1 hover:underline">Sair</a>
+            </div>
+          </div>
+        `;
+        const logoutBtn = document.getElementById('logoutBtnMobileMenu');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+              await auth.signOut();
+              window.location.reload();
+            } catch (error) {
+              console.error('Erro ao sair:', error);
+            }
+          });
+        }
+      } else {
+        container.innerHTML = `
+          <div class="flex flex-col space-y-1">
+            <a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>
+            <a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>
+          </div>
+        `;
+        const loginBtn = document.getElementById('loginBtnMobileMenu');
+        const registerBtn = document.getElementById('registerBtnMobileMenu');
+        if (loginBtn) {
+          loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (typeof openAuthModal === 'function') openAuthModal('login');
+          });
+        }
+        if (registerBtn) {
+          registerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (typeof openAuthModal === 'function') openAuthModal('register');
+          });
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      onAuthStateChanged(auth, (user) => {
+        renderMobileAuth(user);
+        renderAuthMobileMenu(user);
+      });
+    });
+  </script>
 </body>
 </html>
