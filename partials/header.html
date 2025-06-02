@@ -302,11 +302,9 @@
   </div>
 
   <!-- Navegação -->
-   <script> document.addEventListener('DOMContentLoaded', function() { const menuBtn = document.getElementById('mobile-menu-button'); const mobileMenu = document.getElementById('mobile-menu'); if (menuBtn && mobileMenu) { menuBtn.addEventListener('click', function() { mobileMenu.classList.toggle('hidden'); }); } }); </script>
   <nav class="bg-blue-800 text-white">
     <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row justify-center items-center">
-
         <div class="hidden md:flex space-x-1">
           <a href="./index.html" class="nav-link py-3 px-4 hover:bg-blue-900">Home</a>
           <a href="./produto.html" class="nav-link py-3 px-4 hover:bg-blue-900">Produtos</a>
@@ -314,24 +312,46 @@
           <a href="./sobre.html" class="nav-link py-3 px-4 hover:bg-blue-900">Sobre Nós</a>
           <a href="./contato.html" class="nav-link py-3 px-4 hover:bg-blue-900">Contato</a>
         </div>
-
         <div class="md:hidden py-3 px-4">
           <button id="mobile-menu-button" class="text-white focus:outline-none">
             <i class="fas fa-bars text-xl"></i>
           </button>
         </div>
       </div>
-
       <!-- Mobile Menu -->
-      <div id="mobile-menu" class="hidden bg-blue-900 md:hidden">
+      <div id="mobile-menu" class="hidden bg-blue-900 md:hidden flex-col">
         <a href="./index.html" class="block py-2 px-4 hover:bg-blue-800">Home</a>
         <a href="./produto.html" class="block py-2 px-4 hover:bg-blue-800">Produtos</a>
-        <a href="#" class="block py-2 px-4 hover:bg-blue-800">Ofertas</a>
+        <a href="./ofertas.html" class="block py-2 px-4 hover:bg-blue-800">Ofertas</a>
         <a href="./sobre.html" class="block py-2 px-4 hover:bg-blue-800">Sobre Nós</a>
         <a href="./contato.html" class="block py-2 px-4 hover:bg-blue-800">Contato</a>
       </div>
     </div>
   </nav>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('mobile-menu-button');
+    var menu = document.getElementById('mobile-menu');
+    if(btn && menu) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+      });
+      // Fecha o menu ao clicar em um link
+      menu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          menu.classList.add('hidden');
+        });
+      });
+      // Fecha o menu ao clicar fora dele
+      document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+          menu.classList.add('hidden');
+        }
+      });
+    }
+  });
+  </script>
 
   <!-- Modal de Login/Cadastro -->
   <div id="auth-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200">
