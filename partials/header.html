@@ -328,37 +328,6 @@
       </div>
     </div>
   </nav>
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('mobile-menu-button');
-    var menu = document.getElementById('mobile-menu');
-    
-    if(btn && menu) {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        menu.classList.toggle('hidden');
-        console.log('Menu button clicked, toggling menu visibility');
-      });
-      
-      // Fecha o menu ao clicar em um link
-      menu.querySelectorAll('a').forEach(function(link) {
-        link.addEventListener('click', function() {
-          menu.classList.add('hidden');
-        });
-      });
-      
-      // Fecha o menu ao clicar fora dele
-      document.addEventListener('click', function(e) {
-        if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-          menu.classList.add('hidden');
-        }
-      });
-    } else {
-      console.error('Menu mobile não encontrado. Button:', btn, 'Menu:', menu);
-    }
-  });
-  </script>
-
   <!-- Modal de Login/Cadastro -->
   <div id="auth-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200">
     <div id="auth-modal" class="bg-white rounded-lg shadow-xl w-full max-w-md relative p-8">
@@ -429,5 +398,35 @@
   });
   </script>
 </header>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('mobile-menu-button');
+  var menu = document.getElementById('mobile-menu');
+  
+  if(btn && menu) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+      console.log('Menu button clicked, toggling menu visibility');
+    });
+    
+    // Fecha o menu ao clicar em um link
+    menu.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        menu.classList.add('hidden');
+      });
+    });
+    
+    // Fecha o menu ao clicar fora dele
+    document.addEventListener('click', function(e) {
+      if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+  } else {
+    console.error('Menu mobile não encontrado. Button:', btn, 'Menu:', menu);
+  }
+});
+</script>
 </body>
 </html>
