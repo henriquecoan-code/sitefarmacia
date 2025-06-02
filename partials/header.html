@@ -313,13 +313,13 @@
           <a href="./contato.html" class="nav-link py-3 px-4 hover:bg-blue-900">Contato</a>
         </div>
         <div class="md:hidden py-3 px-4">
-          <button id="mobile-menu-button" class="text-white focus:outline-none">
+          <button id="mobile-menu" class="text-white focus:outline-none">
             <i class="fas fa-bars text-xl"></i>
           </button>
         </div>
       </div>
       <!-- Mobile Menu -->
-      <div id="mobile-menu-button" class="hidden bg-blue-900 md:hidden flex-col">
+      <div id="mobile-menu" class="hidden bg-blue-900 md:hidden flex-col">
         <a href="./index.html" class="block py-2 px-4 hover:bg-blue-800">Home</a>
         <a href="./produto.html" class="block py-2 px-4 hover:bg-blue-800">Produtos</a>
         <a href="./ofertas.html" class="block py-2 px-4 hover:bg-blue-800">Ofertas</a>
@@ -330,7 +330,7 @@
   </nav>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('mobile-menu-button');
+    var btn = document.getElementById('mobile-menu');
     var menu = document.getElementById('mobile-menu');
     if(btn && menu) {
       btn.addEventListener('click', function(e) {
