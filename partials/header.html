@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Alpine.js para menu mobile moderno -->
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 <body>
   <!-- Firebase Scripts -->
@@ -146,37 +147,7 @@
         });
       }
     });
-    // Garante renderização dos links de autenticação no menu mobile ao abrir
-    document.addEventListener('alpine:init', function() {
-      document.body.addEventListener('click', function(e) {
-        // Detecta abertura do menu mobile
-        if (e.target.closest('button') && e.target.closest('button').querySelector('.fa-bars')) {
-          setTimeout(function() {
-            if (window.renderAuthMobileMenu && window.auth) {
-              window.renderAuthMobileMenu(window.auth.currentUser);
-            }
-          }, 100); // Pequeno delay para garantir que o aside já está no DOM
-        }
-      });
-    });
-    // Observa mudanças no DOM para garantir que o botão de autenticação apareça no menu mobile
-    (function() {
-      var lastAuthState = null;
-      var observer = new MutationObserver(function(mutationsList, observer) {
-        var container = document.getElementById('authContainerSecondaryMobileMenu');
-        if (container && (container.innerHTML.trim() === '' || container.innerHTML.includes('Entrar') || container.innerHTML.includes('Minha Conta'))) {
-          if (window.renderAuthMobileMenu && window.auth) {
-            // Só atualiza se o estado do usuário mudou ou se o container está vazio
-            var currentUser = window.auth.currentUser;
-            if (lastAuthState !== currentUser) {
-              window.renderAuthMobileMenu(currentUser);
-              lastAuthState = currentUser;
-            }
-          }
-        }
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-    })();
+    // Removido MutationObserver e script de click do menu mobile para evitar conflitos
     </script>
   </header>
   <!-- Menu Mobile Off-canvas Alpine.js -->
