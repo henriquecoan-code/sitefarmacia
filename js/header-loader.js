@@ -11,6 +11,11 @@ export function loadHeader(headerContainerId, authContainerId) {
       }
       headerContainer.innerHTML = html;
 
+      // Reinicializa Alpine.js para processar x-data/x-effect do header dinâmico
+      if (window.Alpine && window.Alpine.initTree) {
+        window.Alpine.initTree(document.body);
+      }
+
       // Atualiza o estado de autenticação no header
       handleAuthState(authContainerId);
 
@@ -23,6 +28,8 @@ export function loadHeader(headerContainerId, authContainerId) {
           window.renderMobileAuth(user);
           window.renderAuthMobileMenu(user);
         });
+        // Chama manualmente para garantir renderização inicial
+        window.renderAuthMobileMenu(window.auth.currentUser);
       }
     })
     .catch((error) => console.error('Erro ao carregar o header:', error));
