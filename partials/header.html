@@ -159,6 +159,24 @@
         }
       });
     });
+    // Observa mudanças no DOM para garantir que o botão de autenticação apareça no menu mobile
+    (function() {
+      var lastAuthState = null;
+      var observer = new MutationObserver(function(mutationsList, observer) {
+        var container = document.getElementById('authContainerSecondaryMobileMenu');
+        if (container && (container.innerHTML.trim() === '' || container.innerHTML.includes('Entrar') || container.innerHTML.includes('Minha Conta'))) {
+          if (window.renderAuthMobileMenu && window.auth) {
+            // Só atualiza se o estado do usuário mudou ou se o container está vazio
+            var currentUser = window.auth.currentUser;
+            if (lastAuthState !== currentUser) {
+              window.renderAuthMobileMenu(currentUser);
+              lastAuthState = currentUser;
+            }
+          }
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    })();
     </script>
   </header>
   <!-- Menu Mobile Off-canvas Alpine.js -->
@@ -225,7 +243,10 @@
         <span><i class="fas fa-exclamation-triangle mr-2"></i>Seu e-mail ainda não foi confirmado.</span>
       </div>
       <!-- 2. Links de autenticação -->
-      <div id="authContainerSecondaryMobileMenu" class="px-6 py-4 text-center border-b text-base font-medium text-blue-900"></div>
+      <div id="authContainerSecondaryMobileMenu"
+           class="px-6 py-4 text-center border-b text-base font-medium text-blue-900"
+           x-effect="window.renderAuthMobileMenu && window.auth && window.renderAuthMobileMenu(window.auth.currentUser)">
+      </div>
       <!-- 3. Links de navegação -->
       <nav class="flex flex-col mt-2">
         <a href="./index.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Home</a>
