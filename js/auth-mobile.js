@@ -45,8 +45,9 @@ function renderMobileAuth(user) {
 function renderAuthMobileMenu(user) {
   var container = document.getElementById('authContainerSecondaryMobileMenu');
   if (!container) return;
+  console.log('Preenchendo menu mobile:', user, container); // Log para depuração
   container.classList.remove('hidden');
-  container.style.display = '';
+  container.style.display = 'block'; // Garante exibição correta
   // Mostra um loader enquanto o Firebase decide
   if (window.auth && window.auth.currentUser === undefined) {
     container.innerHTML = '<span>Carregando...</span>';
