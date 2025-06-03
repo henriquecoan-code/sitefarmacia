@@ -9,7 +9,10 @@ if (!firebase.apps.length) {
     authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
     databaseURL: "https://farmaciasaobenedito-bcb2c-default-rtdb.firebaseio.com",
     projectId: "farmaciasaobenedito-bcb2c",
-    // ...outros campos se necessário
+    storageBucket: "farmaciasaobenedito-bcb2c.appspot.com",
+    messagingSenderId: "789057690355",
+    appId: "1:789057690355:web:e01ee3616df2679fe2f586",
+    measurementId: "G-DHFR7WKVWS"
   });
 }
 const auth = firebase.auth();
