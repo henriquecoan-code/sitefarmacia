@@ -82,16 +82,39 @@ function renderAuthMobileMenu(user) {
   }
 }
 
+// Atualiza o menu mobile sempre que o estado de autenticação mudar
+function updateMobileMenuAuthOnStateChange(user) {
+  // Só renderiza se o aside estiver visível
+  var aside = document.querySelector('aside[x-show]');
+  if (aside && aside.style.display !== 'none') {
+    renderAuthMobileMenu(user);
+  }
+}
+
 auth.onAuthStateChanged(function (user) {
   renderMobileAuth(user);
   renderAuthMobileMenu(user);
+  updateMobileMenuAuthOnStateChange(user);
 });
 
-// (Opcional) Forçar atualização ao abrir o menu, se necessário:
-window.openMobileMenu = function () {
-  document.querySelector('[x-data]').__x.$data.mobileMenuOpen = true;
-  renderAuthMobileMenu(window.auth && window.auth.currentUser);
-};
+// Observa abertura do menu mobile via Alpine.js e força renderização
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    var asideMenu = document.querySelector('aside[x-show]');
+    if (asideMenu) {
+      var observer = new MutationObserver(function() {
+        if (asideMenu.style.display !== 'none') {
+          setTimeout(function() {
+            if (window.renderAuthMobileMenu && window.auth) {
+              window.renderAuthMobileMenu(window.auth.currentUser);
+            }
+          }, 50);
+        }
+      });
+      observer.observe(asideMenu, { attributes: true, attributeFilter: ['style'] });
+    }
+  });
+})();
 
 // Torna as funções e o auth acessíveis globalmente para uso após header dinâmico
 window.renderMobileAuth = renderMobileAuth;
