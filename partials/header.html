@@ -146,6 +146,19 @@
         });
       }
     });
+    // Garante renderização dos links de autenticação no menu mobile ao abrir
+    document.addEventListener('alpine:init', function() {
+      document.body.addEventListener('click', function(e) {
+        // Detecta abertura do menu mobile
+        if (e.target.closest('button') && e.target.closest('button').querySelector('.fa-bars')) {
+          setTimeout(function() {
+            if (window.renderAuthMobileMenu && window.auth) {
+              window.renderAuthMobileMenu(window.auth.currentUser);
+            }
+          }, 100); // Pequeno delay para garantir que o aside já está no DOM
+        }
+      });
+    });
     </script>
   </header>
   <!-- Menu Mobile Off-canvas Alpine.js -->
