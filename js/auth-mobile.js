@@ -5,9 +5,10 @@
 // Inicialização do Firebase (ajuste para o seu projeto, se necessário)
 if (!firebase.apps.length) {
   firebase.initializeApp({
-    apiKey: "SUA_API_KEY",
-    authDomain: "SUA_AUTH_DOMAIN",
-    projectId: "SEU_PROJECT_ID",
+    apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
+    authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
+    databaseURL: "https://farmaciasaobenedito-bcb2c-default-rtdb.firebaseio.com",
+    projectId: "farmaciasaobenedito-bcb2c",
     // ...outros campos se necessário
   });
 }
