@@ -158,8 +158,21 @@
           var observer = new MutationObserver(function() {
             if (asideMenu.style.display !== 'none') {
               setTimeout(function() {
+                var container = document.getElementById('authContainerSecondaryMobileMenu');
+                console.log('[DEBUG] Tentando preencher authContainerSecondaryMobileMenu:', container);
                 if (window.renderAuthMobileMenu && window.auth) {
-                  window.renderAuthMobileMenu(window.auth.currentUser);
+                  if (container) {
+                    window.renderAuthMobileMenu(window.auth.currentUser);
+                  } else {
+                    // Tenta novamente após 100ms se o container ainda não existir
+                    setTimeout(function() {
+                      var retryContainer = document.getElementById('authContainerSecondaryMobileMenu');
+                      console.log('[DEBUG] Retry preenchendo authContainerSecondaryMobileMenu:', retryContainer);
+                      if (retryContainer) {
+                        window.renderAuthMobileMenu(window.auth.currentUser);
+                      }
+                    }, 100);
+                  }
                 }
               }, 50);
             }
