@@ -154,7 +154,12 @@
   <div x-data="{ mobileMenuOpen: false }" class="md:hidden bg-white shadow-sm sticky top-0 z-50">
     <div class="flex items-center justify-between px-2 py-1">
       <!-- 5. Botão do menu mobile à esquerda (maior) -->
-      <button @click="mobileMenuOpen = true" class="text-blue-900 text-3xl focus:outline-none mr-3 flex-shrink-0">
+      <button 
+        x-on:click="
+          mobileMenuOpen = true;
+          window.renderAuthMobileMenu && window.renderAuthMobileMenu(window.auth && window.auth.currentUser)
+        " 
+        class="text-blue-900 text-3xl focus:outline-none mr-3 flex-shrink-0">
         <i class="fas fa-bars"></i>
       </button>
       <!-- 2. Logo centralizado, maior -->
@@ -205,7 +210,8 @@
     >
       <div class="flex items-center justify-between px-4 py-4 border-b">
         <span class="font-bold text-blue-900 text-lg">Menu</span>
-        <button @click="mobileMenuOpen = false" class="text-gray-700 text-2xl focus:outline-none">
+        <!-- Corrigido para fechar o menu lateral -->
+        <button x-on:click="mobileMenuOpen = false" class="text-blue-900 text-3xl focus:outline-none mr-3 flex-shrink-0">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -215,8 +221,7 @@
       </div>
       <!-- 2. Links de autenticação -->
       <div id="authContainerSecondaryMobileMenu"
-           class="px-6 py-4 text-center border-b text-base font-medium text-blue-900"
-           x-effect="mobileMenuOpen && window.renderAuthMobileMenu && window.auth && window.renderAuthMobileMenu(window.auth.currentUser)">
+          class="px-6 py-4 text-center border-b text-base font-medium text-blue-900">
       </div>
       <!-- 3. Links de navegação -->
       <nav class="flex flex-col mt-2">

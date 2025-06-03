@@ -47,6 +47,11 @@ function renderAuthMobileMenu(user) {
   if (!container) return;
   container.classList.remove('hidden');
   container.style.display = '';
+  // Mostra um loader enquanto o Firebase decide
+  if (window.auth && window.auth.currentUser === undefined) {
+    container.innerHTML = '<span>Carregando...</span>';
+    return;
+  }
   if (user) {
     container.innerHTML =
       '<div class="flex flex-col space-y-1">' +
@@ -80,6 +85,12 @@ auth.onAuthStateChanged(function (user) {
   renderMobileAuth(user);
   renderAuthMobileMenu(user);
 });
+
+// (Opcional) Forçar atualização ao abrir o menu, se necessário:
+window.openMobileMenu = function () {
+  document.querySelector('[x-data]').__x.$data.mobileMenuOpen = true;
+  renderAuthMobileMenu(window.auth && window.auth.currentUser);
+};
 
 // Torna as funções e o auth acessíveis globalmente para uso após header dinâmico
 window.renderMobileAuth = renderMobileAuth;
