@@ -50,7 +50,7 @@ function renderAuthMobileMenu(user) {
   if (user) {
     container.innerHTML =
       '<div class="flex flex-col space-y-1">' +
-      '<button href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
+      '<a href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
       '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
       '</div>';
     document.getElementById('logoutBtnMobileMenu').onclick = function (e) {
