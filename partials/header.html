@@ -154,12 +154,7 @@
   <div x-data="{ mobileMenuOpen: false }" class="md:hidden bg-white shadow-sm sticky top-0 z-50">
     <div class="flex items-center justify-between px-2 py-1">
       <!-- 5. Botão do menu mobile à esquerda (maior) -->
-      <button 
-        x-on:click="
-          mobileMenuOpen = true;
-          window.renderAuthMobileMenu && window.renderAuthMobileMenu(window.auth && window.auth.currentUser)
-        " 
-        class="text-blue-900 text-3xl focus:outline-none mr-3 flex-shrink-0">
+      <button @click="mobileMenuOpen = true; window.renderAuthMobileMenu && window.renderAuthMobileMenu(window.auth && window.auth.currentUser)" class="text-blue-900 text-3xl ...">
         <i class="fas fa-bars"></i>
       </button>
       <!-- 2. Logo centralizado, maior -->
