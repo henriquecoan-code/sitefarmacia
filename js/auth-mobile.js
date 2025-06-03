@@ -80,3 +80,8 @@ auth.onAuthStateChanged(function (user) {
   renderMobileAuth(user);
   renderAuthMobileMenu(user);
 });
+
+// Torna as funções e o auth acessíveis globalmente para uso após header dinâmico
+window.renderMobileAuth = renderMobileAuth;
+window.renderAuthMobileMenu = renderAuthMobileMenu;
+window.auth = auth;
