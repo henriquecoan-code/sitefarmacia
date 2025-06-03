@@ -228,5 +228,25 @@
       </nav>
     </aside>
   </div>
+  <script>
+    // Garante que o menu mobile é preenchido sempre que o aside ficar visível
+    (function() {
+      document.addEventListener('DOMContentLoaded', function() {
+        var asideMenu = document.querySelector('aside[x-show]');
+        if (asideMenu) {
+          var observer = new MutationObserver(function() {
+            if (asideMenu.style.display !== 'none') {
+              setTimeout(function() {
+                if (window.renderAuthMobileMenu && window.auth) {
+                  window.renderAuthMobileMenu(window.auth.currentUser);
+                }
+              }, 50);
+            }
+          });
+          observer.observe(asideMenu, { attributes: true, attributeFilter: ['style'] });
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
