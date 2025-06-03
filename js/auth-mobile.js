@@ -3,14 +3,16 @@
 // Requer que firebase-app-compat.js e firebase-auth-compat.js já estejam carregados no <head>
 
 // Inicialização do Firebase (ajuste para o seu projeto, se necessário)
-if (!firebase.apps.length) {
-  firebase.initializeApp({
-    apiKey: "SUA_API_KEY",
-    authDomain: "SUA_AUTH_DOMAIN",
-    projectId: "SEU_PROJECT_ID",
-    // ...outros campos se necessário
-  });
-}
+const firebaseConfig = {
+    apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
+    authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
+    databaseURL: "https://farmaciasaobenedito-bcb2c-default-rtdb.firebaseio.com",
+    projectId: "farmaciasaobenedito-bcb2c",
+    storageBucket: "farmaciasaobenedito-bcb2c.appspot.com",
+    messagingSenderId: "789057690355",
+    appId: "1:789057690355:web:e01ee3616df2679fe2f586",
+    measurementId: "G-DHFR7WKVWS"
+};
 const auth = firebase.auth();
 
 function renderMobileAuth(user) {
@@ -41,8 +43,9 @@ function renderMobileAuth(user) {
 function renderAuthMobileMenu(user) {
   var container = document.getElementById('authContainerSecondaryMobileMenu');
   if (!container) return;
+  // Garante que o container sempre aparece quando o menu está aberto
   container.classList.remove('hidden');
-  container.style.display = '';
+  container.style.removeProperty('display');
   if (user) {
     container.innerHTML =
       '<div class="flex flex-col space-y-1">' +
