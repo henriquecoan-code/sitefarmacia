@@ -22,15 +22,22 @@ export function loadHeader(headerContainerId, authContainerId) {
       // Garante que o menu mobile funcione após o carregamento dinâmico
       if (window.setupMobileMenu) window.setupMobileMenu();
 
-      // Garante que a autenticação mobile seja renderizada após o header ser inserido
-      if (window.auth && window.renderMobileAuth && window.renderAuthMobileMenu) {
-        window.auth.onAuthStateChanged(function(user) {
-          window.renderMobileAuth(user);
-          window.renderAuthMobileMenu(user);
-        });
-        // Chama manualmente para garantir renderização inicial
-        window.renderAuthMobileMenu(window.auth.currentUser);
+      // Aguarda o carregamento do footer e do script auth-mobile.js
+      function waitForAuthMobile(retries = 10) {
+        if (window.auth && window.renderMobileAuth && window.renderAuthMobileMenu) {
+          window.auth.onAuthStateChanged(function(user) {
+            window.renderMobileAuth(user);
+            window.renderAuthMobileMenu(user);
+          });
+          // Chama manualmente para garantir renderização inicial
+          window.renderAuthMobileMenu(window.auth.currentUser);
+        } else if (retries > 0) {
+          setTimeout(() => waitForAuthMobile(retries - 1), 150);
+        } else {
+          console.warn('Funções de autenticação mobile não disponíveis após aguardar o footer.');
+        }
       }
+      waitForAuthMobile();
     })
     .catch((error) => console.error('Erro ao carregar o header:', error));
 }
