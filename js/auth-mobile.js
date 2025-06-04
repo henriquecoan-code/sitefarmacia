@@ -56,6 +56,8 @@ function renderAuthMobileMenu(user) {
   if (user) {
     container.innerHTML =
       '<div class="flex flex-col space-y-1">' +
+      '<a>teste</a>' +
+      '<div class="flex flex-col space-y-1">' +
       '<a href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
       '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
       '</div>';
