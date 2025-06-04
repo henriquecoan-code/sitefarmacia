@@ -3,8 +3,7 @@
 // Requer que firebase-app-compat.js e firebase-auth-compat.js já estejam carregados no <head>
 
 // Inicialização do Firebase (ajuste para o seu projeto, se necessário)
-if (!firebase.apps.length) {
-  firebase.initializeApp({
+const firebaseConfig = {
     apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
     authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
     databaseURL: "https://farmaciasaobenedito-bcb2c-default-rtdb.firebaseio.com",
@@ -13,8 +12,7 @@ if (!firebase.apps.length) {
     messagingSenderId: "789057690355",
     appId: "1:789057690355:web:e01ee3616df2679fe2f586",
     measurementId: "G-DHFR7WKVWS"
-  });
-}
+};
 const auth = firebase.auth();
 
 function renderMobileAuth(user) {
@@ -45,19 +43,11 @@ function renderMobileAuth(user) {
 function renderAuthMobileMenu(user) {
   var container = document.getElementById('authContainerSecondaryMobileMenu');
   if (!container) return;
-  console.log('Preenchendo menu mobile:', user, container); // Log para depuração
+  // Garante que o container sempre aparece quando o menu está aberto
   container.classList.remove('hidden');
-  container.style.display = 'block'; // Garante exibição correta
-  // Mostra um loader enquanto o Firebase decide
-  if (window.auth && window.auth.currentUser === undefined) {
-    container.innerHTML = '<span>Carregando...</span>';
-    return;
-  }
+  container.style.removeProperty('display');
   if (user) {
     container.innerHTML =
-      '<div class="flex flex-col space-y-1">' +
-      '        <a href="./index.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Teste</a>'+
-'</div>' +
       '<div class="flex flex-col space-y-1">' +
       '<a href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
       '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
@@ -85,25 +75,7 @@ function renderAuthMobileMenu(user) {
   }
 }
 
-// Atualiza o menu mobile sempre que o estado de autenticação mudar
-function updateMobileMenuAuthOnStateChange(user) {
-  // Só renderiza se o aside estiver visível
-  var aside = document.querySelector('aside[x-show]');
-  if (aside && aside.style.display !== 'none') {
-    renderAuthMobileMenu(user);
-  }
-}
-
 auth.onAuthStateChanged(function (user) {
   renderMobileAuth(user);
   renderAuthMobileMenu(user);
-  updateMobileMenuAuthOnStateChange(user);
 });
-
-// 1. Fallback no x-effect já está no header.html (garante execução mesmo se a função não existir no primeiro momento)
-// 2. Escopo global já garantido abaixo
-window.renderMobileAuth = renderMobileAuth;
-window.renderAuthMobileMenu = renderAuthMobileMenu;
-window.auth = auth;
-
-// 3. Remover MutationObserver duplicado (deixe só o x-effect no HTML)
