@@ -80,7 +80,7 @@ auth.onAuthStateChanged(function (user) {
   renderAuthMobileMenu(user);
 });
 
-// Função para abrir o modal de autenticação
+// Expor funções e auth no escopo global
 window.renderAuthMobileMenu = renderAuthMobileMenu;
 window.renderMobileAuth = renderMobileAuth;
 window.auth = auth;
