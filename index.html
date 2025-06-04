@@ -97,5 +97,10 @@
       document.getElementById('footer-container').innerHTML = html;
     });
   </script>
+  <script src="./js/menu-mobile.js"></script>
+  <script>
+    // Garante que o menu mobile funcione após o header ser carregado
+    if (window.setupMobileMenu) window.setupMobileMenu();
+  </script>
 </body>
 </html>
