@@ -211,8 +211,18 @@
       </div>
       <!-- Auth/User Info Mobile -->
       <div id="authContainerSecondaryMobileMenu" class="px-6 py-2 border-b"
-  x-effect="if(mobileMenuOpen && window.renderAuthMobileMenu && window.auth){ window.renderAuthMobileMenu(window.auth.currentUser) }"
-></div>
+        x-effect="if(mobileMenuOpen){
+          if(window.renderAuthMobileMenu && window.auth){
+            window.renderAuthMobileMenu(window.auth.currentUser)
+          } else {
+            setTimeout(() => {
+              if(window.renderAuthMobileMenu && window.auth){
+                window.renderAuthMobileMenu(window.auth.currentUser)
+              }
+            }, 200);
+          }
+        }"
+      ></div>
       <nav class="flex flex-col mt-2">
         <a href="./index.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Teste</a>
         <a href="./produto.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Produtos</a>
