@@ -7,12 +7,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Alpine.js para menu mobile moderno -->
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 <body>
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
   <script src="./js/auth-mobile.js"></script>
+ 
 
   <!-- Faixa de aviso de e-mail não confirmado -->
   <div id="email-warning-bar" class="hidden bg-yellow-400 text-yellow-900 text-center text-sm py-1 w-full">
@@ -208,7 +210,9 @@
         </button>
       </div>
       <!-- Auth/User Info Mobile -->
-      <div id="authContainerSecondaryMobileMenu" class="px-6 py-2 border-b"></div>
+      <div id="authContainerSecondaryMobileMenu" class="px-6 py-2 border-b"
+  x-effect="if(mobileMenuOpen && window.renderAuthMobileMenu && window.auth){ window.renderAuthMobileMenu(window.auth.currentUser) }"
+></div>
       <nav class="flex flex-col mt-2">
         <a href="./index.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Teste</a>
         <a href="./produto.html" class="py-3 px-6 hover:bg-blue-100 text-blue-900 font-medium" @click="mobileMenuOpen = false">Produtos</a>
