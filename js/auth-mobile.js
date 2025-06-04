@@ -79,3 +79,8 @@ auth.onAuthStateChanged(function (user) {
   renderMobileAuth(user);
   renderAuthMobileMenu(user);
 });
+
+// Função para abrir o modal de autenticação
+window.renderAuthMobileMenu = renderAuthMobileMenu;
+window.renderMobileAuth = renderMobileAuth;
+window.auth = auth;
