@@ -100,26 +100,10 @@ auth.onAuthStateChanged(function (user) {
   updateMobileMenuAuthOnStateChange(user);
 });
 
-// Observa abertura do menu mobile via Alpine.js e força renderização
-(function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    var asideMenu = document.querySelector('aside[x-show]');
-    if (asideMenu) {
-      var observer = new MutationObserver(function() {
-        if (asideMenu.style.display !== 'none') {
-          setTimeout(function() {
-            if (window.renderAuthMobileMenu && window.auth) {
-              window.renderAuthMobileMenu(window.auth.currentUser);
-            }
-          }, 50);
-        }
-      });
-      observer.observe(asideMenu, { attributes: true, attributeFilter: ['style'] });
-    }
-  });
-})();
-
-// Torna as funções e o auth acessíveis globalmente para uso após header dinâmico
+// 1. Fallback no x-effect já está no header.html (garante execução mesmo se a função não existir no primeiro momento)
+// 2. Escopo global já garantido abaixo
 window.renderMobileAuth = renderMobileAuth;
 window.renderAuthMobileMenu = renderAuthMobileMenu;
 window.auth = auth;
+
+// 3. Remover MutationObserver duplicado (deixe só o x-effect no HTML)
