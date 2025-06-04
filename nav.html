@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AlpineJS Mobile Menu with Subnavigation Toggle</title>
+	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet" type="text/css">
+	<link href="https://cdn.jsdelivr.net/npm/@tailwindcss/ui@latest/dist/tailwind-ui.min.css" rel="stylesheet" type="text/css">
+	<link href="https://rsms.me/inter/inter.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bg-white">
+
+<nav x-data="{ navOpen: false }">
+
+    <!-- mobile menu button -->
+    <button class="p-2 text-gray-900 hover:bg-gray-100 focus:outline-none" aria-label="Main menu" aria-expanded="false" @click="navOpen = !navOpen" :class="{ 'bg-gray-200' : navOpen }">
+        <svg class="h-8 w-8" :class="{ 'hidden' : navOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg class="hidden h-8 w-8" :class="{ 'hidden' : !navOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+
+    <!-- mobile menu-->
+    <div class="hidden" :class="{ 'block' : navOpen , 'hidden' : !navOpen }">
+        <!-- with children -->
+        <div x-data="{ isOpen: false }">
+            <div class="w-full flex justify-between items-start">
+                <a href="#" class="bg-gray-100 hover:bg-gray-200 p-3 flex-grow">Link</a>
+                <a @click=" isOpen = !isOpen" class="bg-gray-300 hover:bg-gray-200 p-3 cursor-pointer focus:outline-none" :class="{ 'bg-gray-900' : isOpen , 'hover:bg-gray-800' : isOpen }">
+                    <svg class="h-6 w-6 transform" :class="{ 'hidden' : isOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <svg class="h-6 w-6 transform -rotate-45 text-white" :class="{ 'hidden' : !isOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </a>
+            </div>
+            <div x-show="isOpen" class="flex flex-col bg-gray-900 text-gray-300">
+                <a href="#" class="text-sm flex p-3 hover:bg-gray-800">Subnav Link</a>
+                <a href="#" class="text-sm flex p-3 hover:bg-gray-800">Subnav Link</a>
+                <a href="#" class="text-sm flex p-3 hover:bg-gray-800">Subnav Link</a>
+                <a href="#" class="text-sm flex p-3 hover:bg-gray-800">Subnav Link</a>
+                <a href="#" class="text-sm flex p-3 hover:bg-gray-800">Subnav Link</a>
+                <a href="#" class="text-sm flex p-3 hover:bg-gray-800">Subnav Link</a>
+            </div>
+        </div>
+        <!-- without children-->
+        <div class="w-full flex">
+            <a href="#" class="bg-gray-100 hover:bg-gray-200 p-3 flex-grow">Link</a>
+        </div>
+    </div>
+
+</nav>
+
+<script	src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v1.9.8/dist/alpine.js" defer></script>
+</body>
+</html>
