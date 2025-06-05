@@ -76,8 +76,9 @@ function renderAuthMobileMenu(user) {
 }
 
 auth.onAuthStateChanged(function (user) {
+  window.currentAuthUser = user; // Salva o usuário globalmente
   renderMobileAuth(user);
-  renderAuthMobileMenu(user);
+  // Não chama renderAuthMobileMenu aqui, só quando o menu abrir
 });
 
 // Expor funções e auth no escopo global
@@ -100,8 +101,8 @@ window.auth = auth;
           container.classList.remove('hidden');
           container.style.removeProperty('display');
         }
-        if (window.renderAuthMobileMenu && window.auth) {
-          window.renderAuthMobileMenu(window.auth.currentUser);
+        if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
+          window.renderAuthMobileMenu(window.currentAuthUser);
         }
       }
       lastOpen = isOpen;
