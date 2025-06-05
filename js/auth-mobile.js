@@ -118,9 +118,10 @@ setupAuthMobile();
   }
 })();
 
-// --- MutationObserver para garantir renderização após Alpine.js ---
+// --- MutationObserver para garantir renderização após Alpine.js, sempre por último ---
 (function observeMobileMenuAuth() {
   var observer = null;
+  var debounceTimer = null;
   function setupObserver() {
     var aside = document.querySelector('aside');
     if (!aside) {
@@ -134,19 +135,17 @@ setupAuthMobile();
     }
     if (observer) observer.disconnect();
     observer = new MutationObserver(function(mutationsList) {
-      for (var mutation of mutationsList) {
-        if (mutation.type === 'attributes' || mutation.type === 'childList') {
-          // Verifica se o menu está visível
-          if (container.offsetParent !== null && !container.classList.contains('hidden')) {
-            if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
-              window.renderAuthMobileMenu(window.currentAuthUser);
-            }
+      // Debounce: espera 50ms após a última mutação para renderizar
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() {
+        if (container.offsetParent !== null && !container.classList.contains('hidden')) {
+          if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
+            window.renderAuthMobileMenu(window.currentAuthUser);
           }
         }
-      }
+      }, 50);
     });
     observer.observe(container, { attributes: true, childList: true, subtree: false });
-    // Também observa o aside para detectar abertura do menu
     observer.observe(aside, { attributes: true, childList: false, subtree: false });
   }
   if (document.readyState === 'loading') {
@@ -154,4 +153,17 @@ setupAuthMobile();
   } else {
     setupObserver();
   }
+})();
+
+// --- Re-executa setupAuthMobile e observer após header/footer dinâmicos ---
+(function ensureAuthMobileAfterDynamicLoad() {
+  function reinitAuthMobile() {
+    if (typeof setupAuthMobile === 'function') setupAuthMobile();
+    if (typeof observeMobileMenuAuth === 'function') observeMobileMenuAuth();
+  }
+  // Suporte para header/footer dinâmicos
+  document.addEventListener('headerLoaded', reinitAuthMobile);
+  document.addEventListener('footerLoaded', reinitAuthMobile);
+  // Fallback: tenta rodar após 2s caso eventos não disparem
+  setTimeout(reinitAuthMobile, 2000);
 })();
