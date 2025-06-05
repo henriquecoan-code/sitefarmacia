@@ -115,8 +115,3 @@ window.auth = auth;
     trySync();
   }
 })();
-// Garante que o menu mobile funcione após o carregamento dinâmico
-// Importa o Firebase e inicializa com a configuração do seu projeto
-  import { firebaseConfig } from './js/firebase-config.js';
-  console.log(firebaseConfig.apiKey);
-    firebase.initializeApp(firebaseConfig);
