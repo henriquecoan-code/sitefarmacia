@@ -87,18 +87,29 @@ window.auth = auth;
 
 // Garante atualização do menu mobile sempre que ele abrir
 (function ensureMobileMenuAuthSync() {
-  // Observa mudanças de atributo no aside do menu mobile
-  var aside = document.querySelector('aside');
-  if (!aside) return;
-  var lastOpen = false;
-  setInterval(function() {
-    var isOpen = aside.style.display !== 'none' && aside.offsetParent !== null;
-    if (isOpen && !lastOpen) {
-      // Menu acabou de abrir
-      if (window.renderAuthMobileMenu && window.auth) {
-        window.renderAuthMobileMenu(window.auth.currentUser);
+  function trySync() {
+    var aside = document.querySelector('aside');
+    if (!aside) return;
+    var lastOpen = false;
+    setInterval(function() {
+      var isOpen = aside.style.display !== 'none' && aside.offsetParent !== null;
+      if (isOpen && !lastOpen) {
+        // Menu acabou de abrir
+        var container = document.getElementById('authContainerSecondaryMobileMenu');
+        if (container) {
+          container.classList.remove('hidden');
+          container.style.removeProperty('display');
+        }
+        if (window.renderAuthMobileMenu && window.auth) {
+          window.renderAuthMobileMenu(window.auth.currentUser);
+        }
       }
-    }
-    lastOpen = isOpen;
-  }, 200);
+      lastOpen = isOpen;
+    }, 200);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', trySync);
+  } else {
+    trySync();
+  }
 })();
