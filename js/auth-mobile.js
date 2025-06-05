@@ -32,6 +32,7 @@ function renderAuthMobileMenu(user) {
   // Aguarda até o elemento existir e estar visível
   function tryRender(attempts = 10) {
     const container = document.getElementById('authContainerSecondaryMobileMenu');
+    console.log('Tentando renderizar menu mobile:', container, 'Tentativas restantes:', attempts, 'User:', user);
     if (!container || container.offsetParent === null) {
       if (attempts > 0) setTimeout(() => tryRender(attempts - 1), 100);
       return;
@@ -67,6 +68,7 @@ function renderAuthMobileMenu(user) {
         if (typeof openAuthModal === 'function') openAuthModal('register');
       };
     }
+    console.log('Conteúdo após render:', container.innerHTML);
   }
   tryRender();
 }
