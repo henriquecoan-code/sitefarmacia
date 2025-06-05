@@ -11,33 +11,38 @@ export function loadHeader(headerContainerId, authContainerId) {
       }
       headerContainer.innerHTML = html;
 
-      // Reinicializa Alpine.js para processar x-data/x-effect do header dinâmico
-      if (window.Alpine && window.Alpine.initTree) {
-        window.Alpine.initTree(document.body);
-      }
-
-      // Atualiza o estado de autenticação no header
-      handleAuthState(authContainerId);
-
-      // Garante que o menu mobile funcione após o carregamento dinâmico
-      if (window.setupMobileMenu) window.setupMobileMenu();
-
-      // Aguarda o carregamento do footer e do script auth-mobile.js
-      function waitForAuthMobile(retries = 10) {
-        if (window.auth && window.renderMobileAuth && window.renderAuthMobileMenu) {
-          window.auth.onAuthStateChanged(function(user) {
-            window.renderMobileAuth(user);
-            window.renderAuthMobileMenu(user);
-          });
-          // Chama manualmente para garantir renderização inicial
-          window.renderAuthMobileMenu(window.auth.currentUser);
-        } else if (retries > 0) {
-          setTimeout(() => waitForAuthMobile(retries - 1), 150);
-        } else {
-          console.warn('Funções de autenticação mobile não disponíveis após aguardar o footer.');
+      // Carrega o script auth-mobile.js dinamicamente após inserir o header
+      const script = document.createElement('script');
+      script.src = './js/auth-mobile.js';
+      script.onload = () => {
+        // Reinicializa Alpine.js para processar x-data/x-effect do header dinâmico
+        if (window.Alpine && window.Alpine.initTree) {
+          window.Alpine.initTree(document.body);
         }
-      }
-      waitForAuthMobile();
+        // Atualiza o estado de autenticação no header
+        handleAuthState(authContainerId);
+        // Garante que o menu mobile funcione após o carregamento dinâmico
+        if (window.setupMobileMenu) window.setupMobileMenu();
+        // Aguarda o carregamento do footer e do script auth-mobile.js
+        function waitForAuthMobile(retries = 10) {
+          if (window.auth && window.renderMobileAuth && window.renderAuthMobileMenu) {
+            window.auth.onAuthStateChanged(function(user) {
+              window.renderMobileAuth(user);
+              window.renderAuthMobileMenu(user);
+            });
+            // Chama manualmente para garantir renderização inicial
+            window.renderAuthMobileMenu(window.auth.currentUser);
+          } else if (retries > 0) {
+            setTimeout(() => waitForAuthMobile(retries - 1), 150);
+          } else {
+            console.warn('Funções de autenticação mobile não disponíveis após aguardar o footer.');
+          }
+        }
+        waitForAuthMobile();
+      };
+      document.body.appendChild(script);
+      // ...não executa mais o restante aqui, pois está dentro do onload do script
+      return;
     })
     .catch((error) => console.error('Erro ao carregar o header:', error));
 }
