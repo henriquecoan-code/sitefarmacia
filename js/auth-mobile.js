@@ -88,6 +88,8 @@ function setupAuthMobile() {
 // Expor funções no escopo global
 window.renderAuthMobileMenu = renderAuthMobileMenu;
 window.renderMobileAuth = renderMobileAuth;
+window.setupAuthMobile = setupAuthMobile;
+window.observeMobileMenuAuth = observeMobileMenuAuth;
 
 setupAuthMobile();
 
@@ -119,7 +121,7 @@ setupAuthMobile();
 })();
 
 // --- MutationObserver para garantir renderização após Alpine.js, sempre por último ---
-(function observeMobileMenuAuth() {
+function observeMobileMenuAuth() {
   var observer = null;
   var debounceTimer = null;
   function setupObserver() {
@@ -153,7 +155,9 @@ setupAuthMobile();
   } else {
     setupObserver();
   }
-})();
+}
+
+observeMobileMenuAuth();
 
 // --- Re-executa setupAuthMobile e observer após header/footer dinâmicos ---
 (function ensureAuthMobileAfterDynamicLoad() {
