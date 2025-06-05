@@ -579,15 +579,20 @@
     });
   </script>
     <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
-    document.addEventListener('DOMContentLoaded', () => {
-      loadHeader('header-container', 'authContainerSecondary').then(() => {
-          fetch('partials/footer.html').then(res => res.text()).then(html => {
-          const footer = document.getElementById('footer-container');
-          if (footer) footer.innerHTML = html;
-        });
-      });
-    });
-  </script>
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+    // ...adicione aqui lógica de conta, dados do usuário, etc...
+    </script>
+    <script src="js/auth-mobile.js"></script>
 </body>
 </html>

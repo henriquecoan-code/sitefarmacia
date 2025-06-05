@@ -122,19 +122,121 @@
     <div id="footer-container"></div>
     <!-- Scripts -->
     <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
-    // Inicializa Firebase se necessário
-    if (!window.firebase?.apps?.length) {
-      window.firebase?.initializeApp?.(firebaseConfig);
+
+    // Inicializa Firebase modular e expõe auth para scripts tradicionais
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+
+    // Carrega header e footer
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
+    // Função para buscar e renderizar produtos
+    async function fetchProducts() {
+      const productsContainer = document.getElementById('lista-produtos');
+      const loadingSkeleton = document.getElementById('loading-skeleton');
+      const emptyState = document.getElementById('empty-state');
+      loadingSkeleton.classList.remove('hidden');
+      productsContainer.innerHTML = '';
+      try {
+        const snapshot = await getDocs(collection(db, 'produtos'));
+        const produtos = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          data.id = doc.id;
+          if (typeof data.valorComDesconto === 'undefined' && typeof data.precoMaximo === 'number' && typeof data.desconto === 'number') {
+            data.valorComDesconto = data.precoMaximo * (1 - data.desconto);
+          }
+          produtos.push(data);
+        });
+        loadingSkeleton.classList.add('hidden');
+        if (!Array.isArray(produtos) || produtos.length === 0) {
+          emptyState.classList.remove('hidden');
+          return;
+        }
+        emptyState.classList.add('hidden');
+        renderProducts(produtos);
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        loadingSkeleton.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+      }
     }
-    document.addEventListener('DOMContentLoaded', async () => {
-        await loadHeader('header-container', 'authContainerSecondary');
-        await loadFooter('footer-container');
-        // Carregue aqui o restante da lógica da página (produtos, filtros, etc)
-        // ...existing code do seu script principal, sem fetch manual do footer...
-    });
+
+    // Função para renderizar produtos (simplificada, adapte conforme seu template)
+    function renderProducts(produtos) {
+      const productsContainer = document.getElementById('lista-produtos');
+      productsContainer.innerHTML = '';
+      produtos.forEach(product => {
+        let fotoSrc = 'img/medicamento.png';
+        if (Array.isArray(product.fotos) && product.fotos.length > 0) {
+          fotoSrc = product.fotos[0] || 'img/medicamento.png';
+        }
+        const productElement = document.createElement('div');
+        productElement.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition flex flex-col h-full';
+        productElement.innerHTML = `
+          <div class="flex justify-center">
+            <div class="relative">
+              <div class="flex justify-center items-center w-48 h-32 bg-gray-100 rounded">
+                <img src="${fotoSrc}" alt="Imagem do Produto" class="w-32 h-32 object-contain mb-2 rounded" onerror="this.onerror=null;this.src='img/medicamento.png';" />
+                ${product.desconto ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">${Math.round(product.desconto * 100)}% OFF</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col flex-1 justify-between">
+            <div>
+              <h3 class="font-semibold text-lg mb-1 truncate-2-lines" title="${product.nome}">${product.nome}</h3>
+              <p class="text-gray-500 text-sm mb-2 truncate-2-lines" title="${product.descricao || ''}">${product.descricao || ''}</p>
+              <div class="flex justify-between mt-auto">
+                <a class="text-blue-700 font-bold text-xl">R$ ${Number(product.precoMaximo).toFixed(2)}</a>
+                <span class="text-blue-700 font-bold text-sm ml-auto mt-1.5">Desc.</span>
+                <a class="text-blue-700 font-bold text-xl">R$ ${Number(product.valorComDesconto).toFixed(2)}</a>
+              </div>
+            </div>
+            <button class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full transition flex items-center justify-center">
+              <i class="fas fa-cart-plus mr-2"></i> Adicionar ao Carrinho
+            </button>
+          </div>
+        `;
+        productsContainer.appendChild(productElement);
+        // Adiciona o evento ao botão
+        const btn = productElement.querySelector('button');
+        btn.addEventListener('click', () => addToCart(product));
+      });
+    }
+
+    // Função para adicionar ao carrinho (simplificada)
+    function addToCart(product) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const index = cart.findIndex(item => item.id === product.id);
+      if (index > -1) {
+        cart[index].quantidade += 1;
+      } else {
+        cart.push({ ...product, quantidade: 1 });
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+    }
+
+    function updateCartCount() {
+      const cartCount = document.getElementById('cart-count');
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (cartCount) {
+        const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+        cartCount.textContent = total;
+      }
+    }
+
+    // Inicialização
+    fetchProducts();
     </script>
     <script src="js/auth-mobile.js"></script>
 </body>

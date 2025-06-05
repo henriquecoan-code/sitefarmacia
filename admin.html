@@ -69,20 +69,18 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, setDoc, doc, collection, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { firebaseConfig } from './js/firebase-config.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
-
-    const app = initializeApp(firebaseConfig);
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
     const db = getFirestore(app);
-
-    // Carregar header/footer e só então carregar admins
-    async function carregarHeaderFooter() {
-      await loadHeader('header-container', 'authContainerSecondary');
-      await fetch('./partials/footer.html').then(r=>r.text()).then(h=>{document.getElementById('footer-container').innerHTML=h});
-    }
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
 
     // Função para listar apenas administradores (Firestore)
     async function carregarAdministradores() {
@@ -116,7 +114,6 @@
 
     // Inicialização única
     async function initAdminPage() {
-      await carregarHeaderFooter();
       const auth = getAuth();
       onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -196,5 +193,6 @@
     // Chama inicialização ao carregar página
     window.addEventListener('DOMContentLoaded', initAdminPage);
   </script>
+  <script src="js/auth-mobile.js"></script>
 </body>
 </html>

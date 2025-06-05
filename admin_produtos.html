@@ -111,28 +111,21 @@
     </main>
   </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-<script type="module">
-import { firebaseConfig } from './js/firebase-config.js';
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-// Aguarda DOM pronto antes de adicionar event listeners
+    <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+    // Aguarda DOM pronto antes de adicionar event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Carregar header e footer
-            fetch('./partials/header.html')
-                .then(response => response.text())
-                .then(data => {
-                    const header = document.getElementById('header-container');
-                    if (header) header.innerHTML = data;
-                });
-            fetch('./partials/footer.html')
-                .then(response => response.text())
-                .then(data => {
-                    const footer = document.getElementById('footer-container');
-                    if (footer) footer.innerHTML = data;
-                });
             // Upload de CSV
             const formUploadCSV = document.getElementById('formUploadCSV');
             if (formUploadCSV) {
@@ -256,5 +249,6 @@ if (!firebase.apps.length) {
             carregarProdutos();
         });
     </script>
+    <script src="js/auth-mobile.js"></script>
 </body>
 </html>

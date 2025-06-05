@@ -10,10 +10,21 @@
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="css/estilo.css">
   <script type="module">
-    import { firebaseConfig } from './js/firebase-config.js';
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    initializeApp(firebaseConfig);
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+    // ...adicione aqui lógica de renderização de produtos, banners, etc, se necessário...
   </script>
+  <script src="js/auth-mobile.js"></script>
 </head>
 <body class="bg-gray-50">
   <!-- Header -->

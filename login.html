@@ -61,7 +61,16 @@
 
   <!-- Scripts -->
   <script type="module">
-    import { auth, signInWithEmailAndPassword } from './js/firebase-config.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
 
     const showToast = (message, type) => {
       const toast = document.createElement('div');
@@ -119,5 +128,6 @@
       }
     });
   </script>
+  <script src="js/auth-mobile.js"></script>
 </body>
 </html>
