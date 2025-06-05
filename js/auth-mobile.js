@@ -62,10 +62,29 @@ function renderAuthMobileMenu(user) {
       document.getElementById('loginBtnMobileMenu').onclick = function (e) {
         e.preventDefault();
         if (typeof openAuthModal === 'function') openAuthModal('login');
+        // Fecha o menu mobile ao abrir o modal
+        if (window.Alpine && window.Alpine.store && window.Alpine.store('mobileMenuOpen')) {
+          window.Alpine.store('mobileMenuOpen', false);
+        } else {
+          // fallback para Alpine 3.x
+          const aside = document.querySelector('aside');
+          if (aside && aside.parentElement && aside.parentElement.__x) {
+            aside.parentElement.__x.$data.mobileMenuOpen = false;
+          }
+        }
       };
       document.getElementById('registerBtnMobileMenu').onclick = function (e) {
         e.preventDefault();
         if (typeof openAuthModal === 'function') openAuthModal('register');
+        // Fecha o menu mobile ao abrir o modal
+        if (window.Alpine && window.Alpine.store && window.Alpine.store('mobileMenuOpen')) {
+          window.Alpine.store('mobileMenuOpen', false);
+        } else {
+          const aside = document.querySelector('aside');
+          if (aside && aside.parentElement && aside.parentElement.__x) {
+            aside.parentElement.__x.$data.mobileMenuOpen = false;
+          }
+        }
       };
     }
     console.log('Conteúdo após render:', container.innerHTML);
