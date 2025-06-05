@@ -1,18 +1,8 @@
 // Importar Firebase usando a versão compat para garantir compatibilidade com o resto do projeto
 import firebase from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js';
 import 'https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js';
-
-// Configuração do Firebase - duplicada aqui para garantir que funcione independentemente
-const firebaseConfig = {
-  apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
-  authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
-  databaseURL: "https://farmaciasaobenedito-bcb2c-default-rtdb.firebaseio.com",
-  projectId: "farmaciasaobenedito-bcb2c",
-  storageBucket: "farmaciasaobenedito-bcb2c.appspot.com",
-  messagingSenderId: "789057690355",
-  appId: "1:789057690355:web:e01ee3616df2679fe2f586",
-  measurementId: "G-DHFR7WKVWS"
-};
+import { auth, firestore } from './firebase-config.js';
+import { escapeHTML } from './utils.js';
 
 /**
  * Gerencia os dados da conta do usuário
@@ -20,13 +10,8 @@ const firebaseConfig = {
  */
 export class AccountManager {
   constructor() {
-    // Garantir que o Firebase esteja inicializado
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    
-    this.auth = firebase.auth();
-    this.db = firebase.firestore();
+    this.auth = auth;
+    this.db = firestore;
     
     // Elementos do DOM
     this.loadingElement = document.getElementById('loading');
@@ -154,16 +139,6 @@ export class AccountManager {
     const nomeInput = document.getElementById('nome');
     const emailInput = document.getElementById('email');
     const telefoneInput = document.getElementById('telefone');
-
-    // Função para escapar HTML e evitar XSS
-    function escapeHTML(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
 
     if (nomeDisplay) nomeDisplay.textContent = escapeHTML(userData.nome || '');
     if (emailDisplay) emailDisplay.textContent = escapeHTML(userData.email || user.email || '');

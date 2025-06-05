@@ -1,3 +1,6 @@
+import { auth } from './firebase-config.js';
+import { escapeHTML } from './utils.js';
+
 // Carrega Header
 fetch('partials/header.html')
   .then(response => response.text())
@@ -22,7 +25,7 @@ fetch('partials/footer.html')
   });
   
   function updateAuthUI() {
-  const user = firebase.auth().currentUser;
+  const user = auth.currentUser;
   const authElements = document.querySelectorAll('.auth-element');
   
   authElements.forEach(element => {

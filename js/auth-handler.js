@@ -1,5 +1,6 @@
 import { auth } from './firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+import { escapeHTML } from './utils.js';
 
 export function handleAuthState(authContainerId) {
   const authContainer = document.getElementById(authContainerId);
@@ -11,15 +12,6 @@ export function handleAuthState(authContainerId) {
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      // Função para escapar HTML e evitar XSS
-      function escapeHTML(str) {
-        return String(str)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#39;");
-      }
       const safeDisplayName = escapeHTML(user.displayName || user.email.split('@')[0] || 'Usuário');
       const safeEmail = escapeHTML(user.email || '');
       authContainer.innerHTML = `

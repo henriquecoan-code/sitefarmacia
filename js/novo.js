@@ -1,3 +1,6 @@
+import { auth, browserLocalPersistence } from './firebase-config.js';
+import { escapeHTML } from './utils.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const authModal = document.getElementById('authModal');
   const authModalBtn = document.getElementById('authModalBtn');
@@ -64,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       showLoading(true);
       console.log('Tentando login com:', email);
-      await firebase.auth().signInWithEmailAndPassword(email, password);
+      await auth.signInWithEmailAndPassword(email, password);
       modal.close();
       showToast('Login realizado com sucesso!', 'success');
     } catch (error) {
@@ -77,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function registerUser(name, email, password) {
     try {
       showLoading(true);
-      const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
       await userCredential.user.updateProfile({ displayName: name });
       modal.close();
       showToast('Cadastro realizado com sucesso!', 'success');
@@ -103,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setupEventListeners() {
     authModalBtn?.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!firebase.auth().currentUser) modal.open(templates.login);
+      if (!auth.currentUser) modal.open(templates.login);
     });
 
     closeAuthModal?.addEventListener('click', modal.close);
@@ -117,14 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     authModalBtn?.addEventListener('mouseenter', () => {
-      if (firebase.auth().currentUser) {
+      if (auth.currentUser) {
         userDropdown?.classList.remove('hidden');
       }
     });
 
     logoutBtn?.addEventListener('click', (e) => {
       e.preventDefault();
-      firebase.auth().signOut()
+      auth.signOut()
         .then(() => location.href = 'index.html')
         .catch(handleAuthError);
     });
@@ -142,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const email = prompt('Digite seu e-mail para redefinir a senha:');
         if (email) {
-          firebase.auth().sendPasswordResetEmail(email)
+          auth.sendPasswordResetEmail(email)
             .then(() => showToast('E-mail de redefinição enviado!', 'success'))
             .catch(handleAuthError);
         }
@@ -154,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const form = e.target;
 
-      if (!firebase.auth) return;
+      if (!auth) return;
 
       if (form.id === 'loginForm') {
         const email = form.querySelector('input[type="email"]')?.value;
@@ -172,16 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function init() {
-    if (typeof firebase === 'undefined' || !firebase.auth) {
-      console.error('Firebase não está disponível');
-      return;
-    }
-
     try {
       setupEventListeners();
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-      firebase.auth().onAuthStateChanged((user) => {
+      auth.setPersistence(browserLocalPersistence);
+      auth.onAuthStateChanged((user) => {
         updateAuthUI(user);
         if (user && location.pathname.includes('login.html')) {
           location.href = 'index.html';

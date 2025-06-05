@@ -1,4 +1,5 @@
 import { auth } from './firebase-config.js';
+import { escapeHTML } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Elementos do DOM (verifique se existem antes de usar)
@@ -49,16 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Atualiza a UI com base no usuário
   function updateAuthUI(user) {
     if (!authModalBtn) return;
-
-    // Função para escapar HTML e evitar XSS
-    function escapeHTML(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
 
     if (user) {
       authModalBtn.innerHTML = `

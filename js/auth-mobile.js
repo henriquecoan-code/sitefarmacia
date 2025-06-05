@@ -1,20 +1,7 @@
 // js/auth-mobile.js
-// Este script funciona em deploy estático (GitHub Pages) sem imports ES6
-// Requer que firebase-app-compat.js e firebase-auth-compat.js já estejam carregados no <head>
-
-// Inicialização do Firebase (ajuste para o seu projeto, se necessário)
-const firebaseConfig = {
-    apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
-    authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
-    databaseURL: "https://farmaciasaobenedito-bcb2c-default-rtdb.firebaseio.com",
-    projectId: "farmaciasaobenedito-bcb2c",
-    storageBucket: "farmaciasaobenedito-bcb2c.appspot.com",
-    messagingSenderId: "789057690355",
-    appId: "1:789057690355:web:e01ee3616df2679fe2f586",
-    measurementId: "G-DHFR7WKVWS"
-};
-
-const auth = firebase.auth();
+// Este script deve ser carregado como script tradicional, não como módulo
+// Não use import aqui!
+// O objeto auth deve ser exposto em window.auth pelo carregador principal
 
 function renderMobileAuth(user) {
   var container = document.getElementById('authContainerSecondaryMobile');
@@ -42,52 +29,66 @@ function renderMobileAuth(user) {
 }
 
 function renderAuthMobileMenu(user) {
-  var container = document.getElementById('authContainerSecondaryMobileMenu');
-  if (!container) return;
-  // Garante que o container sempre aparece quando o menu está aberto
-  container.classList.remove('hidden');
-  container.style.removeProperty('display');
-  if (user) {
-    container.innerHTML =
-      '<div class="flex flex-col space-y-1">' +
-      '<a href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
-      '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
-      '</div>';
-    document.getElementById('logoutBtnMobileMenu').onclick = function (e) {
-      e.preventDefault();
-      auth.signOut().then(function () {
-        window.location.reload();
-      });
-    };
-  } else {
-    container.innerHTML =
-      '<div class="flex flex-col space-y-1">' +
-      '<a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
-      '<a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
-      '</div>';
-    document.getElementById('loginBtnMobileMenu').onclick = function (e) {
-      e.preventDefault();
-      if (typeof openAuthModal === 'function') openAuthModal('login');
-    };
-    document.getElementById('registerBtnMobileMenu').onclick = function (e) {
-      e.preventDefault();
-      if (typeof openAuthModal === 'function') openAuthModal('register');
-    };
+  // Aguarda até o elemento existir e estar visível
+  function tryRender(attempts = 10) {
+    const container = document.getElementById('authContainerSecondaryMobileMenu');
+    if (!container || container.offsetParent === null) {
+      if (attempts > 0) setTimeout(() => tryRender(attempts - 1), 100);
+      return;
+    }
+    container.classList.remove('hidden');
+    container.style.removeProperty('display');
+    if (user) {
+      container.innerHTML =
+        '<div class="flex flex-col space-y-1">' +
+        '<a href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
+        '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
+        '</div>';
+      document.getElementById('logoutBtnMobileMenu').onclick = function (e) {
+        e.preventDefault();
+        if (window.auth) {
+          window.auth.signOut().then(function () {
+            window.location.reload();
+          });
+        }
+      };
+    } else {
+      container.innerHTML =
+        '<div class="flex flex-col space-y-1">' +
+        '<a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
+        '<a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
+        '</div>';
+      document.getElementById('loginBtnMobileMenu').onclick = function (e) {
+        e.preventDefault();
+        if (typeof openAuthModal === 'function') openAuthModal('login');
+      };
+      document.getElementById('registerBtnMobileMenu').onclick = function (e) {
+        e.preventDefault();
+        if (typeof openAuthModal === 'function') openAuthModal('register');
+      };
+    }
   }
+  tryRender();
 }
 
-auth.onAuthStateChanged(function (user) {
-  window.currentAuthUser = user; // Salva o usuário globalmente
-  renderMobileAuth(user);
-  // Não chama renderAuthMobileMenu aqui, só quando o menu abrir
-});
+function setupAuthMobile() {
+  if (!window.auth) {
+    setTimeout(setupAuthMobile, 100);
+    return;
+  }
+  window.auth.onAuthStateChanged(function (user) {
+    window.currentAuthUser = user;
+    renderMobileAuth(user);
+    // Não chama renderAuthMobileMenu aqui, só quando o menu abrir
+  });
+}
 
-// Expor funções e auth no escopo global
+// Expor funções no escopo global
 window.renderAuthMobileMenu = renderAuthMobileMenu;
 window.renderMobileAuth = renderMobileAuth;
-window.auth = auth;
 
-// Garante atualização do menu mobile sempre que ele abrir
+setupAuthMobile();
+
 (function ensureMobileMenuAuthSync() {
   function trySync() {
     var aside = document.querySelector('aside');
@@ -96,7 +97,6 @@ window.auth = auth;
     setInterval(function() {
       var isOpen = aside.style.display !== 'none' && aside.offsetParent !== null;
       if (isOpen && !lastOpen) {
-        // Menu acabou de abrir
         var container = document.getElementById('authContainerSecondaryMobileMenu');
         if (container) {
           container.classList.remove('hidden');

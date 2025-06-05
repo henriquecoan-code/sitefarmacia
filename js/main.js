@@ -1,3 +1,6 @@
+import { auth } from './firebase-config.js';
+import { escapeHTML } from './utils.js';
+
 // Gerenciamento do Carrinho
 class Carrinho {
   constructor() {
