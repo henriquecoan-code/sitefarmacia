@@ -29,7 +29,7 @@ function renderMobileAuth(user) {
     };
   } else {
     container.innerHTML =
-      '<button href="login.html" id="mobileLoginBtn" class="text-blue-900 hover:text-blue-700 focus:outline-none flex flex-col items-center">' +
+      '<button id="mobileLoginBtn" class="text-blue-900 hover:text-blue-700 focus:outline-none flex flex-col items-center">' +
       '<i class="fas fa-user-circle text-3xl"></i>' +
       '<span class="text-xs">Entrar</span>' +
       '</button>';
