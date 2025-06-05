@@ -28,3 +28,41 @@ compat.js"></script>
     <script src="https://www
 ```
 
+# Code Citations
+
+## License: Apache_2_0
+https://github.com/chsyu/F2E-Course/tree/0d5124b7a3107c75f4fec1a18e7cd6042aaef945/wkD/M8_Instagram/upload.html
+
+```
+src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.
+```
+
+
+## License: Apache_2_0
+https://github.com/chsyu/F2E-Course/tree/0d5124b7a3107c75f4fec1a18e7cd6042aaef945/wkD/M8_Instagram/index.html
+
+```
+compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+<script src="https://www
+```
+
+
+## License: MIT
+https://github.com/yyaddaden/to-do-list-app-with-firebase/tree/e06ad40844e1d458aa71d39b71935df30823ae74/public/basic/index.html
+
+```
+gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js
+```
+
+
+## License: unknown
+https://github.com/Saravanagithub10/Sarvan10/tree/a2239684f9b6a1f21d13f00142b5a3ac29b1aeef/Blog%20page/profile.html
+
+```
+/www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-
+```
+
