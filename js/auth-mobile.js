@@ -117,3 +117,41 @@ setupAuthMobile();
     trySync();
   }
 })();
+
+// --- MutationObserver para garantir renderização após Alpine.js ---
+(function observeMobileMenuAuth() {
+  var observer = null;
+  function setupObserver() {
+    var aside = document.querySelector('aside');
+    if (!aside) {
+      setTimeout(setupObserver, 200);
+      return;
+    }
+    var container = document.getElementById('authContainerSecondaryMobileMenu');
+    if (!container) {
+      setTimeout(setupObserver, 200);
+      return;
+    }
+    if (observer) observer.disconnect();
+    observer = new MutationObserver(function(mutationsList) {
+      for (var mutation of mutationsList) {
+        if (mutation.type === 'attributes' || mutation.type === 'childList') {
+          // Verifica se o menu está visível
+          if (container.offsetParent !== null && !container.classList.contains('hidden')) {
+            if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
+              window.renderAuthMobileMenu(window.currentAuthUser);
+            }
+          }
+        }
+      }
+    });
+    observer.observe(container, { attributes: true, childList: true, subtree: false });
+    // Também observa o aside para detectar abertura do menu
+    observer.observe(aside, { attributes: true, childList: false, subtree: false });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupObserver);
+  } else {
+    setupObserver();
+  }
+})();
