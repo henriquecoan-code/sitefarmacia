@@ -13,7 +13,8 @@ const firebaseConfig = {
     appId: "1:789057690355:web:e01ee3616df2679fe2f586",
     measurementId: "G-DHFR7WKVWS"
 };
-const auth = firebase.auth();
+window.auth = firebase.auth(); // Torna auth global
+const auth = window.auth;
 
 function renderMobileAuth(user) {
   var container = document.getElementById('authContainerSecondaryMobile');
