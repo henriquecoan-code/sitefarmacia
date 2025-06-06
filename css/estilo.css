@@ -338,3 +338,52 @@ body {
   100% { transform: rotate(360deg); }
 }
 /* --- Fim Endereço entrega styles --- */
+
+/* --- Footer compact styles --- */
+footer.bg-gray-900 {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.125rem !important;
+}
+footer .container > .grid {
+  margin-bottom: 1rem !important;
+  gap: 1rem !important;
+}
+footer h3, footer .font-bold {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+}
+footer p, footer li, footer a, footer .text-sm, footer .text-xs {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+}
+footer .space-y-1 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.25rem !important;
+}
+footer .space-y-0\.5 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.125rem !important;
+}
+footer .bg-white img {
+  height: 1rem !important;
+}
+footer .grid-cols-3 {
+  gap: 0.25rem !important;
+}
+footer .border-t {
+  padding-top: 0.25rem !important;
+}
+footer .text-center p, footer .text-gray-400 {
+  font-size: 0.75rem !important;
+}
+@media (max-width: 768px) {
+  footer .container > .grid {
+    gap: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  footer h3, footer .font-bold {
+    font-size: 0.7rem !important;
+  }
+  footer p, footer li, footer a, footer .text-sm, footer .text-xs {
+    font-size: 0.7rem !important;
+  }
+}
+/* --- Fim Footer compact styles --- */

@@ -22,6 +22,7 @@ function renderMobileAuth(user) {
       '<span class="text-xs">Entrar</span>' +
       '</button>';
     document.getElementById('mobileLoginBtn').onclick = function (e) {
+      window.location.href = 'login.html';
       e.preventDefault();
       if (typeof openAuthModal === 'function') openAuthModal('login');
     };
@@ -54,38 +55,42 @@ function renderAuthMobileMenu(user) {
         }
       };
     } else {
-      container.innerHTML =
+      // Só renderiza se o conteúdo for diferente do atual para evitar loop infinito
+      const html =
         '<div class="flex flex-col space-y-1">' +
         '<a href="login.html" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
         '<a href="cadastro3.html" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
         '</div>';
-      document.getElementById('loginBtnMobileMenu').onclick = function (e) {
-        e.preventDefault();
-        if (typeof openAuthModal === 'function') openAuthModal('login');
-        // Fecha o menu mobile ao abrir o modal
-        if (window.Alpine && window.Alpine.store && window.Alpine.store('mobileMenuOpen')) {
-          window.Alpine.store('mobileMenuOpen', false);
-        } else {
-          // fallback para Alpine 3.x
-          const aside = document.querySelector('aside');
-          if (aside && aside.parentElement && aside.parentElement.__x) {
+      // Corrige: remove espaços e quebras para comparação robusta
+      const clean = s => s.replace(/\s+/g, ' ').trim();
+      if (clean(container.innerHTML) !== clean(html)) {
+        container.innerHTML = html;
+        document.getElementById('loginBtnMobileMenu').onclick = function (e) {
+          // Não previne o default, deixa navegar normalmente
+          // Fecha o menu mobile ao navegar
+          if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
+            try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
+          }
+          var aside = document.querySelector('aside');
+          if (aside && aside.__x && aside.__x.$data) {
+            aside.__x.$data.mobileMenuOpen = false;
+          } else if (aside && aside.parentElement && aside.parentElement.__x && aside.parentElement.__x.$data) {
             aside.parentElement.__x.$data.mobileMenuOpen = false;
           }
-        }
-      };
-      document.getElementById('registerBtnMobileMenu').onclick = function (e) {
-        e.preventDefault();
-        if (typeof openAuthModal === 'function') openAuthModal('register');
-        // Fecha o menu mobile ao abrir o modal
-        if (window.Alpine && window.Alpine.store && window.Alpine.store('mobileMenuOpen')) {
-          window.Alpine.store('mobileMenuOpen', false);
-        } else {
-          const aside = document.querySelector('aside');
-          if (aside && aside.parentElement && aside.parentElement.__x) {
+        };
+        document.getElementById('registerBtnMobileMenu').onclick = function (e) {
+          // Não previne o default, deixa navegar normalmente
+          if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
+            try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
+          }
+          var aside = document.querySelector('aside');
+          if (aside && aside.__x && aside.__x.$data) {
+            aside.__x.$data.mobileMenuOpen = false;
+          } else if (aside && aside.parentElement && aside.parentElement.__x && aside.parentElement.__x.$data) {
             aside.parentElement.__x.$data.mobileMenuOpen = false;
           }
-        }
-      };
+        };
+      }
     }
     console.log('Conteúdo após render:', container.innerHTML);
   }

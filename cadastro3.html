@@ -8,13 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/estilo.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 </head>
-
-<body class="min-h-screen flex items-center justify-center gradient-bg">
+<body class="min-h-screen flex flex-col gradient-bg">
+    <div id="header-container"></div>
     <!-- Toast Notification -->
     <div id="toast" class="toast hidden">
         <div class="flex items-center">
@@ -22,14 +18,12 @@
             <span id="toast-message"></span>
         </div>
     </div>
-    
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-spinner"></div>
     </div>
-    
-    <div class="w-full max-w-md mx-4">
-        <div class="bg-white rounded-xl form-card overflow-hidden p-8">
+    <div class="w-full max-w-md mx-auto flex-1 flex items-center justify-center">
+        <div class="bg-white rounded-xl form-card overflow-hidden p-8 w-full">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-user-plus text-purple-600 text-2xl"></i>
@@ -37,7 +31,6 @@
                 <h1 class="text-2xl font-bold text-gray-800">Cadastro de Usuário</h1>
                 <p class="text-gray-600 mt-2">Preencha os campos abaixo para criar seu cadastro</p>
             </div>
-            
             <form id="registrationForm" class="space-y-4">
                 <!-- Nome Completo -->
                 <div>
@@ -188,241 +181,175 @@
             </div>
         </div>
     </div>
-
+    <div id="footer-container" class="mt-auto w-full"></div>
     <script type="module">
-    import { firebaseConfig } from './js/firebase-config.js';
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+        import { loadHeader } from './js/header-loader.js';
+        import { loadFooter } from './js/footer-loader.js';
+        import { firebaseConfig } from './js/firebase-config.js';
+        const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        window.auth = auth;
+        await loadHeader('header-container', 'authContainerSecondary');
+        await loadFooter('footer-container');
 
-    // Inicializa o Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const auth = firebase.auth();
-    const db = getFirestore();
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastMessage = document.getElementById('toast-message');
 
-    function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        const toastIcon = document.getElementById('toast-icon');
-        const toastMessage = document.getElementById('toast-message');
+            toast.className = `toast ${type}`;
+            toastIcon.className = type === 'success' ? 'fas fa-check-circle mr-2' : 'fas fa-exclamation-circle mr-2';
+            toastMessage.textContent = message;
 
-        toast.className = `toast ${type}`;
-        toastIcon.className = type === 'success' ? 'fas fa-check-circle mr-2' : 'fas fa-exclamation-circle mr-2';
-        toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
 
-        toast.classList.remove('hidden');
-        toast.classList.add('show');
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            toast.classList.add('hidden');
-        }, 5000);
-    }
-
-    function formatCPF(cpf) {
-        return cpf.replace(/\D/g, '')
-                 .replace(/(\d{3})(\d)/, '$1.$2')
-                 .replace(/(\d{3})(\d)/, '$1.$2')
-                 .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    }
-
-    function formatPhone(phone) {
-        return phone.replace(/\D/g, '')
-                   .replace(/(\d{2})(\d)/, '($1) $2')
-                   .replace(/(\d{5})(\d)/, '$1-$2');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('registrationForm');
-        const submitButton = document.getElementById('submitButton');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-
-        const cpfInput = document.getElementById('cpf');
-        const phoneInput = document.getElementById('phone');
-
-        cpfInput.addEventListener('input', function() {
-            this.value = formatCPF(this.value);
-        });
-
-        phoneInput.addEventListener('input', function() {
-            this.value = formatPhone(this.value);
-        });
-
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
-            const phone = document.getElementById('phone').value.replace(/\D/g, '');
-            const terms = document.getElementById('terms').checked;
-            const rua = document.getElementById('rua').value.trim();
-            const numero = document.getElementById('numero').value.trim();
-            const bairro = document.getElementById('bairro').value.trim();
-            const cidade = document.getElementById('cidade').value.trim();
-            const complemento = document.getElementById('complemento').value.trim();
-
-            if (!fullName || !email || !password || cpf.length !== 11 || phone.length < 10 || !terms || !rua || !numero || !bairro || !cidade) {
-                document.getElementById('fullNameError').classList.toggle('hidden', !!fullName);
-                document.getElementById('emailError').classList.toggle('hidden', !!email);
-                document.getElementById('passwordError').classList.toggle('hidden', password.length >= 6);
-                document.getElementById('cpfError').classList.toggle('hidden', cpf.length === 11);
-                document.getElementById('phoneError').classList.toggle('hidden', phone.length >= 10);
-                document.getElementById('enderecoError').classList.remove('hidden');
-                document.getElementById('termsError').classList.toggle('hidden', terms);
-                showToast('Por favor, preencha todos os campos corretamente', 'error');
-                return;
-            }
-
-            const emailRegex = /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/;
-            if (!emailRegex.test(email)) {
-                document.getElementById('emailError').classList.remove('hidden');
-                showToast('Por favor, insira um e-mail válido', 'error');
-                return;
-            }
-
-            submitButton.disabled = true;
-            loadingOverlay.style.display = 'flex';
-
-
-
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-
-                // Enviar verificação de e-mail
-                await user.sendEmailVerification();
-
-                        // Permite apenas domínios tradicionais
-        const allowedDomains = [
-        'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'bol.com.br', 'uol.com.br', 'live.com'
-        ];
-        const emailDomain = email.split('@')[1].toLowerCase();
-        if (!allowedDomains.includes(emailDomain)) {
-        showToast('Apenas e-mails tradicionais são permitidos.', 'error');
-        return;
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hidden');
+            }, 5000);
         }
 
-                // Criar documento no Firestore
-                await setDoc(doc(db, "usuarios", user.uid), {
-                    nome: fullName,
-                    email: email,
-                    cpf: cpf,
-                    telefone: phone,
-                    endereco: {
-                        rua: rua,
-                        numero: numero,
-                        bairro: bairro,
-                        cidade: cidade,
-                        complemento: complemento
-                    },
-                    role: "user", // padrão
-                    dataCadastro: new Date().toISOString(),
-                    emailVerificado: false
-                });
+        function formatCPF(cpf) {
+            return cpf.replace(/\D/g, '')
+                     .replace(/(\d{3})(\d)/, '$1.$2')
+                     .replace(/(\d{3})(\d)/, '$1.$2')
+                     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        }
 
-                await user.updateProfile({ displayName: fullName });
+        function formatPhone(phone) {
+            return phone.replace(/\D/g, '')
+                       .replace(/(\d{2})(\d)/, '($1) $2')
+                       .replace(/(\d{5})(\d)/, '$1-$2');
+        }
 
-                showToast('Cadastro realizado! Verifique seu e-mail para ativar a conta.', 'success');
-                await auth.signOut();
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registrationForm');
+            const submitButton = document.getElementById('submitButton');
+            const loadingOverlay = document.getElementById('loadingOverlay');
 
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
+            const cpfInput = document.getElementById('cpf');
+            const phoneInput = document.getElementById('phone');
 
-            } catch (error) {
-                console.error('Erro no cadastro:', error);
+            cpfInput.addEventListener('input', function() {
+                this.value = formatCPF(this.value);
+            });
 
-                let errorMessage = 'Erro no cadastro: ';
-                switch(error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'Este e-mail já está cadastrado';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'A senha deve ter pelo menos 6 caracteres';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'E-mail inválido';
-                        break;
-                    default:
-                        errorMessage += error.message;
+            phoneInput.addEventListener('input', function() {
+                this.value = formatPhone(this.value);
+            });
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const fullName = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+                const phone = document.getElementById('phone').value.replace(/\D/g, '');
+                const terms = document.getElementById('terms').checked;
+                const rua = document.getElementById('rua').value.trim();
+                const numero = document.getElementById('numero').value.trim();
+                const bairro = document.getElementById('bairro').value.trim();
+                const cidade = document.getElementById('cidade').value.trim();
+                const complemento = document.getElementById('complemento').value.trim();
+
+                if (!fullName || !email || !password || cpf.length !== 11 || phone.length < 10 || !terms || !rua || !numero || !bairro || !cidade) {
+                    document.getElementById('fullNameError').classList.toggle('hidden', !!fullName);
+                    document.getElementById('emailError').classList.toggle('hidden', !!email);
+                    document.getElementById('passwordError').classList.toggle('hidden', password.length >= 6);
+                    document.getElementById('cpfError').classList.toggle('hidden', cpf.length === 11);
+                    document.getElementById('phoneError').classList.toggle('hidden', phone.length >= 10);
+                    document.getElementById('enderecoError').classList.remove('hidden');
+                    document.getElementById('termsError').classList.toggle('hidden', terms);
+                    showToast('Por favor, preencha todos os campos corretamente', 'error');
+                    return;
                 }
 
-                showToast(errorMessage, 'error');
-            } finally {
-                submitButton.disabled = false;
-                loadingOverlay.style.display = 'none';
-            }
+                const emailRegex = /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(email)) {
+                    document.getElementById('emailError').classList.remove('hidden');
+                    showToast('Por favor, insira um e-mail válido', 'error');
+                    return;
+                }
+
+                submitButton.disabled = true;
+                loadingOverlay.style.display = 'flex';
+
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+
+                    // Enviar verificação de e-mail
+                    await user.sendEmailVerification();
+
+                    // Permite apenas domínios tradicionais
+                    const allowedDomains = [
+                        'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'bol.com.br', 'uol.com.br', 'live.com'
+                    ];
+                    const emailDomain = email.split('@')[1].toLowerCase();
+                    if (!allowedDomains.includes(emailDomain)) {
+                        showToast('Apenas e-mails tradicionais são permitidos.', 'error');
+                        return;
+                    }
+
+                    // Criar documento no Firestore
+                    await setDoc(doc(db, "usuarios", user.uid), {
+                        nome: fullName,
+                        email: email,
+                        cpf: cpf,
+                        telefone: phone,
+                        endereco: {
+                            rua: rua,
+                            numero: numero,
+                            bairro: bairro,
+                            cidade: cidade,
+                            complemento: complemento
+                        },
+                        role: "user", // padrão
+                        dataCadastro: new Date().toISOString(),
+                        emailVerificado: false
+                    });
+
+                    await user.updateProfile({ displayName: fullName });
+
+                    showToast('Cadastro realizado! Verifique seu e-mail para ativar a conta.', 'success');
+                    await auth.signOut();
+
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Erro no cadastro:', error);
+
+                    let errorMessage = 'Erro no cadastro: ';
+                    switch(error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'Este e-mail já está cadastrado';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'A senha deve ter pelo menos 6 caracteres';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'E-mail inválido';
+                            break;
+                        default:
+                            errorMessage += error.message;
+                    }
+
+                    showToast(errorMessage, 'error');
+                } finally {
+                    submitButton.disabled = false;
+                    loadingOverlay.style.display = 'none';
+                }
+            });
         });
-    });
-</script>
-
-    <!--
-Para autenticação e ações realmente seguras com Firebase, siga estas recomendações:
-
-1. **Regras de Segurança no Firebase**  
-   - No Firestore/Realtime Database, defina regras que permitam leitura/escrita apenas para usuários autenticados e, se necessário, apenas para o próprio usuário ou para admins.
-   - Exemplo Firestore:
-     ```
-     rules_version = '2';
-     service cloud.firestore {
-       match /databases/{database}/documents {
-         match /usuarios/{userId} {
-           allow read, write: if request.auth != null && request.auth.uid == userId;
-         }
-         match /pedidos/{pedidoId} {
-           allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
-         }
-         // Para admins:
-         match /usuarios/{userId} {
-           allow read, write: if request.auth.token.role == 'admin';
-         }
-       }
-     }
-     ```
-   - Ajuste conforme sua estrutura e lógica de roles.
-
-2. **Nunca confie apenas no front-end**  
-   - Toda lógica sensível (ex: tornar usuário admin, deletar pedidos, alterar dados de outros usuários) deve ser feita via Cloud Functions (backend) com validação de permissões.
-
-3. **Use Custom Claims para papéis de usuário**  
-   - Defina roles (admin, user) usando [Custom Claims](https://firebase.google.com/docs/auth/admin/custom-claims) no backend (Node.js/Cloud Functions).
-   - No front-end, use `getIdTokenResult()` para ler o papel do usuário e ajustar a interface.
-
-4. **Cloud Functions para lógica sensível**  
-   - Crie funções serverless (Cloud Functions) para ações como criar pedidos, atualizar status, deletar usuários, etc.
-   - Nas funções, valide o token do usuário e o papel antes de executar qualquer ação.
-
-5. **Nunca exponha chaves privadas no front-end**  
-   - O firebaseConfig pode ficar no front, mas nunca exponha arquivos de serviço, chaves privadas ou lógica de autorização sensível.
-
-6. **Exemplo de chamada segura via Cloud Function:**
-   ```js
-   // No front-end
-   const addPedido = firebase.functions().httpsCallable('addPedido');
-   addPedido({ ...dados }).then(result => {
-     // sucesso
-   }).catch(error => {
-     // erro
-   });
-   ```
-   // No backend (Cloud Function)
-   ```js
-   exports.addPedido = functions.https.onCall((data, context) => {
-     if (!context.auth) {
-       throw new functions.https.HttpsError('unauthenticated', 'Usuário não autenticado');
-     }
-     // lógica segura aqui
-   });
-   ```
-
-**Resumo:**  
-- Use regras de segurança no Firebase.
-- Use Custom Claims para roles.
-- Faça lógica sensível no backend (Cloud Functions).
-- Nunca confie apenas no client.
-
-Se quiser exemplos práticos de regras ou funções, peça que eu gero para seu caso!
--->
+    </script>
+    <script src="js/auth-mobile.js"></script>
 </body>
 </html>

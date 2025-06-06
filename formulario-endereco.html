@@ -9,18 +9,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="css/account-styles.css">
-  </script>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-
-<script type="module">
-  import { firebaseConfig } from './js/firebase-config.js';
-  console.log(firebaseConfig.apiKey);
-    firebase.initializeApp(firebaseConfig);
-</script>
-
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
@@ -34,17 +22,14 @@
         <hr class="my-2">
         </nav>
     </aside>
-
     <!-- Área principal - Dados da conta -->
     <main class="flex-1 p-6">
       <div class="max-w-4xl mx-auto">
         <h1 class="text-2xl font-bold text-blue-900 mb-6">Minha Conta</h1>
-        
         <!-- Mensagem de carregamento -->
         <div id="loading" class="bg-white p-6 rounded-lg shadow-md mb-6">
           <p class="text-center text-gray-600">Carregando seus dados...</p>
         </div>
-        
         <!-- Mensagem de erro -->
         <div id="error-message" class="bg-red-100 p-6 rounded-lg shadow-md mb-6 hidden">
           <p class="text-center text-red-600">Você precisa estar logado para acessar esta página.</p>
@@ -52,7 +37,6 @@
             <a href="./login.html" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">Fazer Login</a>
           </div>
         </div>
-        
         <!-- Dados do usuário -->
         <div id="user-data" class="hidden">
             
@@ -129,11 +113,21 @@
       </div>
     </main>
   </div>
-
   <div id="footer-container"></div>
-
-  <!-- Scripts -->
-  <script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+    
     document.addEventListener('DOMContentLoaded', function() {
       console.log("DOM carregado, inicializando gerenciamento de conta");
       
@@ -497,75 +491,6 @@
       }
     });
   </script>
-    <script type="module">
-    import { loadHeader } from './js/header-loader.js';
-    document.addEventListener('DOMContentLoaded', () => {
-      loadHeader('header-container', 'authContainerSecondary').then(() => {
-          fetch('partials/footer.html').then(res => res.text()).then(html => {
-          const footer = document.getElementById('footer-container');
-          if (footer) footer.innerHTML = html;
-        });
-      });
-    });
-  </script>
-  <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // ...existing code...
-  const addressFormElement = document.getElementById('address-form');
-  const loadingElement = document.getElementById('loading');
-  const errorElement = document.getElementById('error-message');
-
-  // Função utilitária para obter parâmetro da URL
-  function getParam(name) {
-    const url = new URL(window.location.href);
-    return url.searchParams.get(name);
-  }
-
-  firebase.auth().onAuthStateChanged(async function(user) {
-    if (!user) {
-      if (loadingElement) loadingElement.classList.add('hidden');
-      if (errorElement) errorElement.classList.remove('hidden');
-      return;
-    }
-    const db = firebase.firestore();
-    const enderecosRef = db.collection('usuarios').doc(user.uid).collection('enderecos');
-    const enderecoId = getParam('id');
-    if (enderecoId) {
-      // Editar endereço existente
-      const doc = await enderecosRef.doc(enderecoId).get();
-      if (doc.exists) {
-        const endereco = doc.data();
-        document.getElementById('cep').value = endereco.cep || '';
-        document.getElementById('rua').value = endereco.rua || '';
-        document.getElementById('numero').value = endereco.numero || '';
-        document.getElementById('bairro').value = endereco.bairro || '';
-        document.getElementById('complemento').value = endereco.complemento || '';
-      }
-    }
-    // Submeter formulário
-    addressFormElement.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const endereco = {
-        cep: document.getElementById('cep').value.trim(),
-        rua: document.getElementById('rua').value.trim(),
-        numero: document.getElementById('numero').value.trim(),
-        bairro: document.getElementById('bairro').value.trim(),
-        complemento: document.getElementById('complemento').value.trim(),
-        principal: false // Sempre secundário ao adicionar/editar
-      };
-      try {
-        if (enderecoId) {
-          await enderecosRef.doc(enderecoId).update(endereco);
-        } else {
-          await enderecosRef.add(endereco);
-        }
-        window.location.href = 'endereco-entrega.html';
-      } catch (err) {
-        alert('Erro ao salvar endereço: ' + err.message);
-      }
-    });
-  });
-});
-</script>
+  <script src="js/auth-mobile.js"></script>
 </body>
 </html>

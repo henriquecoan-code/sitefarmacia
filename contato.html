@@ -44,23 +44,19 @@
   <div id="footer-container"></div>
   <script type="module">
     import { loadHeader } from './js/header-loader.js';
-    document.addEventListener('DOMContentLoaded', () => {
-      loadHeader('header-container', 'authContainerSecondary').then(() => {
-        fetch('partials/footer.html').then(res => res.text()).then(html => {
-          const footer = document.getElementById('footer-container');
-          if (footer) footer.innerHTML = html;
-        });
+    import { loadFooter } from './js/footer-loader.js';
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+    // Feedback do formulário (simulação)
+    const form = document.getElementById('contato-form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        document.getElementById('contato-feedback').classList.remove('hidden');
+        form.reset();
       });
-      // Feedback do formulário (simulação)
-      const form = document.getElementById('contato-form');
-      if (form) {
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-          document.getElementById('contato-feedback').classList.remove('hidden');
-          form.reset();
-        });
-      }
-    });
+    }
   </script>
+  <script src="js/auth-mobile.js"></script>
 </body>
 </html>

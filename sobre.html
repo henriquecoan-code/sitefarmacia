@@ -56,14 +56,10 @@
   <div id="footer-container"></div>
   <script type="module">
     import { loadHeader } from './js/header-loader.js';
-    document.addEventListener('DOMContentLoaded', () => {
-      loadHeader('header-container', 'authContainerSecondary').then(() => {
-        fetch('partials/footer.html').then(res => res.text()).then(html => {
-          const footer = document.getElementById('footer-container');
-          if (footer) footer.innerHTML = html;
-        });
-      });
-    });
+    import { loadFooter } from './js/footer-loader.js';
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
   </script>
+  <script src="js/auth-mobile.js"></script>
 </body>
 </html>

@@ -7,15 +7,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-  <script type="module">
-    import { firebaseConfig } from './js/firebase-config.js';
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-  </script>
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
@@ -44,7 +35,20 @@
     </main>
   </div>
   <div id="footer-container"></div>
-  <script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
     document.addEventListener('DOMContentLoaded', function() {
       const loading = document.getElementById('loading');
       const errorMessage = document.getElementById('error-message');
@@ -145,9 +149,6 @@
       }
 
       // Firebase Auth & Firestore
-      const auth = firebase.auth();
-      const db = firebase.firestore();
-
       auth.onAuthStateChanged(async user => {
         if (!user) {
           showError('Você precisa estar logado para ver seus pedidos.');
@@ -180,16 +181,6 @@
       });
     });
   </script>
-  <script type="module">
-    import { loadHeader } from './js/header-loader.js';
-    document.addEventListener('DOMContentLoaded', () => {
-      loadHeader('header-container', 'authContainerSecondary').then(() => {
-        fetch('partials/footer.html').then(res => res.text()).then(html => {
-          const footer = document.getElementById('footer-container');
-          if (footer) footer.innerHTML = html;
-        });
-      });
-    });
-  </script>
+  <script src="js/auth-mobile.js"></script>
 </body>
 </html>
