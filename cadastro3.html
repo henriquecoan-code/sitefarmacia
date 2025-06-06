@@ -182,17 +182,11 @@
         </div>
     </div>
     <div id="footer-container" class="mt-auto w-full"></div>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script type="text/javascript">
-      // Configuração do Firebase
-      const firebaseConfig = { /* ...mantenha sua config... */ };
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      const auth = firebase.auth();
-      const db = firebase.firestore();
+    <script type="module">
+      import { auth, firestore } from './js/firebase-config.js';
+      import { createUserWithEmailAndPassword, updateProfile, signOut } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+      import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+      // Configuração do Firebase já está centralizada em firebase-config.js
 
       function showToast(message, type = 'success') {
           const toast = document.getElementById('toast');
@@ -342,9 +336,9 @@
             loadingOverlay.style.display = 'flex';
 
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                await userCredential.user.updateProfile({ displayName: fullName });
-                await db.collection('usuarios').doc(userCredential.user.uid).set({
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: fullName });
+                await setDoc(doc(firestore, 'usuarios', userCredential.user.uid), {
                     nome: fullName,
                     email: email,
                     cpf: cpfRaw,
@@ -361,7 +355,7 @@
                     emailVerificado: false
                 });
                 showToast('Cadastro realizado! Verifique seu e-mail para ativar a conta.', 'success');
-                await auth.signOut();
+                await signOut(auth);
                 setTimeout(() => {
                   window.location.href = 'login.html';
                 }, 2000);
