@@ -56,8 +56,8 @@ function renderAuthMobileMenu(user) {
     } else {
       container.innerHTML =
         '<div class="flex flex-col space-y-1">' +
-        '<a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
-        '<a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
+        '<a href="login.html" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
+        '<a href="cadastro3.html" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
         '</div>';
       document.getElementById('loginBtnMobileMenu').onclick = function (e) {
         e.preventDefault();
