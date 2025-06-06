@@ -57,8 +57,8 @@
   <div id="footer-container"></div>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, doc, getDocs, getDoc, deleteDoc, writeBatch, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -81,8 +81,8 @@
         window.location.href = 'formulario-endereco.html';
       });
 
-      // Monitora o estado de autenticação
-      firebase.auth().onAuthStateChanged((user) => {
+      // Monitora o estado de autenticação usando sintaxe modular
+      onAuthStateChanged(auth, (user) => {
         if (user) {
           errorMessage.classList.add('hidden');
           loadingElement.classList.remove('hidden');
@@ -96,16 +96,16 @@
       });
 
       async function carregarEnderecos(user) {
-        const db = firebase.firestore();
         try {
-          const enderecosRef = db.collection('usuarios').doc(user.uid).collection('enderecos');
-          const querySnapshot = await enderecosRef.get();
+          const enderecosRef = collection(db, 'usuarios', user.uid, 'enderecos');
+          const querySnapshot = await getDocs(enderecosRef);
           loadingElement.classList.add('hidden');
           contentElement.classList.remove('hidden');
           listaEnderecos.innerHTML = '';
           if (querySnapshot.empty) {
             // Buscar campo endereco do documento principal
-            const userDoc = await db.collection('usuarios').doc(user.uid).get();
+            const userDocRef = doc(db, 'usuarios', user.uid);
+            const userDoc = await getDoc(userDocRef);
             const userData = userDoc.data();
             if (userData && userData.endereco && (userData.endereco.rua || userData.endereco.cep)) {
               // Exibir endereço principal do documento
@@ -125,9 +125,9 @@
           // Separar principal e secundários
           const enderecos = [];
           let principal = null;
-          querySnapshot.forEach((doc) => {
-            const endereco = doc.data();
-            endereco.id = doc.id;
+          querySnapshot.forEach((docSnap) => {
+            const endereco = docSnap.data();
+            endereco.id = docSnap.id;
             if (endereco.principal) {
               principal = endereco;
             } else {
@@ -212,12 +212,10 @@
       // (A lógica de formulário de cadastro deve garantir principal: false)
 
       async function excluirEndereco(enderecoId) {
-        const auth = firebase.auth();
-        const db = firebase.firestore();
         const user = auth.currentUser;
         if (!user) return;
         try {
-          await db.collection('usuarios').doc(user.uid).collection('enderecos').doc(enderecoId).delete();
+          await deleteDoc(doc(db, 'usuarios', user.uid, 'enderecos', enderecoId));
           await carregarEnderecos(user);
         } catch (error) {
           console.error("Erro ao excluir endereço:", error);
@@ -226,18 +224,16 @@
       }
 
       async function definirEnderecoPrincipal(enderecoId) {
-        const auth = firebase.auth();
-        const db = firebase.firestore();
         const user = auth.currentUser;
         if (!user) return;
         try {
-          const batch = db.batch();
-          const enderecosRef = db.collection('usuarios').doc(user.uid).collection('enderecos');
-          const querySnapshot = await enderecosRef.get();
-          querySnapshot.forEach((doc) => {
-            batch.update(doc.ref, { principal: false });
+          const batch = writeBatch(db);
+          const enderecosRef = collection(db, 'usuarios', user.uid, 'enderecos');
+          const querySnapshot = await getDocs(enderecosRef);
+          querySnapshot.forEach((docSnap) => {
+            batch.update(doc(db, 'usuarios', user.uid, 'enderecos', docSnap.id), { principal: false });
           });
-          batch.update(enderecosRef.doc(enderecoId), { principal: true });
+          batch.update(doc(db, 'usuarios', user.uid, 'enderecos', enderecoId), { principal: true });
           await batch.commit();
           await carregarEnderecos(user);
         } catch (error) {
