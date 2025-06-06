@@ -88,6 +88,7 @@ export class AccountManager {
             nome: user.displayName || '',
             email: user.email || '',
             telefone: '',
+            cpf: '',
             endereco: {
               cep: '',
               rua: '',
@@ -136,64 +137,36 @@ export class AccountManager {
     const nomeDisplay = document.getElementById('nome-display');
     const emailDisplay = document.getElementById('email-display');
     const telefoneDisplay = document.getElementById('telefone-display');
+    const cpfDisplay = document.getElementById('cpf-display');
     const nomeInput = document.getElementById('nome');
     const emailInput = document.getElementById('email');
     const telefoneInput = document.getElementById('telefone');
+    const cpfInput = document.getElementById('cpf');
 
     if (nomeDisplay) nomeDisplay.textContent = escapeHTML(userData.nome || '');
     if (emailDisplay) emailDisplay.textContent = escapeHTML(userData.email || user.email || '');
     if (telefoneDisplay) telefoneDisplay.textContent = escapeHTML(userData.telefone || '');
+    if (cpfDisplay) cpfDisplay.textContent = this.formatCpfCnpj(userData.cpf || '');
 
     if (nomeInput) nomeInput.value = userData.nome || '';
     if (emailInput) emailInput.value = userData.email || user.email || '';
     if (telefoneInput) telefoneInput.value = userData.telefone || '';
+    if (cpfInput) cpfInput.value = this.formatCpfCnpj(userData.cpf || '');
   }
-  
+
   /**
-   * Preenche os campos de endereço
-   * @param {Object} endereco - Dados de endereço do usuário
+   * Formata CPF ou CNPJ para exibição
    */
-  fillAddressData(endereco) {
-    if (!this.noAddressElement || !this.addressFormElement) {
-      console.error("Elementos de endereço não encontrados");
-      return;
+  formatCpfCnpj(value) {
+    const digits = (value || '').replace(/\D/g, '');
+    if (digits.length === 11) {
+      return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (digits.length === 14) {
+      return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
-    
-    if (endereco && endereco.rua && endereco.numero && endereco.bairro) {
-      // Usuário tem endereço, preencher os campos
-      this.noAddressElement.classList.add('hidden');
-      this.addressFormElement.classList.remove('hidden');
-      
-      const cepDisplay = document.getElementById('cep-display');
-      const ruaDisplay = document.getElementById('rua-display');
-      const numeroDisplay = document.getElementById('numero-display');
-      const bairroDisplay = document.getElementById('bairro-display');
-      const complementoDisplay = document.getElementById('complemento-display');
-      
-      const cepInput = document.getElementById('cep');
-      const ruaInput = document.getElementById('rua');
-      const numeroInput = document.getElementById('numero');
-      const bairroInput = document.getElementById('bairro');
-      const complementoInput = document.getElementById('complemento');
-      
-      if (cepDisplay) cepDisplay.textContent = escapeHTML(endereco.cep || '');
-      if (ruaDisplay) ruaDisplay.textContent = escapeHTML(endereco.rua || '');
-      if (numeroDisplay) numeroDisplay.textContent = escapeHTML(endereco.numero || '');
-      if (bairroDisplay) bairroDisplay.textContent = escapeHTML(endereco.bairro || '');
-      if (complementoDisplay) complementoDisplay.textContent = escapeHTML(endereco.complemento || '');
-      
-      if (cepInput) cepInput.value = endereco.cep || '';
-      if (ruaInput) ruaInput.value = endereco.rua || '';
-      if (numeroInput) numeroInput.value = endereco.numero || '';
-      if (bairroInput) bairroInput.value = endereco.bairro || '';
-      if (complementoInput) complementoInput.value = endereco.complemento || '';
-    } else {
-      // Usuário não tem endereço cadastrado
-      this.noAddressElement.classList.remove('hidden');
-      this.addressFormElement.classList.add('hidden');
-    }
+    return value;
   }
-  
+
   /**
    * Configura os botões de edição
    */
@@ -268,37 +241,60 @@ export class AccountManager {
   setupForms(userDocRef) {
     // Configurar formulário de dados pessoais
     const personalForm = document.getElementById('personal-form');
-    
+    const cpfInput = document.getElementById('cpf');
+    const cpfError = document.getElementById('cpf-error');
+    if (cpfInput) {
+      cpfInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+          // CPF
+          value = value.replace(/(\d{3})(\d)/, '$1.$2');
+          value = value.replace(/(\d{3})(\d)/, '$1.$2');
+          value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        } else {
+          // CNPJ
+          value = value.replace(/(\d{2})(\d)/, '$1.$2');
+          value = value.replace(/(\d{3})(\d)/, '$1.$2');
+          value = value.replace(/(\d{3})(\d)/, '$1/$2');
+          value = value.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+        }
+        e.target.value = value;
+      });
+    }
     if (personalForm) {
       personalForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+        const cpfRaw = document.getElementById('cpf')?.value.replace(/\D/g, '') || '';
+        if (!(cpfRaw.length === 11 || cpfRaw.length === 14)) {
+          if (cpfError) {
+            cpfError.textContent = 'Digite um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.';
+            cpfError.classList.remove('hidden');
+          }
+          return;
+        } else if (cpfError) {
+          cpfError.classList.add('hidden');
+        }
         const userData = {
           nome: document.getElementById('nome')?.value || '',
           email: document.getElementById('email')?.value || '',
-          telefone: document.getElementById('telefone')?.value || ''
+          telefone: document.getElementById('telefone')?.value || '',
+          cpf: cpfRaw
         };
-        
-        // Atualizar dados no Firestore
         userDocRef.update(userData)
           .then(() => {
-            // Atualizar os campos de exibição
             const nomeDisplay = document.getElementById('nome-display');
             const emailDisplay = document.getElementById('email-display');
             const telefoneDisplay = document.getElementById('telefone-display');
-            
+            const cpfDisplay = document.getElementById('cpf-display');
             if (nomeDisplay) nomeDisplay.textContent = userData.nome;
             if (emailDisplay) emailDisplay.textContent = userData.email;
             if (telefoneDisplay) telefoneDisplay.textContent = userData.telefone;
-            
-            // Voltar para o modo de exibição
+            if (cpfDisplay) cpfDisplay.textContent = this.formatCpfCnpj(userData.cpf);
             this.resetFormToDisplayMode('personal');
-            
-            // Mostrar mensagem de sucesso
             this.showToast('Dados pessoais atualizados com sucesso!', 'success');
           })
           .catch(error => {
-            console.error("Erro ao atualizar dados pessoais:", error);
+            console.error('Erro ao atualizar dados pessoais:', error);
             this.showToast('Erro ao atualizar dados. Por favor, tente novamente.', 'error');
           });
       });

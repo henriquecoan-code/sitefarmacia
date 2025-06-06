@@ -90,9 +90,9 @@
                     <p id="passwordError" class="error-message hidden">A senha deve ter pelo menos 6 caracteres</p>
                 </div>
                 
-                <!-- CPF -->
+                <!-- CPF/CNPJ -->
                 <div>
-                    <label for="cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                    <label for="cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF ou CNPJ</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-id-card text-gray-400"></i>
@@ -102,12 +102,12 @@
                             id="cpf" 
                             name="cpf"
                             class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-                            placeholder="000.000.000-00"
+                            placeholder="000.000.000-00 ou 00.000.000/0000-00"
                             required
-                            maxlength="14"
+                            maxlength="18"
                         >
                     </div>
-                    <p id="cpfError" class="error-message hidden">Por favor, insira um CPF válido</p>
+                    <p id="cpfError" class="error-message hidden">Por favor, insira um CPF ou CNPJ válido</p>
                 </div>
                 
                 <!-- Telefone -->
@@ -214,11 +214,21 @@
             }, 5000);
         }
 
-        function formatCPF(cpf) {
-            return cpf.replace(/\D/g, '')
-                     .replace(/(\d{3})(\d)/, '$1.$2')
-                     .replace(/(\d{3})(\d)/, '$1.$2')
-                     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        function formatCpfCnpj(value) {
+            value = value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                // CPF: 000.000.000-00
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            } else {
+                // CNPJ: 00.000.000/0000-00
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            return value;
         }
 
         function formatPhone(phone) {
@@ -236,7 +246,7 @@
             const phoneInput = document.getElementById('phone');
 
             cpfInput.addEventListener('input', function() {
-                this.value = formatCPF(this.value);
+                this.value = formatCpfCnpj(this.value);
             });
 
             phoneInput.addEventListener('input', function() {
@@ -249,7 +259,7 @@
                 const fullName = document.getElementById('fullName').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
-                const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+                const cpfRaw = document.getElementById('cpf').value.replace(/\D/g, '');
                 const phone = document.getElementById('phone').value.replace(/\D/g, '');
                 const terms = document.getElementById('terms').checked;
                 const rua = document.getElementById('rua').value.trim();
@@ -258,11 +268,11 @@
                 const cidade = document.getElementById('cidade').value.trim();
                 const complemento = document.getElementById('complemento').value.trim();
 
-                if (!fullName || !email || !password || cpf.length !== 11 || phone.length < 10 || !terms || !rua || !numero || !bairro || !cidade) {
+                if (!fullName || !email || !password || cpfRaw.length !== 11 || phone.length < 10 || !terms || !rua || !numero || !bairro || !cidade) {
                     document.getElementById('fullNameError').classList.toggle('hidden', !!fullName);
                     document.getElementById('emailError').classList.toggle('hidden', !!email);
                     document.getElementById('passwordError').classList.toggle('hidden', password.length >= 6);
-                    document.getElementById('cpfError').classList.toggle('hidden', cpf.length === 11);
+                    document.getElementById('cpfError').classList.toggle('hidden', cpfRaw.length === 11);
                     document.getElementById('phoneError').classList.toggle('hidden', phone.length >= 10);
                     document.getElementById('enderecoError').classList.remove('hidden');
                     document.getElementById('termsError').classList.toggle('hidden', terms);
@@ -287,6 +297,15 @@
                     return;
                 }
 
+                // Validação CPF/CNPJ
+                if (!(cpfRaw.length === 11 || cpfRaw.length === 14)) {
+                    document.getElementById('cpfError').classList.remove('hidden');
+                    showToast('Por favor, insira um CPF ou CNPJ válido', 'error');
+                    return;
+                } else {
+                    document.getElementById('cpfError').classList.add('hidden');
+                }
+
                 submitButton.disabled = true;
                 loadingOverlay.style.display = 'flex';
 
@@ -300,7 +319,7 @@
                         await setDoc(doc(db, "usuarios", user.uid), {
                             nome: fullName,
                             email: email,
-                            cpf: cpf,
+                            cpf: cpfRaw, // salva só os dígitos
                             telefone: phone,
                             endereco: {
                                 rua: rua,
