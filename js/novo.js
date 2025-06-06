@@ -1,4 +1,6 @@
 import { auth, browserLocalPersistence } from './firebase-config.js';
+import { firestore } from './firebase-config.js';
+import { setDoc, doc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
 import { escapeHTML } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -82,6 +84,22 @@ document.addEventListener('DOMContentLoaded', () => {
       showLoading(true);
       const userCredential = await auth.createUserWithEmailAndPassword(email, password);
       await userCredential.user.updateProfile({ displayName: name });
+      // Criação do documento no Firestore
+      await setDoc(doc(firestore, "usuarios", userCredential.user.uid), {
+        nome: name,
+        email: email,
+        telefone: "",
+        endereco: {
+          rua: "",
+          numero: "",
+          bairro: "",
+          cidade: "",
+          complemento: ""
+        },
+        role: "user",
+        dataCadastro: new Date().toISOString(),
+        emailVerificado: false
+      });
       modal.close();
       showToast('Cadastro realizado com sucesso!', 'success');
     } catch (error) {
