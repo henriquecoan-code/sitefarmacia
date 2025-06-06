@@ -182,194 +182,211 @@
         </div>
     </div>
     <div id="footer-container" class="mt-auto w-full"></div>
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-        import { getFirestore, setDoc, doc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
-        import { loadHeader } from './js/header-loader.js';
-        import { loadFooter } from './js/footer-loader.js';
-        import { firebaseConfig } from './js/firebase-config.js';
-        const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        window.auth = auth;
-        await loadHeader('header-container', 'authContainerSecondary');
-        await loadFooter('footer-container');
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script type="text/javascript">
+      // Configuração do Firebase
+      const firebaseConfig = { /* ...mantenha sua config... */ };
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const auth = firebase.auth();
+      const db = firebase.firestore();
 
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toast-icon');
-            const toastMessage = document.getElementById('toast-message');
+      function showToast(message, type = 'success') {
+          const toast = document.getElementById('toast');
+          const toastIcon = document.getElementById('toast-icon');
+          const toastMessage = document.getElementById('toast-message');
 
-            toast.className = `toast ${type}`;
-            toastIcon.className = type === 'success' ? 'fas fa-check-circle mr-2' : 'fas fa-exclamation-circle mr-2';
-            toastMessage.textContent = message;
+          toast.className = `toast ${type}`;
+          toastIcon.className = type === 'success' ? 'fas fa-check-circle mr-2' : 'fas fa-exclamation-circle mr-2';
+          toastMessage.textContent = message;
 
-            toast.classList.remove('hidden');
-            toast.classList.add('show');
+          toast.classList.remove('hidden');
+          toast.classList.add('show');
 
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.classList.add('hidden');
-            }, 5000);
-        }
+          setTimeout(() => {
+              toast.classList.remove('show');
+              toast.classList.add('hidden');
+          }, 5000);
+      }
 
-        function formatCpfCnpj(value) {
-            value = value.replace(/\D/g, '');
-            if (value.length <= 11) {
-                // CPF: 000.000.000-00
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-            } else {
-                // CNPJ: 00.000.000/0000-00
-                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+      function formatCpfCnpj(value) {
+          value = value.replace(/\D/g, '');
+          if (value.length <= 11) {
+              // CPF: 000.000.000-00
+              value = value.replace(/(\d{3})(\d)/, '$1.$2');
+              value = value.replace(/(\d{3})(\d)/, '$1.$2');
+              value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+          } else {
+              // CNPJ: 00.000.000/0000-00
+              value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+              value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+              value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+              value = value.replace(/(\d{4})(\d)/, '$1-$2');
+          }
+          return value;
+      }
+
+      function formatPhone(phone) {
+          return phone.replace(/\D/g, '')
+                     .replace(/(\d{2})(\d)/, '($1) $2')
+                     .replace(/(\d{5})(\d)/, '$1-$2');
+      }
+
+      function setFieldError(fieldId, show) {
+          const el = document.getElementById(fieldId);
+          if (el) el.classList.toggle('hidden', !show);
+      }
+
+      function focusFirstInvalid(fields) {
+          for (const id of fields) {
+              const el = document.getElementById(id);
+              if (el && (el.classList.contains('error-message') && !el.classList.contains('hidden'))) {
+                  const input = document.getElementById(id.replace('Error', ''));
+                  if (input) {
+                      input.focus();
+                      break;
+                  }
+              }
+          }
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+          const form = document.getElementById('registrationForm');
+          const submitButton = document.getElementById('submitButton');
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          const cpfInput = document.getElementById('cpf');
+          const phoneInput = document.getElementById('phone');
+          const errorFields = [
+              'fullNameError', 'emailError', 'passwordError', 'cpfError', 'phoneError', 'enderecoError', 'termsError'
+          ];
+
+          // Esconde erro ao digitar
+          ['fullName','email','password','cpf','phone','rua','numero','bairro','cidade','terms'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) {
+                  el.addEventListener('input', () => {
+                      const errorEl = document.getElementById(id + 'Error');
+                      if (errorEl) errorEl.classList.add('hidden');
+                  });
+              }
+          });
+
+          cpfInput.addEventListener('input', function() {
+            this.value = formatCpfCnpj(this.value);
+          });
+          phoneInput.addEventListener('input', function() {
+            this.value = formatPhone(this.value);
+          });
+          form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const cpfRaw = document.getElementById('cpf').value.replace(/\D/g, '');
+            const phone = document.getElementById('phone').value.replace(/\D/g, '');
+            const terms = document.getElementById('terms').checked;
+            const rua = document.getElementById('rua').value.trim();
+            const numero = document.getElementById('numero').value.trim();
+            const bairro = document.getElementById('bairro').value.trim();
+            const cidade = document.getElementById('cidade').value.trim();
+            const complemento = document.getElementById('complemento').value.trim();
+
+            // Ajuste: Aceitar CPF (11) ou CNPJ (14) dígitos
+            if (!fullName || !email || !password || !(cpfRaw.length === 11 || cpfRaw.length === 14) || phone.length < 10 || !terms || !rua || !numero || !bairro || !cidade) {
+                setFieldError('fullNameError', !fullName);
+                setFieldError('emailError', !email);
+                setFieldError('passwordError', password.length < 6);
+                setFieldError('cpfError', !(cpfRaw.length === 11 || cpfRaw.length === 14));
+                setFieldError('phoneError', phone.length < 10);
+                setFieldError('enderecoError', !(rua && numero && bairro && cidade));
+                setFieldError('termsError', !terms);
+                showToast('Por favor, preencha todos os campos corretamente', 'error');
+                focusFirstInvalid(errorFields);
+                return;
             }
-            return value;
-        }
 
-        function formatPhone(phone) {
-            return phone.replace(/\D/g, '')
-                       .replace(/(\d{2})(\d)/, '($1) $2')
-                       .replace(/(\d{5})(\d)/, '$1-$2');
-        }
+            const emailRegex = /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                setFieldError('emailError', true);
+                showToast('Por favor, insira um e-mail válido', 'error');
+                document.getElementById('email').focus();
+                return;
+            }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('registrationForm');
-            const submitButton = document.getElementById('submitButton');
-            const loadingOverlay = document.getElementById('loadingOverlay');
+            // Validação do domínio ANTES de criar o usuário
+            const allowedDomains = [
+                'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'bol.com.br', 'uol.com.br', 'live.com'
+            ];
+            const emailDomain = email.split('@')[1]?.toLowerCase();
+            if (!allowedDomains.includes(emailDomain)) {
+                showToast('Apenas e-mails tradicionais são permitidos.', 'error');
+                document.getElementById('email').focus();
+                return;
+            }
 
-            const cpfInput = document.getElementById('cpf');
-            const phoneInput = document.getElementById('phone');
+            // Validação CPF/CNPJ
+            if (!(cpfRaw.length === 11 || cpfRaw.length === 14)) {
+                setFieldError('cpfError', true);
+                showToast('Por favor, insira um CPF ou CNPJ válido', 'error');
+                document.getElementById('cpf').focus();
+                return;
+            } else {
+                setFieldError('cpfError', false);
+            }
 
-            cpfInput.addEventListener('input', function() {
-                this.value = formatCpfCnpj(this.value);
-            });
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="loader mr-2"></span>Processando...';
+            loadingOverlay.style.display = 'flex';
 
-            phoneInput.addEventListener('input', function() {
-                this.value = formatPhone(this.value);
-            });
-
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const fullName = document.getElementById('fullName').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const cpfRaw = document.getElementById('cpf').value.replace(/\D/g, '');
-                const phone = document.getElementById('phone').value.replace(/\D/g, '');
-                const terms = document.getElementById('terms').checked;
-                const rua = document.getElementById('rua').value.trim();
-                const numero = document.getElementById('numero').value.trim();
-                const bairro = document.getElementById('bairro').value.trim();
-                const cidade = document.getElementById('cidade').value.trim();
-                const complemento = document.getElementById('complemento').value.trim();
-
-                if (!fullName || !email || !password || cpfRaw.length !== 11 || phone.length < 10 || !terms || !rua || !numero || !bairro || !cidade) {
-                    document.getElementById('fullNameError').classList.toggle('hidden', !!fullName);
-                    document.getElementById('emailError').classList.toggle('hidden', !!email);
-                    document.getElementById('passwordError').classList.toggle('hidden', password.length >= 6);
-                    document.getElementById('cpfError').classList.toggle('hidden', cpfRaw.length === 11);
-                    document.getElementById('phoneError').classList.toggle('hidden', phone.length >= 10);
-                    document.getElementById('enderecoError').classList.remove('hidden');
-                    document.getElementById('termsError').classList.toggle('hidden', terms);
-                    showToast('Por favor, preencha todos os campos corretamente', 'error');
-                    return;
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({ displayName: fullName });
+                await db.collection('usuarios').doc(userCredential.user.uid).set({
+                    nome: fullName,
+                    email: email,
+                    cpf: cpfRaw,
+                    telefone: phone,
+                    endereco: {
+                        rua: rua,
+                        numero: numero,
+                        bairro: bairro,
+                        cidade: cidade,
+                        complemento: complemento
+                    },
+                    role: "user",
+                    dataCadastro: new Date().toISOString(),
+                    emailVerificado: false
+                });
+                showToast('Cadastro realizado! Verifique seu e-mail para ativar a conta.', 'success');
+                await auth.signOut();
+                setTimeout(() => {
+                  window.location.href = 'login.html';
+                }, 2000);
+            } catch (error) {
+                let errorMessage = 'Erro no cadastro: ';
+                switch(error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Este e-mail já está cadastrado';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'A senha deve ter pelo menos 6 caracteres';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido';
+                        break;
+                    default:
+                        errorMessage += error.message;
                 }
-
-                const emailRegex = /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/;
-                if (!emailRegex.test(email)) {
-                    document.getElementById('emailError').classList.remove('hidden');
-                    showToast('Por favor, insira um e-mail válido', 'error');
-                    return;
-                }
-
-                // Validação do domínio ANTES de criar o usuário
-                const allowedDomains = [
-                    'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'bol.com.br', 'uol.com.br', 'live.com'
-                ];
-                const emailDomain = email.split('@')[1]?.toLowerCase();
-                if (!allowedDomains.includes(emailDomain)) {
-                    showToast('Apenas e-mails tradicionais são permitidos.', 'error');
-                    return;
-                }
-
-                // Validação CPF/CNPJ
-                if (!(cpfRaw.length === 11 || cpfRaw.length === 14)) {
-                    document.getElementById('cpfError').classList.remove('hidden');
-                    showToast('Por favor, insira um CPF ou CNPJ válido', 'error');
-                    return;
-                } else {
-                    document.getElementById('cpfError').classList.add('hidden');
-                }
-
-                submitButton.disabled = true;
-                loadingOverlay.style.display = 'flex';
-
-                try {
-                    // SDK modular: createUserWithEmailAndPassword(auth, email, password)
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    const user = userCredential.user;
-                    await user.sendEmailVerification();
-                    // Criação do documento no Firestore
-                    try {
-                        await setDoc(doc(db, "usuarios", user.uid), {
-                            nome: fullName,
-                            email: email,
-                            cpf: cpfRaw, // salva só os dígitos
-                            telefone: phone,
-                            endereco: {
-                                rua: rua,
-                                numero: numero,
-                                bairro: bairro,
-                                cidade: cidade,
-                                complemento: complemento
-                            },
-                            role: "user",
-                            dataCadastro: new Date().toISOString(),
-                            emailVerificado: false
-                        });
-                    } catch (firestoreError) {
-                        console.error('Erro ao criar documento no Firestore:', firestoreError);
-                        showToast('Erro ao salvar dados no banco. Verifique as regras do Firestore.', 'error');
-                        submitButton.disabled = false;
-                        loadingOverlay.style.display = 'none';
-                        return;
-                    }
-                    // updateProfile do SDK modular
-                    await updateProfile(user, { displayName: fullName });
-                    showToast('Cadastro realizado! Verifique seu e-mail para ativar a conta.', 'success');
-                    await signOut(auth);
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                } catch (error) {
-                    console.error('Erro no cadastro:', error);
-
-                    let errorMessage = 'Erro no cadastro: ';
-                    switch(error.code) {
-                        case 'auth/email-already-in-use':
-                            errorMessage = 'Este e-mail já está cadastrado';
-                            break;
-                        case 'auth/weak-password':
-                            errorMessage = 'A senha deve ter pelo menos 6 caracteres';
-                            break;
-                        case 'auth/invalid-email':
-                            errorMessage = 'E-mail inválido';
-                            break;
-                        default:
-                            errorMessage += error.message;
-                    }
-
-                    showToast(errorMessage, 'error');
-                } finally {
-                    submitButton.disabled = false;
-                    loadingOverlay.style.display = 'none';
-                }
-            });
+                showToast(errorMessage, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Cadastrar';
+                loadingOverlay.style.display = 'none';
+            }
+          });
         });
     </script>
     <script src="js/auth-mobile.js"></script>

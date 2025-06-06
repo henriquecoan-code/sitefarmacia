@@ -1,8 +1,3 @@
-import { auth, browserLocalPersistence } from './firebase-config.js';
-import { firestore } from './firebase-config.js';
-import { setDoc, doc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
-import { escapeHTML } from './utils.js';
-
 document.addEventListener('DOMContentLoaded', () => {
   const authModal = document.getElementById('authModal');
   const authModalBtn = document.getElementById('authModalBtn');
@@ -26,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <input type="text" placeholder="Nome completo" required />
         <input type="email" placeholder="Email" required />
         <input type="password" placeholder="Senha" required />
-        <input type="text" placeholder="CPF" id="cpf" name="cpf" required />
         <button type="submit">Cadastrar</button>
         <p><a href="#" id="switchToLogin">Já tenho conta</a></p>
       </form>
@@ -70,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       showLoading(true);
       console.log('Tentando login com:', email);
-      await auth.signInWithEmailAndPassword(email, password);
+      await firebase.auth().signInWithEmailAndPassword(email, password);
       modal.close();
       showToast('Login realizado com sucesso!', 'success');
     } catch (error) {
@@ -80,28 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function registerUser(name, email, password, cpf) {
+  async function registerUser(name, email, password) {
     try {
       showLoading(true);
       const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
       await userCredential.user.updateProfile({ displayName: name });
-      // Salva o documento do usuário no Firestore (API compat)
-      await firebase.firestore().collection('usuarios').doc(userCredential.user.uid).set({
-        nome: name,
-        email: email,
-        telefone: "",
-        cpf: cpf || "",
-        endereco: {
-          rua: "",
-          numero: "",
-          bairro: "",
-          cidade: "",
-          complemento: ""
-        },
-        role: "user",
-        dataCadastro: new Date().toISOString(),
-        emailVerificado: false
-      });
       modal.close();
       showToast('Cadastro realizado com sucesso!', 'success');
     } catch (error) {
@@ -126,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setupEventListeners() {
     authModalBtn?.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!auth.currentUser) modal.open(templates.login);
+      if (!firebase.auth().currentUser) modal.open(templates.login);
     });
 
     closeAuthModal?.addEventListener('click', modal.close);
@@ -140,14 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     authModalBtn?.addEventListener('mouseenter', () => {
-      if (auth.currentUser) {
+      if (firebase.auth().currentUser) {
         userDropdown?.classList.remove('hidden');
       }
     });
 
     logoutBtn?.addEventListener('click', (e) => {
       e.preventDefault();
-      auth.signOut()
+      firebase.auth().signOut()
         .then(() => location.href = 'index.html')
         .catch(handleAuthError);
     });
@@ -165,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const email = prompt('Digite seu e-mail para redefinir a senha:');
         if (email) {
-          auth.sendPasswordResetEmail(email)
+          firebase.auth().sendPasswordResetEmail(email)
             .then(() => showToast('E-mail de redefinição enviado!', 'success'))
             .catch(handleAuthError);
         }
@@ -177,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const form = e.target;
 
-      if (!auth) return;
+      if (!firebase.auth) return;
 
       if (form.id === 'loginForm') {
         const email = form.querySelector('input[type="email"]')?.value;
@@ -189,19 +166,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = form.querySelector('input[type="text"]')?.value;
         const email = form.querySelector('input[type="email"]')?.value;
         const password = form.querySelector('input[type="password"]')?.value;
-        // Busca o campo de CPF se existir
-        const cpfInput = form.querySelector('input[name="cpf"]') || form.querySelector('input[id="cpf"]');
-        let cpf = cpfInput ? cpfInput.value.replace(/\D/g, '') : '';
-        if (name && email && password) await registerUser(name, email, password, cpf);
+        if (name && email && password) await registerUser(name, email, password);
       }
     });
   }
 
   function init() {
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+      console.error('Firebase não está disponível');
+      return;
+    }
+
     try {
       setupEventListeners();
-      auth.setPersistence(browserLocalPersistence);
-      auth.onAuthStateChanged((user) => {
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+      firebase.auth().onAuthStateChanged((user) => {
         updateAuthUI(user);
         if (user && location.pathname.includes('login.html')) {
           location.href = 'index.html';
