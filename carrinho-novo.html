@@ -58,6 +58,7 @@
 
         // Função para carregar endereços do usuário (corrigida para usar auth/db do módulo)
         async function carregarEnderecosUsuario() {
+            const { collection, doc, getDoc, getDocs } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
             const enderecoSelect = document.getElementById('endereco-select');
             enderecoSelect.innerHTML = '<option value="">Carregando endereços...</option>';
             let enderecos = [];
@@ -72,16 +73,18 @@
                 enderecoSelect.disabled = true;
                 return;
             }
-            // Busca subcoleção de endereços
-            const sub = await db.collection('usuarios').doc(user.uid).collection('enderecos').get();
-            sub.forEach(doc => {
-                const data = doc.data();
-                enderecos.push({ id: doc.id, ...data });
+            // Busca subcoleção de endereços (modular)
+            const subRef = collection(db, 'usuarios', user.uid, 'enderecos');
+            const subSnap = await getDocs(subRef);
+            subSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                enderecos.push({ id: docSnap.id, ...data });
             });
             // Busca campo principal do doc, se não houver nenhum endereço principal na subcoleção
-            const docUser = await db.collection('usuarios').doc(user.uid).get();
-            if (docUser.exists && docUser.data().endereco) {
-                principal = docUser.data().endereco;
+            const docUserRef = doc(db, 'usuarios', user.uid);
+            const docUserSnap = await getDoc(docUserRef);
+            if (docUserSnap.exists() && docUserSnap.data().endereco) {
+                principal = docUserSnap.data().endereco;
             }
             // Ordena: principal=true primeiro, depois os outros
             enderecos.sort((a, b) => (b.principal === true) - (a.principal === true));
@@ -101,7 +104,24 @@
         }
 
         // Carrega endereços do usuário após header/footer e Firebase prontos
-        carregarEnderecosUsuario();
+        // Aguarda autenticação antes de carregar endereços
+        function aguardarUsuarioECarregarEnderecos() {
+            const unsubscribe = auth.onAuthStateChanged(user => {
+                if (user) {
+                    carregarEnderecosUsuario();
+                } else {
+                    // Se não autenticado, limpa o select
+                    const enderecoSelect = document.getElementById('endereco-select');
+                    if (enderecoSelect) {
+                        enderecoSelect.innerHTML = '<option value="">Faça login para selecionar endereço</option>';
+                        enderecoSelect.disabled = true;
+                    }
+                }
+                unsubscribe(); // Garante que só executa uma vez
+            });
+        }
+
+        aguardarUsuarioECarregarEnderecos();
 
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         function renderCart() {
@@ -164,6 +184,7 @@
             renderCart();
         }
         document.getElementById('finalizar-compra').addEventListener('click', async () => {
+            const { collection, doc, getDoc, getDocs, addDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
             // Validação obrigatória da forma de pagamento
             const pagamento = document.getElementById('pagamento').value;
             if (!['Pix','Cartão','Dinheiro'].includes(pagamento)) {
@@ -174,7 +195,7 @@
             // Aguarda o estado de autenticação estar pronto antes de prosseguir
             function getCurrentUser() {
                 return new Promise(resolve => {
-                    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+                    const unsubscribe = auth.onAuthStateChanged(user => {
                         unsubscribe();
                         resolve(user);
                     });
@@ -193,50 +214,43 @@
                 alert('Selecione um endereço de entrega.');
                 return;
             }
-            const db = firebase.firestore();
             if (enderecoId === 'principal-doc') {
                 // Buscar campo principal do doc
-                const docUser = await db.collection('usuarios').doc(user.uid).get();
-                if (docUser.exists && docUser.data().endereco) {
-                    endereco = docUser.data().endereco;
+                const docUserRef = doc(db, 'usuarios', user.uid);
+                const docUserSnap = await getDoc(docUserRef);
+                if (docUserSnap.exists() && docUserSnap.data().endereco) {
+                    endereco = docUserSnap.data().endereco;
                 } else {
                     alert('Endereço principal não encontrado.');
                     return;
                 }
             } else {
                 // Buscar endereço na subcoleção
-                const docEnd = await db.collection('usuarios').doc(user.uid).collection('enderecos').doc(enderecoId).get();
-                if (docEnd.exists) {
-                    endereco = docEnd.data();
+                const docEndRef = doc(db, 'usuarios', user.uid, 'enderecos', enderecoId);
+                const docEndSnap = await getDoc(docEndRef);
+                if (docEndSnap.exists()) {
+                    endereco = docEndSnap.data();
                 } else {
                     alert('Endereço selecionado não encontrado.');
                     return;
                 }
             }
-            // Corrigido: buscar nome, telefone e email do usuário autenticado
+            // Buscar nome, telefone e email do usuário autenticado
             let nomeUsuario = '';
             let telefone = '';
             let emailUsuario = '';
             if (user.displayName) nomeUsuario = user.displayName;
             if (user.email) emailUsuario = user.email;
             try {
-                const db = firebase.firestore();
-                const doc = await db.collection('usuarios').doc(user.uid).get();
-                if (doc.exists) {
-                    const data = doc.data();
+                const docUserRef = doc(db, 'usuarios', user.uid);
+                const docUserSnap = await getDoc(docUserRef);
+                if (docUserSnap.exists()) {
+                    const data = docUserSnap.data();
                     if (data.nome) nomeUsuario = data.nome;
                     if (data.telefone) telefone = data.telefone;
                 }
             } catch (e) {}
             const observacoes = document.getElementById('observacoes').value;
-            try {
-                const db = firebase.firestore();
-                const doc = await db.collection('usuarios').doc(user.uid).get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.telefone) telefone = data.telefone;
-                }
-            } catch (e) {}
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             let total = 0;
             const produtos = cart.map(item => {
@@ -255,13 +269,10 @@
             lastOrderNumber += 1;
             localStorage.setItem('lastOrderNumber', lastOrderNumber);
             const numeroPedido = lastOrderNumber;
-
             const dataPedido = new Date().toLocaleString('pt-BR');
-
-            // Salva o pedido no Firestore
+            // Salva o pedido no Firestore (modular)
             try {
-                const db = firebase.firestore();
-                await db.collection('pedidos').add({
+                await addDoc(collection(db, 'pedidos'), {
                     numeroPedido,
                     dataPedido,
                     userId: user.uid,
@@ -279,8 +290,6 @@
                 alert('Erro ao salvar pedido no servidor.');
                 return;
             }
-
-            // Remove geração e download do arquivo .txt
             // Exibe mensagem de pedido concluído
             const main = document.querySelector('main');
             main.innerHTML = `
