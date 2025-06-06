@@ -139,6 +139,12 @@
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
 
+    // Variáveis globais para filtros
+    let allProducts = [];
+    let currentCategory = '';
+    let currentSubcategory = '';
+    let currentSearch = '';
+
     // Função para buscar e renderizar produtos
     async function fetchProducts() {
       const productsContainer = document.getElementById('lista-produtos');
@@ -157,19 +163,118 @@
           }
           produtos.push(data);
         });
+        allProducts = produtos; // Salva todos os produtos para filtrar depois
         loadingSkeleton.classList.add('hidden');
         if (!Array.isArray(produtos) || produtos.length === 0) {
           emptyState.classList.remove('hidden');
           return;
         }
         emptyState.classList.add('hidden');
-        renderProducts(produtos);
+        applyFilters();
+        updateSubcategories();
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         loadingSkeleton.classList.add('hidden');
         emptyState.classList.remove('hidden');
       }
     }
+
+    // Aplica filtros e busca
+    function applyFilters() {
+      let filtered = allProducts;
+      if (currentCategory) {
+        filtered = filtered.filter(p => (p.categoria || '').toLowerCase() === currentCategory);
+      }
+      if (currentSubcategory) {
+        filtered = filtered.filter(p => (p.subcategoria || '').toLowerCase() === currentSubcategory);
+      }
+      if (currentSearch) {
+        const search = currentSearch.toLowerCase();
+        filtered = filtered.filter(p =>
+          (p.nome && p.nome.toLowerCase().includes(search)) ||
+          (p.descricao && p.descricao.toLowerCase().includes(search))
+        );
+      }
+      const emptyState = document.getElementById('empty-state');
+      if (!filtered.length) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+      renderProducts(filtered);
+    }
+
+    // Atualiza subcategorias conforme categoria
+    function updateSubcategories() {
+      const subcatSelect = document.getElementById('filtro-subcategoria');
+      let subcats = new Set();
+      allProducts.forEach(p => {
+        if (!currentCategory || (p.categoria || '').toLowerCase() === currentCategory) {
+          if (p.subcategoria) subcats.add(p.subcategoria);
+        }
+      });
+      subcatSelect.innerHTML = '<option value="">Todas as subcategorias</option>';
+      Array.from(subcats).sort().forEach(sub => {
+        subcatSelect.innerHTML += `<option value="${sub.toLowerCase()}">${sub}</option>`;
+      });
+    }
+
+    // Listeners dos filtros
+    const catSelect = document.getElementById('filtro-categoria');
+    const subcatSelect = document.getElementById('filtro-subcategoria');
+    const searchInput = document.getElementById('busca-produto');
+
+    // Menu lateral esquerdo
+    const asideLinks = document.querySelectorAll('aside nav a[data-categoria], #aside-todos');
+
+    asideLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        // Atualiza categoria
+        if (link.id === 'aside-todos') {
+          currentCategory = '';
+          catSelect.value = '';
+        } else {
+          currentCategory = link.getAttribute('data-categoria');
+          catSelect.value = currentCategory;
+        }
+        currentSubcategory = '';
+        subcatSelect.value = '';
+        updateSubcategories();
+        applyFilters();
+        // Atualiza destaque visual
+        asideLinks.forEach(l => l.classList.remove('font-bold', 'text-blue-900'));
+        link.classList.add('font-bold', 'text-blue-900');
+      });
+    });
+
+    catSelect.addEventListener('change', e => {
+      currentCategory = e.target.value;
+      currentSubcategory = '';
+      updateSubcategories();
+      subcatSelect.value = '';
+      applyFilters();
+      // Atualiza menu lateral
+      asideLinks.forEach(link => {
+        if (link.id === 'aside-todos' && !currentCategory) {
+          link.classList.add('font-bold', 'text-blue-900');
+        } else if (link.getAttribute('data-categoria') === currentCategory) {
+          link.classList.add('font-bold', 'text-blue-900');
+        } else {
+          link.classList.remove('font-bold', 'text-blue-900');
+        }
+      });
+    });
+
+    subcatSelect.addEventListener('change', e => {
+      currentSubcategory = e.target.value;
+      applyFilters();
+    });
+
+    searchInput.addEventListener('input', e => {
+      currentSearch = e.target.value;
+      applyFilters();
+    });
 
     // Função para renderizar produtos (simplificada, adapte conforme seu template)
     function renderProducts(produtos) {

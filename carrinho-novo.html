@@ -56,6 +56,53 @@
         await loadHeader('header-container', 'authContainerSecondary');
         await loadFooter('footer-container');
 
+        // Função para carregar endereços do usuário (corrigida para usar auth/db do módulo)
+        async function carregarEnderecosUsuario() {
+            const enderecoSelect = document.getElementById('endereco-select');
+            enderecoSelect.innerHTML = '<option value="">Carregando endereços...</option>';
+            let enderecos = [];
+            let principal = null;
+            let user = null;
+            // Aguarda autenticação
+            await new Promise(resolve => {
+                const unsub = auth.onAuthStateChanged(u => { user = u; unsub(); resolve(); });
+            });
+            if (!user) {
+                enderecoSelect.innerHTML = '<option value="">Faça login para selecionar endereço</option>';
+                enderecoSelect.disabled = true;
+                return;
+            }
+            // Busca subcoleção de endereços
+            const sub = await db.collection('usuarios').doc(user.uid).collection('enderecos').get();
+            sub.forEach(doc => {
+                const data = doc.data();
+                enderecos.push({ id: doc.id, ...data });
+            });
+            // Busca campo principal do doc, se não houver nenhum endereço principal na subcoleção
+            const docUser = await db.collection('usuarios').doc(user.uid).get();
+            if (docUser.exists && docUser.data().endereco) {
+                principal = docUser.data().endereco;
+            }
+            // Ordena: principal=true primeiro, depois os outros
+            enderecos.sort((a, b) => (b.principal === true) - (a.principal === true));
+            enderecoSelect.innerHTML = '';
+            if (enderecos.length > 0) {
+                enderecos.forEach((e, idx) => {
+                    let txt = `${e.rua || ''}, ${e.numero || ''} - ${e.bairro || ''}, ${e.cidade || ''}${e.complemento ? ' ('+e.complemento+')' : ''}`;
+                    enderecoSelect.innerHTML += `<option value="${e.id}">${e.principal ? '[Principal] ' : ''}${txt}</option>`;
+                });
+            } else if (principal) {
+                let txt = `${principal.rua || ''}, ${principal.numero || ''} - ${principal.bairro || ''}, ${principal.cidade || ''}${principal.complemento ? ' ('+principal.complemento+')' : ''}`;
+                enderecoSelect.innerHTML = `<option value="principal-doc">${txt}</option>`;
+            } else {
+                enderecoSelect.innerHTML = '<option value="">Nenhum endereço cadastrado</option>';
+                enderecoSelect.disabled = true;
+            }
+        }
+
+        // Carrega endereços do usuário após header/footer e Firebase prontos
+        carregarEnderecosUsuario();
+
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         function renderCart() {
             const cartList = document.getElementById('cart-list');
@@ -258,61 +305,5 @@
         window.removeItem = removeItem;
     </script>
     <script src="js/auth-mobile.js"></script>
-    <script>
-        // Função para carregar endereços do usuário
-        async function carregarEnderecosUsuario() {
-            const enderecoSelect = document.getElementById('endereco-select');
-            enderecoSelect.innerHTML = '<option value="">Carregando endereços...</option>';
-            let enderecos = [];
-            let principal = null;
-            let user = null;
-            await new Promise(resolve => {
-                const unsub = firebase.auth().onAuthStateChanged(u => { user = u; unsub(); resolve(); });
-            });
-            if (!user) {
-                enderecoSelect.innerHTML = '<option value="">Faça login para selecionar endereço</option>';
-                enderecoSelect.disabled = true;
-                return;
-            }
-            const db = firebase.firestore();
-            // Busca subcoleção de endereços
-            const sub = await db.collection('usuarios').doc(user.uid).collection('enderecos').get();
-            sub.forEach(doc => {
-                const data = doc.data();
-                enderecos.push({ id: doc.id, ...data });
-            });
-            // Busca campo principal do doc, se não houver nenhum endereço principal na subcoleção
-            const docUser = await db.collection('usuarios').doc(user.uid).get();
-            if (docUser.exists && docUser.data().endereco) {
-                principal = docUser.data().endereco;
-            }
-            // Ordena: principal=true primeiro, depois os outros
-            enderecos.sort((a, b) => (b.principal === true) - (a.principal === true));
-            enderecoSelect.innerHTML = '';
-            if (enderecos.length > 0) {
-                enderecos.forEach((e, idx) => {
-                    let txt = `${e.rua || ''}, ${e.numero || ''} - ${e.bairro || ''}, ${e.cidade || ''}${e.complemento ? ' ('+e.complemento+')' : ''}`;
-                    enderecoSelect.innerHTML += `<option value="${e.id}">${e.principal ? '[Principal] ' : ''}${txt}</option>`;
-                });
-            } else if (principal) {
-                let txt = `${principal.rua || ''}, ${principal.numero || ''} - ${principal.bairro || ''}, ${principal.cidade || ''}${principal.complemento ? ' ('+principal.complemento+')' : ''}`;
-                enderecoSelect.innerHTML = `<option value="principal-doc">${txt}</option>`;
-            } else {
-                enderecoSelect.innerHTML = '<option value="">Nenhum endereço cadastrado</option>';
-                enderecoSelect.disabled = true;
-            }
-        }
-        // Só chama após Firebase estar pronto
-        window.onFirebaseReady = function() {
-            carregarEnderecosUsuario();
-        };
-
-        // Habilita/desabilita botão finalizar conforme pagamento
-        const pagamentoSelect = document.getElementById('pagamento');
-        const finalizarBtn = document.getElementById('finalizar-compra');
-        pagamentoSelect.addEventListener('change', () => {
-            finalizarBtn.disabled = !['Pix','Cartão','Dinheiro'].includes(pagamentoSelect.value);
-        });
-    </script>
 </body>
 </html>
