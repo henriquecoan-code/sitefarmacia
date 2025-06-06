@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nome: name,
         email: email,
         telefone: "",
+        cpf: "",
         endereco: {
           rua: "",
           numero: "",
