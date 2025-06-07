@@ -124,130 +124,135 @@
     window.auth = auth;
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
-    // Aguarda DOM pronto antes de adicionar event listeners
-    document.addEventListener('DOMContentLoaded', function() {
-            // Upload de CSV
-            const formUploadCSV = document.getElementById('formUploadCSV');
-            if (formUploadCSV) {
-                formUploadCSV.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    const fileInput = document.getElementById('csvFile');
-                    const status = document.getElementById('csv-status');
-                    if (!fileInput || !fileInput.files.length) return;
-                    const formData = new FormData();
-                    formData.append('csv', fileInput.files[0]);
-                    if (status) status.textContent = 'Enviando...';
-                    try {
-                        const resp = await fetch('http://localhost:3000/produtos/upload-csv', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const data = await resp.json();
-                        if (data.success) {
-                            if (status) status.textContent = `Importação concluída (${data.count} produtos)`;
-                            carregarProdutos();
-                        } else {
-                            if (status) status.textContent = data.error || 'Erro ao importar CSV';
-                        }
-                    } catch (err) {
-                        if (status) status.textContent = 'Erro ao enviar arquivo.';
-                    }
-                });
+
+    // Inicialização principal após header/footer carregados
+    document.addEventListener('DOMContentLoaded', mainInit);
+
+    async function mainInit() {
+      // Upload de CSV
+      const formUploadCSV = document.getElementById('formUploadCSV');
+      if (formUploadCSV) {
+        formUploadCSV.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const fileInput = document.getElementById('csvFile');
+          const status = document.getElementById('csv-status');
+          if (!fileInput || !fileInput.files.length) return;
+          const formData = new FormData();
+          formData.append('csv', fileInput.files[0]);
+          if (status) status.textContent = 'Enviando...';
+          try {
+            const resp = await fetch('http://localhost:3000/produtos/upload-csv', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await resp.json();
+            if (data.success) {
+              if (status) status.textContent = `Importação concluída (${data.count} produtos)`;
+              carregarProdutos();
+            } else {
+              if (status) status.textContent = data.error || 'Erro ao importar CSV';
             }
-            // Cadastro manual de produto
-            const formAdicionarProduto = document.getElementById('formAdicionarProduto');
-            if (formAdicionarProduto) {
-                formAdicionarProduto.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    const form = e.target;
-                    const formData = new FormData(form);
-                    const fotosInput = document.getElementById('fotos');
-                    for (let i = 0; fotosInput && i < fotosInput.files.length; i++) {
-                        formData.append('fotos', fotosInput.files[i]);
-                    }
-                    const submitBtn = document.getElementById('submitButton');
-                    if (submitBtn) submitBtn.disabled = true;
-                    try {
-                        const resp = await fetch('http://localhost:3000/produtos', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const data = await resp.json();
-                        if (resp.ok) {
-                            mostrarToast('Produto cadastrado com sucesso!', true);
-                            form.reset();
-                            carregarProdutos();
-                        } else {
-                            mostrarToast(data.error || 'Erro ao cadastrar produto.', false);
-                        }
-                    } catch (err) {
-                        mostrarToast('Erro ao cadastrar produto.', false);
-                    }
-                    if (submitBtn) submitBtn.disabled = false;
-                });
-            }
-            // Toast helper
-            function mostrarToast(msg, sucesso) {
-                const toast = document.getElementById('toast');
-                const icon = document.getElementById('toast-icon');
-                const message = document.getElementById('toast-message');
-                if (message && icon && toast) {
-                    message.textContent = msg;
-                    icon.className = sucesso ? 'fas fa-check-circle text-green-600 mr-2' : 'fas fa-times-circle text-red-600 mr-2';
-                    toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 3000);
-                }
-            }
-            // Carregar produtos cadastrados
-            async function carregarProdutos() {
-                const container = document.getElementById('produtos-container');
-                if (!container) return;
-                container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
-                try {
-                    const snapshot = await firebase.firestore().collection('produtos').get();
-                    const produtos = [];
-                    snapshot.forEach(doc => {
-                        const prod = doc.data();
-                        prod.id = doc.id;
-                        if (typeof prod.valorComDesconto === 'undefined' && typeof prod.precoMaximo === 'number' && typeof prod.desconto === 'number') {
-                            prod.valorComDesconto = prod.precoMaximo * (1 - prod.desconto);
-                        }
-                        produtos.push(prod);
-                    });
-                    if (!Array.isArray(produtos) || produtos.length === 0) {
-                        container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
-                        return;
-                    }
-                    container.innerHTML = '';
-                    produtos.forEach(prod => {
-                        const el = document.createElement('div');
-                        el.className = 'bg-gray-50 rounded-lg shadow p-4 mb-4 flex flex-col';
-                        // Usa imagem local do frontend se não houver foto
-                        let fotoSrc = (prod.fotos && prod.fotos[0]) ? prod.fotos[0] : 'img/medicamento.png';
-                        if (fotoSrc && !fotoSrc.startsWith('http') && !fotoSrc.startsWith('img/')) {
-                            fotoSrc = 'img/medicamento.png';
-                        }
-                        el.innerHTML = `
-                            <div class='flex items-center gap-4'>
-                                <img src="${fotoSrc}" alt="${prod.nome}" class="w-16 h-16 object-contain rounded bg-white border" onerror="this.onerror=null;this.src='img/medicamento.png';">
-                                <div>
-                                    <div class='font-bold text-blue-900'>${prod.nome}</div>
-                                    <div class='text-sm text-gray-600'>${prod.categoria || ''} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
-                                    <div class='text-xs text-gray-400'>Estoque: ${prod.quantidade || 0}</div>
-                                </div>
-                            </div>
-                            <div class='mt-2 text-sm text-gray-700'>${prod.descricao || ''}</div>
-                            <div class='mt-2 text-blue-700 font-bold'>R$ ${Number(prod.valorComDesconto || prod.precoMaximo).toFixed(2)}</div>
-                        `;
-                        container.appendChild(el);
-                    });
-                } catch (err) {
-                    container.innerHTML = '<div class="text-red-500">Erro ao carregar produtos.</div>';
-                }
-            }
-            // Inicializa lista ao abrir
-            carregarProdutos();
+          } catch (err) {
+            if (status) status.textContent = 'Erro ao enviar arquivo.';
+          }
         });
+      }
+      // Cadastro manual de produto
+      const formAdicionarProduto = document.getElementById('formAdicionarProduto');
+      if (formAdicionarProduto) {
+        formAdicionarProduto.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const form = e.target;
+          const formData = new FormData(form);
+          const fotosInput = document.getElementById('fotos');
+          for (let i = 0; fotosInput && i < fotosInput.files.length; i++) {
+            formData.append('fotos', fotosInput.files[i]);
+          }
+          const submitBtn = document.getElementById('submitButton');
+          if (submitBtn) submitBtn.disabled = true;
+          try {
+            const resp = await fetch('http://localhost:3000/produtos', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await resp.json();
+            if (resp.ok) {
+              mostrarToast('Produto cadastrado com sucesso!', true);
+              form.reset();
+              carregarProdutos();
+            } else {
+              mostrarToast(data.error || 'Erro ao cadastrar produto.', false);
+            }
+          } catch (err) {
+            mostrarToast('Erro ao cadastrar produto.', false);
+          }
+          if (submitBtn) submitBtn.disabled = false;
+        });
+      }
+      // Toast helper
+      function mostrarToast(msg, sucesso) {
+        const toast = document.getElementById('toast');
+        const icon = document.getElementById('toast-icon');
+        const message = document.getElementById('toast-message');
+        if (message && icon && toast) {
+          message.textContent = msg;
+          icon.className = sucesso ? 'fas fa-check-circle text-green-600 mr-2' : 'fas fa-times-circle text-red-600 mr-2';
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+      }
+      // Carregar produtos cadastrados (Firestore modular)
+      async function carregarProdutos() {
+        const container = document.getElementById('produtos-container');
+        if (!container) return;
+        container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
+        try {
+          const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+          const produtosCol = collection(db, 'produtos');
+          const snapshot = await getDocs(produtosCol);
+          const produtos = [];
+          snapshot.forEach(doc => {
+            const prod = doc.data();
+            prod.id = doc.id;
+            if (typeof prod.valorComDesconto === 'undefined' && typeof prod.precoMaximo === 'number' && typeof prod.desconto === 'number') {
+              prod.valorComDesconto = prod.precoMaximo * (1 - prod.desconto);
+            }
+            produtos.push(prod);
+          });
+          if (!Array.isArray(produtos) || produtos.length === 0) {
+            container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
+            return;
+          }
+          container.innerHTML = '';
+          produtos.forEach(prod => {
+            const el = document.createElement('div');
+            el.className = 'bg-gray-50 rounded-lg shadow p-4 mb-4 flex flex-col';
+            // Usa imagem local do frontend se não houver foto
+            let fotoSrc = (prod.fotos && prod.fotos[0]) ? prod.fotos[0] : 'img/medicamento.png';
+            if (fotoSrc && !fotoSrc.startsWith('http') && !fotoSrc.startsWith('img/')) {
+              fotoSrc = 'img/medicamento.png';
+            }
+            el.innerHTML = `
+              <div class='flex items-center gap-4'>
+                <img src="${fotoSrc}" alt="${prod.nome}" class="w-16 h-16 object-contain rounded bg-white border" onerror="this.onerror=null;this.src='img/medicamento.png';">
+                <div>
+                  <div class='font-bold text-blue-900'>${prod.nome}</div>
+                  <div class='text-sm text-gray-600'>${prod.categoria || ''} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
+                  <div class='text-xs text-gray-400'>Estoque: ${prod.quantidade || 0}</div>
+                </div>
+              </div>
+              <div class='mt-2 text-sm text-gray-700'>${prod.descricao || ''}</div>
+              <div class='mt-2 text-blue-700 font-bold'>R$ ${Number(prod.valorComDesconto || prod.precoMaximo).toFixed(2)}</div>
+            `;
+            container.appendChild(el);
+          });
+        } catch (err) {
+          container.innerHTML = '<div class="text-red-500">Erro ao carregar produtos.</div>';
+        }
+      }
+      // Inicializa lista ao abrir
+      carregarProdutos();
+    }
     </script>
 </body>
 </html>
