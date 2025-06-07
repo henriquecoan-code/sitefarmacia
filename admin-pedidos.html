@@ -122,7 +122,15 @@
         let msgEmpresa = '';
         let msgCliente = '';
         if (order.status === 'Pendente') {
-          msgEmpresa = `Pedido: ${order.numeroPedido || ''} || Pedido recebido \nCliente: ${order.nomeUsuario || ''}Pedido: ${order.numeroPedido || ''}\nTelefone: ${order.telefone || ''}\nAEndereço: Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''}${endereco.complemento ? ', ' + endereco.complemento : ''}\nForma de pagamento: ${order.pagamento || ''}\nObservações: ${order.observacoes || 'Nenhuma'}\n\nProdutos:\n${order.produtos.map(p => `- ${p.quantidade}x ${p.nome} (R$ ${p.valor})`).join('\n')}\n\nTotal: R$ ${order.total}`;
+          msgEmpresa =
+            'Pedido: ' + (order.numeroPedido || '') + ' || Pedido recebido\n' +
+            'Cliente: ' + (order.nomeUsuario || '') + ' Pedido: ' + (order.numeroPedido || '') + '\n' +
+            'Telefone: ' + (order.telefone || '') + '\n' +
+            'Endereço: Rua ' + (endereco.rua || '') + ', Nº ' + (endereco.numero || '') + ', ' + (endereco.bairro || '') + ', ' + (endereco.cidade || '') + (endereco.complemento ? ', ' + endereco.complemento : '') + '\n' +
+            'Forma de pagamento: ' + (order.pagamento || '') + '\n' +
+            'Observações: ' + (order.observacoes || 'Nenhuma') + '\n\n' +
+            'Produtos:\n' + order.produtos.map(p => '- ' + p.quantidade + 'x ' + p.nome + ' (R$ ' + p.valor + ')').join('\n') + '\n\n' +
+            'Total: R$ ' + order.total;
           msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido foi recebido e está entrando em separação. Em breve entraremos em contato para entrega. Obrigado!`;
         } else if (order.status === 'Em Separação') {
           msgEmpresa = '';
@@ -246,8 +254,9 @@
             return;
           }
           try {
-            const db = firebase.firestore();
-            await db.collection('pedidos').doc(pedidoDocId).update({ status: novoStatus });
+            const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+            const pedidoRef = doc(db, 'pedidos', pedidoDocId);
+            await updateDoc(pedidoRef, { status: novoStatus });
             this.classList.add('bg-green-600');
             setTimeout(() => this.classList.remove('bg-green-600'), 1200);
             this.setAttribute('data-current-status', novoStatus);
@@ -328,13 +337,17 @@
         const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
         const docRef = doc(db, 'usuarios', user.uid);
         const docSnap = await getDoc(docRef);
+        console.log('Admin check:', docSnap.exists(), docSnap.data()); // LOG para depuração
         if (!docSnap.exists() || docSnap.data().role !== 'admin') {
           showError('Acesso restrito: apenas administradores podem ver os pedidos.');
           return;
         }
+        // LOG: admin autenticado
+        console.log('Admin autenticado:', user.email);
         fetchAllOrders();
       } catch (e) {
         showError('Erro ao verificar permissão de administrador.');
+        console.error('Erro admin check:', e);
       }
     });
 
@@ -359,9 +372,11 @@
         pedidos.sort((a, b) => (b.numeroPedido || 0) - (a.numeroPedido || 0));
         if (loading) loading.classList.add('hidden');
         allOrders = pedidos;
+        console.log('Pedidos carregados:', pedidos.length); // LOG para depuração
         filtrarPedidos();
       } catch (e) {
         showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
+        console.error('Erro ao carregar pedidos:', e);
       }
     }
 
