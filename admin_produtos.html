@@ -113,8 +113,8 @@
   <div id="footer-container"></div>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -125,149 +125,87 @@
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
 
-    // Inicialização principal após header/footer carregados
+    // Lógica semelhante ao admin-pedidos: busca produtos do Firestore e exibe em cards expansíveis
     document.addEventListener('DOMContentLoaded', mainInit);
 
     async function mainInit() {
-      // Upload de CSV
-      const formUploadCSV = document.getElementById('formUploadCSV');
-      if (formUploadCSV) {
-        formUploadCSV.addEventListener('submit', async function(e) {
-          e.preventDefault();
-          const fileInput = document.getElementById('csvFile');
-          const status = document.getElementById('csv-status');
-          if (!fileInput || !fileInput.files.length) return;
-          const formData = new FormData();
-          formData.append('csv', fileInput.files[0]);
-          if (status) status.textContent = 'Enviando...';
-          try {
-            const resp = await fetch('http://localhost:3000/produtos/upload-csv', {
-              method: 'POST',
-              body: formData
-            });
-            const data = await resp.json();
-            if (data.success) {
-              if (status) status.textContent = `Importação concluída (${data.count} produtos)`;
-              carregarProdutos();
-            } else {
-              if (status) status.textContent = data.error || 'Erro ao importar CSV';
-            }
-          } catch (err) {
-            if (status) status.textContent = 'Erro ao enviar arquivo.';
-          }
+      const container = document.getElementById('produtos-container');
+      if (!container) return;
+      container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
+      try {
+        // Busca todos os produtos do Firestore, ordenados por nome
+        const produtosRef = collection(db, 'produtos');
+        const q = query(produtosRef, orderBy('nome'));
+        const snapshot = await getDocs(q);
+        const produtos = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          data.id = doc.id;
+          produtos.push(data);
         });
-      }
-      // Cadastro manual de produto
-      const formAdicionarProduto = document.getElementById('formAdicionarProduto');
-      if (formAdicionarProduto) {
-        formAdicionarProduto.addEventListener('submit', async function(e) {
-          e.preventDefault();
-          const form = e.target;
-          const formData = new FormData(form);
-          const fotosInput = document.getElementById('fotos');
-          for (let i = 0; fotosInput && i < fotosInput.files.length; i++) {
-            formData.append('fotos', fotosInput.files[i]);
-          }
-          const submitBtn = document.getElementById('submitButton');
-          if (submitBtn) submitBtn.disabled = true;
-          try {
-            const resp = await fetch('http://localhost:3000/produtos', {
-              method: 'POST',
-              body: formData
-            });
-            const data = await resp.json();
-            if (resp.ok) {
-              mostrarToast('Produto cadastrado com sucesso!', true);
-              form.reset();
-              carregarProdutos();
-            } else {
-              mostrarToast(data.error || 'Erro ao cadastrar produto.', false);
-            }
-          } catch (err) {
-            mostrarToast('Erro ao cadastrar produto.', false);
-          }
-          if (submitBtn) submitBtn.disabled = false;
-        });
-      }
-      // Toast helper
-      function mostrarToast(msg, sucesso) {
-        const toast = document.getElementById('toast');
-        const icon = document.getElementById('toast-icon');
-        const message = document.getElementById('toast-message');
-        if (message && icon && toast) {
-          message.textContent = msg;
-          icon.className = sucesso ? 'fas fa-check-circle text-green-600 mr-2' : 'fas fa-times-circle text-red-600 mr-2';
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 3000);
+        if (!produtos.length) {
+          container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
+          return;
         }
-      }
-      // Carregar produtos cadastrados (Firestore modular)
-      async function carregarProdutos() {
-        const container = document.getElementById('produtos-container');
-        if (!container) return;
-        container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
-        try {
-          // Busca produtos do backend (não do Firestore direto)
-          const resp = await fetch('http://localhost:3000/produtos');
-          const produtos = await resp.json();
-          if (!Array.isArray(produtos) || produtos.length === 0) {
-            container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
-            return;
+        container.innerHTML = '';
+        produtos.forEach((prod, idx) => {
+          let fotoSrc = 'img/medicamento.png';
+          if (Array.isArray(prod.fotos) && prod.fotos.length > 0) {
+            fotoSrc = prod.fotos[0];
           }
-          container.innerHTML = '';
-          produtos.forEach(prod => {
-            let fotoSrc = 'img/medicamento.png';
-            if (Array.isArray(prod.fotos) && prod.fotos.length > 0) {
-              fotoSrc = prod.fotos[0] || 'img/medicamento.png';
-            }
-            const desconto = prod.desconto ? Math.round(prod.desconto * 100) : 0;
-            const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition flex flex-col h-full';
-            card.innerHTML = `
-              <div class="flex justify-center">
-                <div class="relative">
-                  <div class="flex justify-center items-center w-48 h-32 bg-gray-100 rounded">
-                    <img src="${fotoSrc}" alt="Imagem do Produto" class="w-32 h-32 object-contain mb-2 rounded" onerror="this.onerror=null;this.src='img/medicamento.png';" />
-                    ${desconto > 0 ? `<span class=\"absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded\">${desconto}% OFF</span>` : ''}
+          const desconto = prod.desconto ? Math.round(prod.desconto * 100) : 0;
+          const detailsId = `produto-details-${idx}`;
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition flex flex-col h-full border';
+          card.innerHTML = `
+            <div class="flex justify-center">
+              <div class="relative">
+                <div class="flex justify-center items-center w-48 h-32 bg-gray-100 rounded">
+                  <img src="${fotoSrc}" alt="Imagem do Produto" class="w-32 h-32 object-contain mb-2 rounded" onerror="this.onerror=null;this.src='img/medicamento.png';" />
+                  ${desconto > 0 ? `<span class=\"absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded\">${desconto}% OFF</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="p-4 flex flex-col flex-1 justify-between">
+              <div>
+                <h3 class="font-semibold text-lg mb-1 truncate-2-lines" title="${prod.nome}">${prod.nome}</h3>
+                <p class="text-gray-500 text-sm mb-2 truncate-2-lines" title="${prod.descricao || ''}">${prod.descricao || ''}</p>
+                <div class="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                  <span>Estoque: ${prod.quantidade || 0}</span>
+                  <span>|</span>
+                  <span>ID: ${prod.id}</span>
+                </div>
+                <div class="flex justify-between items-end mt-2">
+                  <div>
+                    <span class="text-gray-500 line-through text-sm">${desconto > 0 ? `R$ ${Number(prod.precoMaximo).toFixed(2)}` : ''}</span>
+                    <p class="text-blue-700 font-bold text-xl">R$ ${Number(prod.valorComDesconto || prod.precoMaximo).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
-              <div class="p-4 flex flex-col flex-1 justify-between">
-                <div>
-                  <h3 class="font-semibold text-lg mb-1 truncate-2-lines" title="${prod.nome}">${prod.nome}</h3>
-                  <p class="text-gray-500 text-sm mb-2 truncate-2-lines" title="${prod.descricao || ''}">${prod.descricao || ''}</p>
-                  <div class="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                    <span>Estoque: ${prod.quantidade || 0}</span>
-                    <span>|</span>
-                    <span>ID: ${prod.id}</span>
-                  </div>
-                  <div class="flex justify-between items-end mt-2">
-                    <div>
-                      <span class="text-gray-500 line-through text-sm">${desconto > 0 ? `R$ ${Number(prod.precoMaximo).toFixed(2)}` : ''}</span>
-                      <p class="text-blue-700 font-bold text-xl">R$ ${Number(prod.valorComDesconto || prod.precoMaximo).toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-                <button type="button" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full transition flex items-center justify-center" @click="open = !open">
-                  <i class="fas fa-info-circle mr-2"></i> Detalhes
-                </button>
-                <div x-data="{ open: false }" x-show="open" class="mt-4 border-t pt-4 text-sm text-gray-700" style="display:none;">
-                  <div><b>Categoria:</b> ${prod.categoria || '-'} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
-                  <div class='mt-1'><b>Preço Máximo:</b> R$ ${Number(prod.precoMaximo).toFixed(2)}</div>
-                  <div class='mt-1'><b>Desconto:</b> ${desconto}%</div>
-                  <div class='mt-1'><b>Tags:</b> ${Array.isArray(prod.tags) ? prod.tags.join(', ') : (prod.tags || '-')}</div>
-                  <div class='mt-1'><b>ID:</b> ${prod.id}</div>
-                </div>
+              <button type="button" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full transition flex items-center justify-center" onclick="toggleProdutoDetails('${detailsId}')">
+                <i class="fas fa-info-circle mr-2"></i> Detalhes
+              </button>
+              <div id="${detailsId}" class="mt-4 border-t pt-4 text-sm text-gray-700 hidden">
+                <div><b>Categoria:</b> ${prod.categoria || '-'} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
+                <div class='mt-1'><b>Preço Máximo:</b> R$ ${Number(prod.precoMaximo).toFixed(2)}</div>
+                <div class='mt-1'><b>Desconto:</b> ${desconto}%</div>
+                <div class='mt-1'><b>Tags:</b> ${Array.isArray(prod.tags) ? prod.tags.join(', ') : (prod.tags || '-')}</div>
+                <div class='mt-1'><b>ID:</b> ${prod.id}</div>
               </div>
-            `;
-            container.appendChild(card);
-          });
-        } catch (err) {
-          container.innerHTML = '<div class="text-red-500">Erro ao carregar produtos.</div>';
-        }
+            </div>
+          `;
+          container.appendChild(card);
+        });
+        // Função global para expandir/ocultar detalhes
+        window.toggleProdutoDetails = function(id) {
+          const details = document.getElementById(id);
+          if (details) {
+            details.classList.toggle('hidden');
+          }
+        };
+      } catch (err) {
+        container.innerHTML = '<div class="text-red-500">Erro ao carregar produtos.</div>';
       }
-      // Inicializa lista ao abrir
-      carregarProdutos();
     }
     </script>
 </body>
