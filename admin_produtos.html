@@ -125,7 +125,7 @@
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
     // Aguarda DOM pronto antes de adicionar event listeners
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
             // Upload de CSV
             const formUploadCSV = document.getElementById('formUploadCSV');
             if (formUploadCSV) {
@@ -249,6 +249,5 @@
             carregarProdutos();
         });
     </script>
-    <script src="js/auth-mobile.js"></script>
 </body>
 </html>
