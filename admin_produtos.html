@@ -1,120 +1,122 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administração de Produtos - Farmácia São Benedito</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/estilo.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração de Produtos</title>
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="stylesheet" href="css/account-styles.css">
+  <style>
+    .produtos-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+    .produto-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 1rem; width: 260px; display: flex; flex-direction: column; align-items: center; }
+    .produto-card img { max-width: 120px; max-height: 120px; margin-bottom: 0.5rem; }
+    .produto-card h3 { margin: 0.5rem 0 0.2rem 0; font-size: 1.1rem; }
+    .produto-card p { margin: 0.2rem 0; font-size: 0.95rem; }
+    .filtros { margin: 1.5rem 0 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; }
+    .filtros input, .filtros select { padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; }
+    .upload-area { margin: 2rem 0 1rem 0; }
+    .upload-area input[type="file"] { display: none; }
+    .upload-label { background: #1976d2; color: #fff; padding: 0.7rem 1.5rem; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .upload-label:hover { background: #125ea2; }
+    .status-msg { margin-top: 0.5rem; font-size: 0.95rem; }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-gray-50">
   <div id="header-container"></div>
   <div class="flex flex-1">
     <!-- Aside Menu Padronizado -->
-    <aside class="w-64 bg-white shadow-lg min-h-screen">
+    <aside class="w-64 bg-white shadow-lg min-h-screen hidden md:block">
       <div class="p-6 border-b">
         <h2 class="text-xl font-bold text-blue-900">Administração</h2>
       </div>
       <nav class="flex flex-col space-y-2 p-6">
         <a href="admin.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-user-shield mr-2"></i>Administradores</a>
-        <a href="admin_produtos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-blue-900 font-bold"><i class="fas fa-pills mr-2"></i>Produtos</a>
+        <a href="admin_produtos_novo.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-blue-900 font-bold"><i class="fas fa-pills mr-2"></i>Produtos</a>
         <a href="admin-pedidos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-clipboard-list mr-2"></i>Pedidos</a>
       </nav>
     </aside>
-    <main class="flex-1 p-8">
-        <!-- Toast Notification -->
-        <div id="toast" class="toast">
-            <div class="flex items-center">
-                <i id="toast-icon" class="mr-2"></i>
-                <span id="toast-message"></span>
-            </div>
-        </div>
-
-        <div class="w-full max-w-2xl mx-auto">
-            <div class="bg-white rounded-xl form-card overflow-hidden p-8">
-                <div class="text-center mb-8">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-pills text-blue-600 text-2xl"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-800">Cadastrar Novo Produto</h1>
-                    <p class="text-gray-600 mt-2">Preencha os campos abaixo para adicionar um produto ou faça upload em massa via CSV.</p>
+    <main class="flex-1 flex justify-center items-start p-8">
+      <div class="w-full">
+        <div class="w-full flex justify-center">
+          <div class="w-full">
+            <h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Administração de Produtos</h1>
+            <!-- Formulário manual de produto -->
+            <form id="form-produto" class="bg-white rounded-lg shadow p-2 mb-4 space-y-2 w-full mx-auto text-xs" style="font-size:0.92rem;">
+              <input type="hidden" id="produto-id">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Nome</label>
+                  <input type="text" id="nome" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
                 </div>
-                <!-- Upload de CSV -->
-                <form id="formUploadCSV" class="mb-8" enctype="multipart/form-data">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Importar produtos via CSV</label>
-                    <input type="file" id="csvFile" name="csv" accept=".csv" class="mb-2" required>
-                    <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">Enviar CSV</button>
-                    <a href="produtos-modelo.csv" download class="ml-4 text-blue-600 underline text-sm">Baixar modelo CSV</a>
-                    <span id="csv-status" class="ml-4 text-sm"></span>
-                </form>
-                <!-- Formulário manual existente -->
-                <form id="formAdicionarProduto" class="space-y-4" method="POST" enctype="multipart/form-data">
-                    <!-- Nome do Produto -->
-                    <div>
-                        <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
-                        <input type="text" id="nome" name="nome" class="w-full rounded-lg border-gray-300" placeholder="Ex: Paracetamol 750mg" required>
-                    </div>
-                    
-                    <!-- Descrição -->
-                    <div>
-                        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                        <textarea id="descricao" name="descricao" rows="3" class="w-full rounded-lg border-gray-300" placeholder="Ex: Caixa com 20 comprimidos, indicado para dores e febre." required></textarea>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Preço Máximo -->
-                        <div>
-                            <label for="precoMaximo" class="block text-sm font-medium text-gray-700 mb-1">Preço Máximo (R$)</label>
-                            <input type="number" id="precoMaximo" name="precoMaximo" step="0.01" min="0" class="w-full rounded-lg border-gray-300" placeholder="Ex: 22.50" required>
-                        </div>
-                        
-                        <!-- Desconto (% de 0 a 1) -->
-                        <div>
-                            <label for="desconto" class="block text-sm font-medium text-gray-700 mb-1">Desconto (Ex: 0.1 para 10%)</label>
-                            <input type="number" id="desconto" name="desconto" step="0.01" min="0" max="1" class="w-full rounded-lg border-gray-300" placeholder="Ex: 0.10" required>
-                        </div>
-                    </div>
-
-                    <!-- Quantidade -->
-                    <div>
-                        <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade em Estoque</label>
-                        <input type="number" id="quantidade" name="quantidade" min="0" class="w-full rounded-lg border-gray-300" placeholder="Ex: 150" required>
-                    </div>
-                    
-                    <!-- Tags -->
-                    <div>
-                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags (separadas por vírgula)</label>
-                        <input type="text" id="tags" name="tags" class="w-full rounded-lg border-gray-300" placeholder="Ex: analgésico, febre, dor de cabeça">
-                    </div>
-                    
-                    <!-- Fotos -->
-                    <div>
-                        <label for="fotos" class="block text-sm font-medium text-gray-700 mb-1">Fotos do Produto (múltiplas)</label>
-                        <input type="file" id="fotos" name="fotos" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" multiple>
-                    </div>
-                    
-                    <!-- Botão de Envio -->
-                    <div class="pt-4">
-                        <button type="submit" id="submitButton" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
-                            <i class="fas fa-plus-circle mr-2"></i> Adicionar Produto
-                        </button>
-                    </div>
-                </form>
-                <div id="produtos-lista" class="mt-10">
-                    <h2 class="text-xl font-bold mb-4">Produtos Cadastrados</h2>
-                    <div id="produtos-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Categoria</label>
+                  <input type="text" id="categoria" class="w-full rounded border px-2 py-1 h-7 text-xs">
                 </div>
-            </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN (Código tradicional)</label>
+                  <input type="text" id="ean" class="w-full rounded border px-2 py-1 h-7 text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red (Código reduzido)</label>
+                  <input type="text" id="cod-red" class="w-full rounded border px-2 py-1 h-7 text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço Máximo (R$)</label>
+                  <input type="number" id="precoMaximo" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" required>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Desconto (0 a 1)</label>
+                  <input type="number" id="desconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" max="1">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Quantidade</label>
+                  <input type="number" id="quantidade" class="w-full rounded border px-2 py-1 h-7 text-xs" min="0">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Tags (separadas por vírgula)</label>
+                  <input type="text" id="tags" class="w-full rounded border px-2 py-1 h-7 text-xs">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Descrição</label>
+                <textarea id="descricao" class="w-full rounded border px-2 py-1 text-xs" rows="1" style="min-height:1.5em;"></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Fotos (URLs separadas por vírgula)</label>
+                <input type="text" id="fotos" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+              <div class="flex gap-1">
+                <button type="submit" id="btn-salvar" class="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 transition text-xs h-7">Salvar</button>
+                <button type="button" id="btn-cancelar" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 transition hidden text-xs h-7">Cancelar</button>
+              </div>
+              <div id="form-status" class="text-xs mt-1"></div>
+            </form>
+          </div>
         </div>
+        <section class="upload-area">
+          <label class="upload-label" for="csv-upload">📤 Fazer upload de produtos (.csv)</label>
+          <input type="file" id="csv-upload" accept=".csv">
+          <div class="status-msg" id="upload-status"></div>
+          <a href="produtos-modelo.csv" download style="font-size:0.95rem;display:block;margin-top:0.5rem;">Baixar modelo de planilha</a>
+        </section>
+        <section class="filtros">
+          <input type="text" id="filtro-nome" placeholder="Pesquisar por nome...">
+          <select id="filtro-categoria">
+            <option value="">Todas as categorias</option>
+          </select>
+        </section>
+        <section>
+          <div class="produtos-container" id="produtos-lista"></div>
+        </section>
+      </div>
     </main>
   </div>
   <div id="footer-container"></div>
+  <script type="module" src="js/load-components.js"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -125,88 +127,209 @@
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
 
-    // Lógica semelhante ao admin-pedidos: busca produtos do Firestore e exibe em cards expansíveis
-    document.addEventListener('DOMContentLoaded', mainInit);
+    let produtos = [];
+    let categorias = new Set();
 
-    async function mainInit() {
-      const container = document.getElementById('produtos-container');
-      if (!container) return;
-      container.innerHTML = '<div class="text-gray-500">Carregando...</div>';
-      try {
-        // Busca todos os produtos do Firestore, ordenados por nome
-        const produtosRef = collection(db, 'produtos');
-        const q = query(produtosRef, orderBy('nome'));
-        const snapshot = await getDocs(q);
-        const produtos = [];
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          data.id = doc.id;
-          produtos.push(data);
-        });
-        if (!produtos.length) {
-          container.innerHTML = '<div class="text-gray-400">Nenhum produto cadastrado.</div>';
-          return;
-        }
-        container.innerHTML = '';
-        produtos.forEach((prod, idx) => {
-          let fotoSrc = 'img/medicamento.png';
-          if (Array.isArray(prod.fotos) && prod.fotos.length > 0) {
-            fotoSrc = prod.fotos[0];
-          }
-          const desconto = prod.desconto ? Math.round(prod.desconto * 100) : 0;
-          const detailsId = `produto-details-${idx}`;
-          const card = document.createElement('div');
-          card.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition flex flex-col h-full border';
-          card.innerHTML = `
-            <div class="flex justify-center">
-              <div class="relative">
-                <div class="flex justify-center items-center w-48 h-32 bg-gray-100 rounded">
-                  <img src="${fotoSrc}" alt="Imagem do Produto" class="w-32 h-32 object-contain mb-2 rounded" onerror="this.onerror=null;this.src='img/medicamento.png';" />
-                  ${desconto > 0 ? `<span class=\"absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded\">${desconto}% OFF</span>` : ''}
-                </div>
-              </div>
-            </div>
-            <div class="p-4 flex flex-col flex-1 justify-between">
-              <div>
-                <h3 class="font-semibold text-lg mb-1 truncate-2-lines" title="${prod.nome}">${prod.nome}</h3>
-                <p class="text-gray-500 text-sm mb-2 truncate-2-lines" title="${prod.descricao || ''}">${prod.descricao || ''}</p>
-                <div class="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                  <span>Estoque: ${prod.quantidade || 0}</span>
-                  <span>|</span>
-                  <span>ID: ${prod.id}</span>
-                </div>
-                <div class="flex justify-between items-end mt-2">
-                  <div>
-                    <span class="text-gray-500 line-through text-sm">${desconto > 0 ? `R$ ${Number(prod.precoMaximo).toFixed(2)}` : ''}</span>
-                    <p class="text-blue-700 font-bold text-xl">R$ ${Number(prod.valorComDesconto || prod.precoMaximo).toFixed(2)}</p>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full transition flex items-center justify-center" onclick="toggleProdutoDetails('${detailsId}')">
-                <i class="fas fa-info-circle mr-2"></i> Detalhes
-              </button>
-              <div id="${detailsId}" class="mt-4 border-t pt-4 text-sm text-gray-700 hidden">
-                <div><b>Categoria:</b> ${prod.categoria || '-'} ${prod.subcategoria ? ' - ' + prod.subcategoria : ''}</div>
-                <div class='mt-1'><b>Preço Máximo:</b> R$ ${Number(prod.precoMaximo).toFixed(2)}</div>
-                <div class='mt-1'><b>Desconto:</b> ${desconto}%</div>
-                <div class='mt-1'><b>Tags:</b> ${Array.isArray(prod.tags) ? prod.tags.join(', ') : (prod.tags || '-')}</div>
-                <div class='mt-1'><b>ID:</b> ${prod.id}</div>
-              </div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-        // Função global para expandir/ocultar detalhes
-        window.toggleProdutoDetails = function(id) {
-          const details = document.getElementById(id);
-          if (details) {
-            details.classList.toggle('hidden');
-          }
-        };
-      } catch (err) {
-        container.innerHTML = '<div class="text-red-500">Erro ao carregar produtos.</div>';
-      }
+    async function carregarProdutos() {
+      const lista = document.getElementById('produtos-lista');
+      lista.innerHTML = '<div>Carregando produtos...</div>';
+      produtos = [];
+      categorias.clear();
+      const snap = await getDocs(collection(db, 'produtos'));
+      snap.forEach(doc => {
+        const data = doc.data();
+        produtos.push({ id: doc.id, ...data });
+        if (data.categoria) categorias.add(data.categoria);
+      });
+      atualizarCategorias();
+      renderizarProdutos();
     }
-    </script>
+
+    function atualizarCategorias() {
+      const select = document.getElementById('filtro-categoria');
+      const valorAtual = select.value;
+      select.innerHTML = '<option value="">Todas as categorias</option>';
+      Array.from(categorias).sort().forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        select.appendChild(opt);
+      });
+      select.value = valorAtual;
+    }
+
+    // Formulário manual
+    const form = document.getElementById('form-produto');
+    const formStatus = document.getElementById('form-status');
+    const btnCancelar = document.getElementById('btn-cancelar');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('produto-id').value;
+      const nome = document.getElementById('nome').value.trim();
+      const descricao = document.getElementById('descricao').value.trim();
+      const precoMaximo = parseFloat(document.getElementById('precoMaximo').value);
+      let desconto = parseFloat(document.getElementById('desconto').value.replace(',', '.')) || 0;
+      if (desconto > 1) desconto = desconto / 100;
+      const valorComDesconto = precoMaximo * (1 - desconto);
+      const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
+      const categoria = document.getElementById('categoria').value.trim();
+      const ean = document.getElementById('ean').value.trim();
+      const codRed = document.getElementById('cod-red').value.trim();
+      const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      const fotos = document.getElementById('fotos').value.split(',').map(f => f.trim()).filter(Boolean);
+      const produto = { nome, descricao, precoMaximo, desconto, valorComDesconto, quantidade, categoria, ean, codRed, tags, fotos, criadoEm: new Date() };
+      try {
+        if (id) {
+          // Edição
+          await updateDoc(doc(db, 'produtos', id), produto);
+          formStatus.textContent = 'Produto atualizado com sucesso!';
+        } else {
+          // Novo
+          await addDoc(collection(db, 'produtos'), produto);
+          formStatus.textContent = 'Produto cadastrado com sucesso!';
+        }
+        form.reset();
+        document.getElementById('produto-id').value = '';
+        btnCancelar.classList.add('hidden');
+        await carregarProdutos();
+      } catch (err) {
+        formStatus.textContent = 'Erro ao salvar: ' + err.message;
+      }
+      setTimeout(() => { formStatus.textContent = ''; }, 3000);
+    });
+    btnCancelar.addEventListener('click', () => {
+      form.reset();
+      document.getElementById('produto-id').value = '';
+      btnCancelar.classList.add('hidden');
+      formStatus.textContent = '';
+    });
+
+    function renderizarProdutos() {
+      const lista = document.getElementById('produtos-lista');
+      const nomeFiltro = document.getElementById('filtro-nome').value.toLowerCase();
+      const catFiltro = document.getElementById('filtro-categoria').value;
+      let filtrados = produtos.filter(p =>
+        (!nomeFiltro || (p.nome && p.nome.toLowerCase().includes(nomeFiltro))) &&
+        (!catFiltro || p.categoria === catFiltro)
+      );
+      if (filtrados.length === 0) {
+        lista.innerHTML = '<div style="color:#888">Nenhum produto encontrado.</div>';
+        return;
+      }
+      lista.innerHTML = '';
+      filtrados.forEach(prod => {
+        const card = document.createElement('div');
+        card.className = 'produto-card';
+        card.innerHTML = `
+          <img src="${prod.fotos && prod.fotos[0] ? prod.fotos[0] : 'img/medicamento.png'}" alt="${prod.nome}">
+          <h3>${prod.nome || ''}</h3>
+          <p><b>Categoria:</b> ${prod.categoria || '-'}</p>
+          <p><b>Preço:</b> R$ ${prod.precoMaximo ? prod.precoMaximo.toFixed(2) : '-'}</p>
+          <p><b>Desconto:</b> ${prod.desconto ? (prod.desconto * 100).toFixed(0) + '%' : '-'}</p>
+          <div class="flex gap-2 mt-2">
+            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded edit-btn" data-id="${prod.id}"><i class="fas fa-edit"></i> Editar</button>
+            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded delete-btn" data-id="${prod.id}"><i class="fas fa-trash"></i> Excluir</button>
+          </div>
+        `;
+        lista.appendChild(card);
+      });
+      // Botões de edição
+      lista.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const prod = produtos.find(p => p.id === btn.dataset.id);
+          if (!prod) return;
+          document.getElementById('produto-id').value = prod.id;
+          document.getElementById('nome').value = prod.nome || '';
+          document.getElementById('descricao').value = prod.descricao || '';
+          document.getElementById('precoMaximo').value = prod.precoMaximo || '';
+          document.getElementById('desconto').value = prod.desconto > 1 ? (prod.desconto * 100) : (prod.desconto || '');
+          document.getElementById('quantidade').value = prod.quantidade || '';
+          document.getElementById('categoria').value = prod.categoria || '';
+          document.getElementById('ean').value = prod.ean || '';
+          document.getElementById('cod-red').value = prod.codRed || '';
+          document.getElementById('tags').value = Array.isArray(prod.tags) ? prod.tags.join(', ') : (prod.tags || '');
+          document.getElementById('fotos').value = Array.isArray(prod.fotos) ? prod.fotos.join(', ') : (prod.fotos || '');
+          btnCancelar.classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+      // Botões de exclusão
+      lista.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+          try {
+            await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js').then(({ deleteDoc, doc }) =>
+              deleteDoc(doc(db, 'produtos', btn.dataset.id))
+            );
+            await carregarProdutos();
+          } catch (err) {
+            alert('Erro ao excluir: ' + err.message);
+          }
+        });
+      });
+    }
+
+    document.getElementById('filtro-nome').addEventListener('input', renderizarProdutos);
+    document.getElementById('filtro-categoria').addEventListener('change', renderizarProdutos);
+
+    // Função para parsear CSV simples (assume separador ; ou ,)
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) return [];
+      const sep = lines[0].includes(';') ? ';' : ',';
+      const headers = lines[0].split(sep).map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const cols = line.split(sep);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (cols[i]||'').trim());
+        return obj;
+      });
+    }
+
+    document.getElementById('csv-upload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const status = document.getElementById('upload-status');
+      status.textContent = 'Lendo arquivo...';
+      try {
+        const text = await file.text();
+        const produtosCSV = parseCSV(text);
+        if (!produtosCSV.length) throw new Error('CSV vazio ou inválido');
+        status.textContent = 'Salvando produtos no Firestore...';
+        let count = 0;
+        for (const prod of produtosCSV) {
+          // Conversão e validação básica
+          if (!prod.nome || !prod.precoMaximo) continue;
+          const precoMaximo = parseFloat(prod.precoMaximo.replace(',', '.'));
+          const desconto = prod.desconto ? parseFloat(prod.desconto.replace(',', '.')) : 0;
+          const valorComDesconto = precoMaximo * (1 - desconto);
+          const quantidade = prod.quantidade ? parseInt(prod.quantidade, 10) : 0;
+          const tags = prod.tags ? prod.tags.split(',').map(t => t.trim()) : [];
+          const fotos = prod.fotos ? prod.fotos.split(',').map(f => f.trim()) : [];
+          await addDoc(collection(db, 'produtos'), {
+            nome: prod.nome,
+            descricao: prod.descricao || '',
+            precoMaximo,
+            desconto,
+            valorComDesconto,
+            quantidade,
+            categoria: prod.categoria || '',
+            subcategoria: prod.subcategoria || '',
+            tags,
+            fotos,
+            criadoEm: new Date()
+          });
+          count++;
+        }
+        status.textContent = `Importação concluída: ${count} produto(s) salvo(s)!`;
+        await carregarProdutos();
+      } catch (err) {
+        status.textContent = 'Erro ao importar: ' + err.message;
+      }
+      setTimeout(() => { status.textContent = ''; }, 4000);
+    });
+
+    carregarProdutos();
+  </script>
 </body>
 </html>
