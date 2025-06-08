@@ -72,8 +72,7 @@
       lista.innerHTML = '<div>Carregando administradores...</div>';
       admins = [];
       // Busca apenas usuários com role 'admin' na coleção 'usuarios'
-      const q = window.firebaseQuery || (window.firebaseQuery = (await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js')).query);
-      const where = window.firebaseWhere || (window.firebaseWhere = (await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js')).where);
+      const q = query;
       const usuariosRef = collection(db, 'usuarios');
       const queryAdmins = q(usuariosRef, where('role', '==', 'admin'));
       const snap = await getDocs(queryAdmins);
