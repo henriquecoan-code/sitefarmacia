@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Minha Conta - Farmácia São Benedito - Gerencie seus dados pessoais e endereço.">
-  <title>Minha Conta - Farmácia São Benedito</title>
+  <title>Meus Pedidos - Farmácia São Benedito</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link rel="stylesheet" href="css/account-styles.css">
-  <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
@@ -17,48 +14,31 @@
     <!--menu esquerdo-->
     <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
       <nav class="flex flex-col space-y-4 px-6 mt-8">
-        <a href="./minha-conta.html" class="text-blue-900 font-bold hover:text-blue-700 transition">Minha Conta</a>
+        <a href="./minha-conta.html" class="text-gray-700 hover:text-blue-700 transition">Minha Conta</a>
         <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
-        <a href="./pedidos.html" class="text-gray-700 hover:text-blue-700 transition">Pedidos</a>
+        <a href="./pedidos.html" class="text-blue-900 font-bold hover:text-blue-700 transition">Pedidos</a>
         <hr class="my-2">
-        </nav>
+      </nav>
     </aside>
-    <!-- Área principal - Dados da conta -->
-    <main class="flex-1 p-6">
-      <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-bold text-blue-900 mb-6">Endereços de Entrega</h1>
-        <!-- Loading spinner -->
-        <div id="loading" class="text-center py-12">
-          <div class="loading-spinner mx-auto mb-4"></div>
-          <p class="text-gray-600">Carregando seus endereços...</p>
-        </div>
-        <!-- Mensagem de erro -->
-        <div id="error-message" class="bg-red-100 p-6 rounded-lg shadow-md mb-6 hidden">
-          <p class="text-center text-red-600">Você precisa estar logado para acessar esta página.</p>
-          <div class="flex justify-center mt-4">
-            <a href="./login.html" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">Fazer Login</a>
+    <!-- Conteúdo principal -->
+    <!-- Endereço Principal -->
+    <main class="flex-1 p-6 bg-gray-50">
+        <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
+            <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
+              <i class="fas fa-edit mr-1"></i> Editar
+            </a>
           </div>
-        </div>
-        <!-- Conteúdo principal -->
-        <div id="content" class="hidden">
-          <button id="adicionarEndereco" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition mb-4">+ Adicionar Endereço</button>
-          <div class="endereco-lista" id="listaEnderecos">
-            <!-- Endereços aparecerão aqui -->
-          </div>
-          <div id="endereco-empty" class="hidden text-center py-12">
-            <i class="fas fa-search-dollar text-5xl text-gray-300 mb-4"></i>
-            <h3 class="text-xl font-medium text-gray-500">Nenhum endereço cadastrado</h3>
-            <p class="text-gray-400 mt-2">Adicione um endereço para entrega.</p>
-          </div>
-        </div>
-      </div>
+          <div id="address-loading" class="text-center text-gray-600">Carregando endereço...</div>
+          <div id="main-address" class="hidden"></div>
+          <div id="no-address" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
+        </section>
     </main>
-  </div>
-  <div id="footer-container"></div>
-  <script type="module">
+    <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, doc, getDocs, getDoc, deleteDoc, writeBatch, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -66,185 +46,129 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     window.auth = auth;
-    await loadHeader('header-container', 'authContainerSecondary');
-    await loadFooter('footer-container');
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const listaEnderecos = document.getElementById('listaEnderecos');
-      const btnAdicionar = document.getElementById('adicionarEndereco');
-      const loadingElement = document.getElementById('loading');
-      const errorMessage = document.getElementById('error-message');
-      const contentElement = document.getElementById('content');
-      const enderecosVazio = document.getElementById('endereco-empty');
-
-      btnAdicionar.addEventListener('click', () => {
-        window.location.href = 'formulario-endereco.html';
-      });
-
-      // Monitora o estado de autenticação usando sintaxe modular
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          errorMessage.classList.add('hidden');
-          loadingElement.classList.remove('hidden');
-          contentElement.classList.add('hidden');
-          carregarEnderecos(user);
-        } else {
-          loadingElement.classList.add('hidden');
-          errorMessage.classList.remove('hidden');
-          contentElement.classList.add('hidden');
+    try {
+      await loadHeader('header-container', 'authContainerSecondary');
+    } catch (e) {
+      console.error('Erro ao carregar o header:', e);
+    }
+    try {
+      await loadFooter('footer-container');
+    } catch (e) {
+      console.error('Erro ao carregar o footer:', e);
+    }
+        // OUVINTE DE AUTENTICAÇÃO FORA DO DOMContentLoaded
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        // Exibe mensagem de erro diretamente no DOM
+        const noAddress = document.getElementById('no-address');
+        const mainAddressDiv = document.getElementById('main-address');
+        const addressLoading = document.getElementById('address-loading');
+        if (addressLoading) addressLoading.classList.add('hidden');
+        if (mainAddressDiv) mainAddressDiv.classList.add('hidden');
+        if (noAddress) {
+          noAddress.textContent = 'Você precisa estar logado para ver seus pedidos.';
+          noAddress.classList.remove('hidden');
         }
-      });
-
-      async function carregarEnderecos(user) {
+        return;
+      }
+      console.log('UID do usuário logado:', user.uid); // Diagnóstico do UID
+      try {
+        let pedidos = [];
         try {
-          const enderecosRef = collection(db, 'usuarios', user.uid, 'enderecos');
-          const querySnapshot = await getDocs(enderecosRef);
-          loadingElement.classList.add('hidden');
-          contentElement.classList.remove('hidden');
-          listaEnderecos.innerHTML = '';
-          if (querySnapshot.empty) {
-            // Buscar campo endereco do documento principal
-            const userDocRef = doc(db, 'usuarios', user.uid);
-            const userDoc = await getDoc(userDocRef);
-            const userData = userDoc.data();
-            if (userData && userData.endereco && (userData.endereco.rua || userData.endereco.cep)) {
-              // Exibir endereço principal do documento
-              const enderecoPrincipal = userData.endereco;
-              enderecoPrincipal.id = 'principal';
-              listaEnderecos.appendChild(criarCardEndereco(enderecoPrincipal, true));
-              enderecosVazio.classList.add('hidden');
-              listaEnderecos.classList.remove('hidden');
-            } else {
-              enderecosVazio.classList.remove('hidden');
-              listaEnderecos.classList.add('hidden');
-            }
-            return;
-          }
-          enderecosVazio.classList.add('hidden');
-          listaEnderecos.classList.remove('hidden');
-          // Separar principal e secundários
-          const enderecos = [];
-          let principal = null;
-          querySnapshot.forEach((docSnap) => {
-            const endereco = docSnap.data();
-            endereco.id = docSnap.id;
-            if (endereco.principal) {
-              principal = endereco;
-            } else {
-              enderecos.push(endereco);
-            }
-          });
-          if (principal) {
-            listaEnderecos.appendChild(criarCardEndereco(principal, true));
-          }
-          // Se não houver principal, mostrar todos como secundários
-          if (!principal && enderecos.length > 0) {
-            enderecos.forEach(endereco => {
-              listaEnderecos.appendChild(criarCardEndereco(endereco, false));
-            });
-          } else if (principal && enderecos.length > 0) {
-            enderecos.forEach(endereco => {
-              listaEnderecos.appendChild(criarCardEndereco(endereco, false));
-            });
-          }
+          // Consulta apenas os pedidos do usuário logado, ordenados por numeroPedido
+          const q = query(
+            collection(db, 'pedidos'),
+            where('userId', '==', user.uid),
+            orderBy('numeroPedido', 'desc')
+          );
+          const snapshot = await getDocs(q);
+          snapshot.forEach(doc => pedidos.push(doc.data()));
         } catch (err) {
-          console.error('Erro ao carregar endereços:', err);
-          loadingElement.classList.add('hidden');
-          contentElement.classList.remove('hidden');
-          listaEnderecos.innerHTML = `
-            <div class="bg-red-50 p-4 rounded-md">
-              <p class="text-red-600">Erro ao carregar endereços. Por favor, tente novamente.</p>
-              <p class="text-red-500 text-sm mt-1">${err.message}</p>
+          // Se erro de índice, busca sem orderBy
+          const q = query(
+            collection(db, 'pedidos'),
+            where('userId', '==', user.uid)
+          );
+          const snapshot = await getDocs(q);
+          snapshot.forEach(doc => pedidos.push(doc.data()));
+        }
+        console.log('Pedidos retornados do Firestore:', pedidos); // <-- Diagnóstico
+        window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
+        if (typeof loading !== 'undefined' && loading) loading.classList.add('hidden');
+        if (typeof renderOrders !== 'undefined') renderOrders(pedidos);
+        // Chama o carregamento do endereço principal após autenticação
+        await loadMainAddress(user.uid);
+      } catch (e) {
+        // Exibe erro na tela
+        const errorMessage = document.getElementById('no-address');
+        const mainAddressDiv = document.getElementById('main-address');
+        if (mainAddressDiv) mainAddressDiv.classList.add('hidden');
+        if (errorMessage) errorMessage.classList.remove('hidden');
+        console.error('Erro ao carregar pedidos:', e);
+      }
+    });
+        async function loadMainAddress(uid) {
+      const addressLoading = document.getElementById('address-loading');
+      const mainAddressDiv = document.getElementById('main-address');
+      const noAddress = document.getElementById('no-address');
+      // Sempre oculta o endereço e mensagem de "nenhum endereço" ao iniciar
+      mainAddressDiv.classList.add('hidden');
+      noAddress.classList.add('hidden');
+      addressLoading.classList.remove('hidden');
+      try {
+        // Tenta buscar endereço na subcoleção 'enderecos' primeiro
+        const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
+        const querySnapshot = await getDocs(enderecosRef);
+        let principal = null;
+        querySnapshot.forEach((docSnap) => {
+          const endereco = docSnap.data();
+          if (endereco.principal) principal = endereco;
+        });
+        addressLoading.classList.add('hidden');
+        if (principal) {
+          mainAddressDiv.innerHTML = `
+            <div class="space-y-1">
+              <div><span class="font-semibold">Rua: ${principal.rua || ''}, ${principal.numero || ''}</span></div>
+              <div>Telefone: ${principal.telefone || ''}</div>
+              <div>Cidade: ${principal.cidade || ''}</div>
+              <div>Bairro: ${principal.bairro || ''} - CEP: ${principal.cep || ''}</div>
+              <div>${principal.complemento ? 'Complemento: ' + principal.complemento : ''}</div>
             </div>
           `;
+          mainAddressDiv.classList.remove('hidden');
+          noAddress.classList.add('hidden');
+          return;
         }
-      }
-
-      function criarCardEndereco(endereco, isPrincipal) {
-        const card = document.createElement('div');
-        card.className = 'card-endereco';
-        card.innerHTML = `
-          <div class="card-actions">
-            <button class="btn-action btn-edit" data-id="${endereco.id}" title="Editar endereço">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn-action btn-delete" data-id="${endereco.id}" title="Excluir endereço">
-              <i class="fas fa-trash-alt"></i>
-            </button>
-            ${isPrincipal ?
-              `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">Principal</span>` :
-              `<button class="btn-action btn-primary" data-id="${endereco.id}" title="Definir como principal">
-                <i class="fas fa-star"></i> Tornar principal
-              </button>`
-            }
+        // Se não houver principal na subcoleção, busca no documento raiz
+        const userRef = doc(db, 'usuarios', uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists() || !userSnap.data().endereco || !userSnap.data().endereco.rua) {
+          noAddress.classList.remove('hidden');
+          mainAddressDiv.classList.add('hidden');
+          return;
+        }
+        const endereco = userSnap.data().endereco;
+        mainAddressDiv.innerHTML = `
+          <div class="space-y-1">
+            <div><span class="font-semibold">Rua: ${endereco.rua || ''}, ${endereco.numero || ''}</span></div>
+            <div>Telefone: ${endereco.telefone || ''}</div>
+            <div>Cidade: ${endereco.cidade || ''}</div>
+            <div>Bairro: ${endereco.bairro || ''} - CEP: ${endereco.cep || ''}</div>
+            <div>${endereco.complemento ? 'Complemento: ' + endereco.complemento : ''}</div>
           </div>
-          <h3>${endereco.nome || 'Endereço'}</h3>
-          <p>${endereco.rua || ''}, ${endereco.numero || ''}</p>
-          <p>${endereco.bairro || ''} - ${endereco.cidade || ''}/${endereco.estado || ''}</p>
-          <p>CEP: ${endereco.cep || ''}</p>
-          ${endereco.complemento ? `<p>Complemento: ${endereco.complemento}</p>` : ''}
         `;
-        // Botões
-        const btnEdit = card.querySelector('.btn-edit');
-        if (btnEdit) {
-          btnEdit.addEventListener('click', () => {
-            window.location.href = `formulario-endereco.html?id=${endereco.id}`;
-          });
-        }
-        const btnDelete = card.querySelector('.btn-delete');
-        if (btnDelete) {
-          btnDelete.addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja excluir este endereço?')) {
-              excluirEndereco(endereco.id);
-            }
-          });
-        }
-        const btnPrimary = card.querySelector('.btn-primary');
-        if (btnPrimary) {
-          btnPrimary.addEventListener('click', () => {
-            definirEnderecoPrincipal(endereco.id);
-          });
-        }
-        return card;
+        mainAddressDiv.classList.remove('hidden');
+        noAddress.classList.add('hidden');
+      } catch (error) {
+        addressLoading.textContent = 'Erro ao carregar endereço.';
+        mainAddressDiv.classList.add('hidden');
+        noAddress.classList.add('hidden');
+        console.error(error);
       }
-
-      // Ao adicionar endereço, sempre salva como secundário
-      // (A lógica de formulário de cadastro deve garantir principal: false)
-
-      async function excluirEndereco(enderecoId) {
-        const user = auth.currentUser;
-        if (!user) return;
-        try {
-          await deleteDoc(doc(db, 'usuarios', user.uid, 'enderecos', enderecoId));
-          await carregarEnderecos(user);
-        } catch (error) {
-          console.error("Erro ao excluir endereço:", error);
-          alert('Erro ao excluir endereço. Por favor, tente novamente.');
-        }
-      }
-
-      async function definirEnderecoPrincipal(enderecoId) {
-        const user = auth.currentUser;
-        if (!user) return;
-        try {
-          const batch = writeBatch(db);
-          const enderecosRef = collection(db, 'usuarios', user.uid, 'enderecos');
-          const querySnapshot = await getDocs(enderecosRef);
-          querySnapshot.forEach((docSnap) => {
-            batch.update(doc(db, 'usuarios', user.uid, 'enderecos', docSnap.id), { principal: false });
-          });
-          batch.update(doc(db, 'usuarios', user.uid, 'enderecos', enderecoId), { principal: true });
-          await batch.commit();
-          await carregarEnderecos(user);
-        } catch (error) {
-          console.error("Erro ao definir endereço principal:", error);
-          alert('Erro ao definir endereço principal. Por favor, tente novamente.');
-        }
-      }
-
-      // Não chamar carregarEnderecos aqui - será chamado pelo onAuthStateChanged
-    });
+    }
   </script>
+    </div>
+  <div id="footer-container"></div>
   <script src="js/auth-mobile.js"></script>
 </body>
 </html>

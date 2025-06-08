@@ -25,11 +25,6 @@
     <!-- Área principal - Dados da conta -->
     <main class="flex-1 p-6">
       <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-bold text-blue-900 mb-6">Minha Conta</h1>
-        <!-- Mensagem de carregamento -->
-        <div id="loading" class="bg-white p-6 rounded-lg shadow-md mb-6">
-          <p class="text-center text-gray-600">Carregando seus dados...</p>
-        </div>
         <!-- Mensagem de erro -->
         <div id="error-message" class="bg-red-100 p-6 rounded-lg shadow-md mb-6 hidden">
           <p class="text-center text-red-600">Você precisa estar logado para acessar esta página.</p>
@@ -53,62 +48,59 @@
           </div>
           
           <!-- Endereço Principal -->
-          <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+          <div class="bg-white p-6 rounded-lg shadow-md mb-6 max-w-xl mx-auto">
             <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-semibold text-blue-800">Endereço</h2>
+              <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Editar Endereço</h2>
               <a href="./endereco-entrega.html" class="text-blue-600 hover:text-blue-800 text-sm">
-                <i class="fas fa-map-marker-alt mr-1"></i> Voltar para Endereços
+                <i class="fas fa-arrow-left mr-1"></i> Voltar para Endereços
               </a>
             </div>
             <form id="address-form" class="space-y-6">
-              <!-- CEP -->
-              <div class="flex flex-col md:flex-row md:items-center">
-                <label for="cep" class="text-gray-700 font-medium w-full md:w-1/4 mb-2 md:mb-0">CEP:</label>
-                <div class="w-full md:w-3/4 flex items-center">
-                  <input type="text" id="cep" name="cep" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="9" placeholder="00000-000">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- CEP -->
+                <div>
+                  <label for="cep" class="block text-gray-700 font-medium mb-1">CEP</label>
+                  <input type="text" id="cep" name="cep" maxlength="9" placeholder="00000-000" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-              </div>
-              
-              <!-- Rua -->
-              <div class="flex flex-col md:flex-row md:items-center">
-                <label for="rua" class="text-gray-700 font-medium w-full md:w-1/4 mb-2 md:mb-0">Rua:</label>
-                <div class="w-full md:w-3/4 flex items-center">
+                <!-- Cidade -->
+                <div>
+                  <label for="cidade" class="block text-gray-700 font-medium mb-1">Cidade</label>
+                  <input type="text" id="cidade" name="cidade" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <!-- Rua -->
+                <div>
+                  <label for="rua" class="block text-gray-700 font-medium mb-1">Rua</label>
                   <input type="text" id="rua" name="rua" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-              </div>
-              
-              <!-- Número -->
-              <div class="flex flex-col md:flex-row md:items-center">
-                <label for="numero" class="text-gray-700 font-medium w-full md:w-1/4 mb-2 md:mb-0">Número:</label>
-                <div class="w-full md:w-3/4 flex items-center">
+                <!-- Número -->
+                <div>
+                  <label for="numero" class="block text-gray-700 font-medium mb-1">Número</label>
                   <input type="text" id="numero" name="numero" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-              </div>
-              
-              <!-- Bairro -->
-              <div class="flex flex-col md:flex-row md:items-center">
-                <label for="bairro" class="text-gray-700 font-medium w-full md:w-1/4 mb-2 md:mb-0">Bairro:</label>
-                <div class="w-full md:w-3/4 flex items-center">
+                <!-- Bairro -->
+                <div>
+                  <label for="bairro" class="block text-gray-700 font-medium mb-1">Bairro</label>
                   <input type="text" id="bairro" name="bairro" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-              </div>
-              
-              <!-- Complemento -->
-              <div class="flex flex-col md:flex-row md:items-center">
-                <label for="complemento" class="text-gray-700 font-medium w-full md:w-1/4 mb-2 md:mb-0">Complemento:</label>
-                <div class="w-full md:w-3/4 flex items-center">
+                <!-- Complemento -->
+                <div>
+                  <label for="complemento" class="block text-gray-700 font-medium mb-1">Complemento</label>
                   <input type="text" id="complemento" name="complemento" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Apto, Bloco, etc. (opcional)">
                 </div>
+                <!-- Telefone -->
+                <div class="md:col-span-2">
+                  <label for="telefone" class="block text-gray-700 font-medium mb-1">Telefone</label>
+                  <input type="text" id="telefone" name="telefone" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="(99) 99999-9999">
+                </div>
               </div>
-              
-              <!-- Botão Salvar -->
               <div class="flex justify-end space-x-4 mt-8">
-                <button type="submit" id="save-address-button" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">
+                <button type="submit" id="save-address-button" class="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800 transition font-semibold shadow">
                   Salvar Endereço
                 </button>
               </div>
             </form>
           </div>
+          <!-- Fim do card de endereço -->
         </div>
       </div>
     </main>
@@ -257,35 +249,19 @@
           console.error("Elementos de endereço não encontrados");
           return;
         }
-        
         if (endereco && endereco.rua && endereco.numero && endereco.bairro) {
           // Usuário tem endereço, preencher os campos
           noAddressElement.classList.add('hidden');
           addressFormElement.classList.remove('hidden');
-          
-          const cepDisplay = document.getElementById('cep-display');
-          const ruaDisplay = document.getElementById('rua-display');
-          const numeroDisplay = document.getElementById('numero-display');
-          const bairroDisplay = document.getElementById('bairro-display');
-          const complementoDisplay = document.getElementById('complemento-display');
-          
-          const cepInput = document.getElementById('cep');
-          const ruaInput = document.getElementById('rua');
-          const numeroInput = document.getElementById('numero');
-          const bairroInput = document.getElementById('bairro');
-          const complementoInput = document.getElementById('complemento');
-          
-          if (cepDisplay) cepDisplay.textContent = endereco.cep || '';
-          if (ruaDisplay) ruaDisplay.textContent = endereco.rua || '';
-          if (numeroDisplay) numeroDisplay.textContent = endereco.numero || '';
-          if (bairroDisplay) bairroDisplay.textContent = endereco.bairro || '';
-          if (complementoDisplay) complementoDisplay.textContent = endereco.complemento || '';
-          
-          if (cepInput) cepInput.value = endereco.cep || '';
-          if (ruaInput) ruaInput.value = endereco.rua || '';
-          if (numeroInput) numeroInput.value = endereco.numero || '';
-          if (bairroInput) bairroInput.value = endereco.bairro || '';
-          if (complementoInput) complementoInput.value = endereco.complemento || '';
+
+          // Preencher campos do formulário
+          document.getElementById('cep').value = endereco.cep || '';
+          document.getElementById('rua').value = endereco.rua || '';
+          document.getElementById('numero').value = endereco.numero || '';
+          document.getElementById('bairro').value = endereco.bairro || '';
+          document.getElementById('complemento').value = endereco.complemento || '';
+          document.getElementById('cidade').value = endereco.cidade || '';
+          document.getElementById('telefone').value = endereco.telefone || '';
         } else {
           // Usuário não tem endereço cadastrado
           noAddressElement.classList.remove('hidden');
@@ -408,7 +384,9 @@
               rua: document.getElementById('rua')?.value || '',
               numero: document.getElementById('numero')?.value || '',
               bairro: document.getElementById('bairro')?.value || '',
-              complemento: document.getElementById('complemento')?.value || ''
+              complemento: document.getElementById('complemento')?.value || '',
+              cidade: document.getElementById('cidade')?.value || '',
+              telefone: document.getElementById('telefone')?.value || ''
             };
             
             // Atualizar endereço no Firestore
@@ -420,22 +398,23 @@
                 const numeroDisplay = document.getElementById('numero-display');
                 const bairroDisplay = document.getElementById('bairro-display');
                 const complementoDisplay = document.getElementById('complemento-display');
+                const cidadeDisplay = document.getElementById('cidade-display');
                 
                 if (cepDisplay) cepDisplay.textContent = endereco.cep;
                 if (ruaDisplay) ruaDisplay.textContent = endereco.rua;
                 if (numeroDisplay) numeroDisplay.textContent = endereco.numero;
                 if (bairroDisplay) bairroDisplay.textContent = endereco.bairro;
                 if (complementoDisplay) complementoDisplay.textContent = endereco.complemento;
+                if (cidadeDisplay) cidadeDisplay.textContent = endereco.cidade;
                 
                 // Voltar para o modo de exibição
                 resetFormToDisplayMode('address');
-                
                 // Mostrar mensagem de sucesso
-                showToast('Endereço atualizado com sucesso!', 'success');
+                showToast('Endereço atualizado com sucesso! Aguarde aprovação da equipe.', 'success');
               })
               .catch(error => {
                 console.error("Erro ao atualizar endereço:", error);
-                showToast('Erro ao atualizar endereço. Por favor, tente novamente.', 'error');
+                showToast('Endereço recusado. Por favor, revise os dados e tente novamente.', 'error');
               });
           });
         }
