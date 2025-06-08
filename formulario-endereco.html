@@ -398,8 +398,18 @@
               saveBtn.innerHTML = '<span class="loader mr-2"></span>Salvando...';
             }
 
-            const endereco = { cep, rua, numero, bairro, complemento, cidade, telefone };
+            // Empacotamento dos dados para garantir tipos e estrutura correta
+            const endereco = {
+              cep: String(cep),
+              rua: String(rua),
+              numero: String(numero),
+              bairro: String(bairro),
+              complemento: String(complemento),
+              cidade: String(cidade),
+              telefone: String(telefone)
+            };
             try {
+              // Atualização correta usando o método update da instância do userDocRef
               await userDocRef.update({ endereco });
               showToast('Endereço atualizado com sucesso! Aguarde aprovação da equipe.', 'success');
               resetFormToDisplayMode('address');
