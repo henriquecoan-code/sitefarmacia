@@ -51,13 +51,12 @@
     </main>
   </div>
   <div id="footer-container"></div>
-  <script type="module" src="js/load-components.js"></script>
   <script type="module">
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
     import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
-    import { loadHeader } from './js/header-loader.js';
-    import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
     const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
     const auth = getAuth(app);
