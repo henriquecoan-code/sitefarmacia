@@ -44,7 +44,19 @@
   <div id="footer-container"></div>
   <script type="module" src="js/load-components.js"></script>
   <script type="module">
-    import { firestore } from './js/firebase-config.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
     let produtos = [];
     let categorias = new Set();
 
@@ -53,7 +65,7 @@
       lista.innerHTML = '<div>Carregando produtos...</div>';
       produtos = [];
       categorias.clear();
-      const snap = await firestore.collection('produtos').get();
+      const snap = await getDocs(collection(db, 'produtos'));
       snap.forEach(doc => {
         const data = doc.data();
         produtos.push({ id: doc.id, ...data });
@@ -106,20 +118,56 @@
     document.getElementById('filtro-nome').addEventListener('input', renderizarProdutos);
     document.getElementById('filtro-categoria').addEventListener('change', renderizarProdutos);
 
+    // Função para parsear CSV simples (assume separador ; ou ,)
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) return [];
+      const sep = lines[0].includes(';') ? ';' : ',';
+      const headers = lines[0].split(sep).map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const cols = line.split(sep);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (cols[i]||'').trim());
+        return obj;
+      });
+    }
+
     document.getElementById('csv-upload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const status = document.getElementById('upload-status');
-      status.textContent = 'Enviando arquivo...';
+      status.textContent = 'Lendo arquivo...';
       try {
-        const formData = new FormData();
-        formData.append('csv', file);
-        const resp = await fetch('http://localhost:3000/importar-csv', {
-          method: 'POST',
-          body: formData
-        });
-        if (!resp.ok) throw new Error('Falha ao importar CSV');
-        status.textContent = 'Produtos importados com sucesso!';
+        const text = await file.text();
+        const produtosCSV = parseCSV(text);
+        if (!produtosCSV.length) throw new Error('CSV vazio ou inválido');
+        status.textContent = 'Salvando produtos no Firestore...';
+        let count = 0;
+        for (const prod of produtosCSV) {
+          // Conversão e validação básica
+          if (!prod.nome || !prod.precoMaximo) continue;
+          const precoMaximo = parseFloat(prod.precoMaximo.replace(',', '.'));
+          const desconto = prod.desconto ? parseFloat(prod.desconto.replace(',', '.')) : 0;
+          const valorComDesconto = precoMaximo * (1 - desconto);
+          const quantidade = prod.quantidade ? parseInt(prod.quantidade, 10) : 0;
+          const tags = prod.tags ? prod.tags.split(',').map(t => t.trim()) : [];
+          const fotos = prod.fotos ? prod.fotos.split(',').map(f => f.trim()) : [];
+          await addDoc(collection(db, 'produtos'), {
+            nome: prod.nome,
+            descricao: prod.descricao || '',
+            precoMaximo,
+            desconto,
+            valorComDesconto,
+            quantidade,
+            categoria: prod.categoria || '',
+            subcategoria: prod.subcategoria || '',
+            tags,
+            fotos,
+            criadoEm: new Date()
+          });
+          count++;
+        }
+        status.textContent = `Importação concluída: ${count} produto(s) salvo(s)!`;
         await carregarProdutos();
       } catch (err) {
         status.textContent = 'Erro ao importar: ' + err.message;
