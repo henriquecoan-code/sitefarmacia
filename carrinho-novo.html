@@ -143,7 +143,7 @@
                 finalizarBtn.disabled = false;
             }
             cart.forEach((item, idx) => {
-                const subtotal = item.quantidade * (item.valorComDesconto || item.precoMaximo || 0);
+                const subtotal = itens.quantidade * (itens.valorComDesconto || itens.precoMaximo || 0);
                 total += subtotal;
                 const el = document.createElement('div');
                 el.className = "flex flex-col md:flex-row items-center bg-white rounded-lg shadow p-4 gap-4";
@@ -152,13 +152,13 @@
                         alt=\"${item.nome}\" class=\"w-24 h-24 object-contain rounded bg-gray-100\" 
                         onerror=\"this.onerror=null;this.src='http://localhost:3000/uploads/medicamento.png';\">
                     <div class=\"flex-1 w-full\">
-                        <h3 class=\"font-semibold text-lg\">${item.nome}</h3>
-                        <p class=\"text-gray-500 text-sm mb-2\">${item.descricao || ''}</p>
+                        <h3 class=\"font-semibold text-lg\">${itens.nome}</h3>
+                        <p class=\"text-gray-500 text-sm mb-2\">${itens.descricao || ''}</p>
                         <div class=\"flex items-center gap-2 mt-2\">
                             <button class=\"bg-gray-200 px-2 rounded text-lg font-bold\" onclick=\"updateQty(${idx}, -1)\">-</button>
-                            <span class=\"mx-2\">${item.quantidade}</span>
+                            <span class=\"mx-2\">${itens.quantidade}</span>
                             <button class=\"bg-gray-200 px-2 rounded text-lg font-bold\" onclick=\"updateQty(${idx}, 1)\">+</button>
-                            <span class=\"ml-4 text-blue-700 font-bold\">R$ ${(item.valorComDesconto || item.precoMaximo).toFixed(2)}</span>
+                            <span class=\"ml-4 text-blue-700 font-bold\">R$ ${(itens.valorComDesconto || itens.precoMaximo).toFixed(2)}</span>
                             <button class=\"ml-6 text-red-600 hover:text-red-800\" onclick=\"removeItem(${idx})\">
                                 <i class=\"fas fa-trash\"></i> Remover
                             </button>
