@@ -532,6 +532,42 @@ footer .text-center p, footer .text-gray-400 {
 .card-produto .btn-carrinho:focus {
   box-shadow: 0 0 0 2px #60a5fa;
 }
+.card-produto .qtd-input {
+  width: 2.5rem;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  padding: 0.2rem 0.1rem;
+  margin: 0 0.2rem;
+  background: #f8fafc;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.card-produto .qtd-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #60a5fa33;
+  outline: none;
+}
+.card-produto .qtd-btn {
+  width: 2rem;
+  height: 2rem;
+  background: #e5e7eb;
+  color: #334155;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+  user-select: none;
+}
+.card-produto .qtd-btn:hover {
+  background: #dbeafe;
+  color: #2563eb;
+}
 @media (max-width: 640px) {
   .card-produto .info {
     padding: 0.7rem;
@@ -543,6 +579,16 @@ footer .text-center p, footer .text-gray-400 {
     font-size: 0.85rem;
   }
   .card-produto .preco-desconto {
+    font-size: 1rem;
+  }
+  .card-produto .qtd-input {
+    width: 2rem;
+    font-size: 0.95rem;
+    padding: 0.15rem 0.05rem;
+  }
+  .card-produto .qtd-btn {
+    width: 1.7rem;
+    height: 1.7rem;
     font-size: 1rem;
   }
 }
