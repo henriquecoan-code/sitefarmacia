@@ -259,6 +259,19 @@ input:focus, textarea:focus, select:focus {
 .toast.show { transform: translateX(0); display: flex; }
 .toast.success { background-color: #10b981; }
 .toast.error { background-color: #ef4444; }
+/* Estilos painel de administração de produtos */
+.produtos-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+.produto-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 1rem; width: 260px; display: flex; flex-direction: column; align-items: center; }
+.produto-card img { max-width: 120px; max-height: 120px; margin-bottom: 0.5rem; }
+.produto-card h3 { margin: 0.5rem 0 0.2rem 0; font-size: 1.1rem; }
+.produto-card p { margin: 0.2rem 0; font-size: 0.95rem; }
+.filtros { margin: 1.5rem 0 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; }
+.filtros input, .filtros select { padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; }
+.upload-area { margin: 2rem 0 1rem 0; }
+.upload-area input[type="file"] { display: none; }
+.upload-label { background: #1976d2; color: #fff; padding: 0.7rem 1.5rem; border-radius: 5px; cursor: pointer; font-weight: bold; }
+.upload-label:hover { background: #125ea2; }
+.status-msg { margin-top: 0.5rem; font-size: 0.95rem; }
 /* --- Fim Admin_produtos.html custom styles --- */
 
 /* --- Admin.html custom styles --- */

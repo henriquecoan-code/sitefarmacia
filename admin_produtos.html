@@ -6,20 +6,6 @@
   <title>Administração de Produtos</title>
   <link rel="stylesheet" href="css/estilo.css">
   <link rel="stylesheet" href="css/account-styles.css">
-  <style>
-    .produtos-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
-    .produto-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 1rem; width: 260px; display: flex; flex-direction: column; align-items: center; }
-    .produto-card img { max-width: 120px; max-height: 120px; margin-bottom: 0.5rem; }
-    .produto-card h3 { margin: 0.5rem 0 0.2rem 0; font-size: 1.1rem; }
-    .produto-card p { margin: 0.2rem 0; font-size: 0.95rem; }
-    .filtros { margin: 1.5rem 0 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; }
-    .filtros input, .filtros select { padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; }
-    .upload-area { margin: 2rem 0 1rem 0; }
-    .upload-area input[type="file"] { display: none; }
-    .upload-label { background: #1976d2; color: #fff; padding: 0.7rem 1.5rem; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .upload-label:hover { background: #125ea2; }
-    .status-msg { margin-top: 0.5rem; font-size: 0.95rem; }
-  </style>
 </head>
 <body class="min-h-screen flex flex-col bg-gray-50">
   <div id="header-container"></div>
@@ -43,7 +29,7 @@
             <!-- Formulário manual de produto -->
             <form id="form-produto" class="bg-white rounded-lg shadow p-2 mb-4 space-y-2 w-full mx-auto text-xs" style="font-size:0.92rem;">
               <input type="hidden" id="produto-id">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div>
                   <label class="block text-xs font-medium text-gray-700 mb-0.5">Nome</label>
                   <input type="text" id="nome" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
@@ -53,11 +39,11 @@
                   <input type="text" id="categoria" class="w-full rounded border px-2 py-1 h-7 text-xs">
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN (Código tradicional)</label>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN</label>
                   <input type="text" id="ean" class="w-full rounded border px-2 py-1 h-7 text-xs">
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red (Código reduzido)</label>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red</label>
                   <input type="text" id="cod-red" class="w-full rounded border px-2 py-1 h-7 text-xs">
                 </div>
                 <div>
@@ -65,14 +51,14 @@
                   <input type="number" id="precoMaximo" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" required>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Desconto (0 a 1)</label>
-                  <input type="number" id="desconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" max="1">
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Desconto (%)</label>
+                  <input type="number" id="desconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" max="100">
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-gray-700 mb-0.5">Quantidade</label>
                   <input type="number" id="quantidade" class="w-full rounded border px-2 py-1 h-7 text-xs" min="0">
                 </div>
-                <div>
+                <div class="md:col-span-2">
                   <label class="block text-xs font-medium text-gray-700 mb-0.5">Tags (separadas por vírgula)</label>
                   <input type="text" id="tags" class="w-full rounded border px-2 py-1 h-7 text-xs">
                 </div>
