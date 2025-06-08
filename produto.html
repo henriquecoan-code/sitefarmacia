@@ -323,7 +323,9 @@
           btnText.classList.add('hidden');
           btnLoading.classList.remove('hidden');
           await new Promise(r => setTimeout(r, 400)); // Simula loading
-          addToCart(product);
+          if (window.addToCart) {
+            await window.addToCart(product);
+          }
           btnLoading.classList.add('hidden');
           btnOk.classList.remove('hidden');
           setTimeout(() => {
@@ -332,28 +334,6 @@
           }, 900);
         });
       });
-    }
-
-    // Função para adicionar ao carrinho (simplificada)
-    function addToCart(product) {
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const index = cart.findIndex(item => item.id === product.id);
-      if (index > -1) {
-        cart[index].quantidade += 1;
-      } else {
-        cart.push({ ...product, quantidade: 1 });
-      }
-      localStorage.setItem('cart', JSON.stringify(cart));
-      updateCartCount();
-    }
-
-    function updateCartCount() {
-      const cartCount = document.getElementById('cart-count');
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
-      if (cartCount) {
-        const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-        cartCount.textContent = total;
-      }
     }
 
     // Ajusta grid de produtos para 2 colunas no mobile
