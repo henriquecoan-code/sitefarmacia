@@ -82,9 +82,9 @@
       const noOrders = document.getElementById('no-orders');
       try {
         const ordersRef = collection(db, 'pedidos');
-        // Corrigido: campo correto é 'userId', igual ao usado em pedidos.html
         const q = query(ordersRef, where('userId', '==', uid), where('status', 'not-in', ['entregue', 'cancelado']));
         const querySnapshot = await getDocs(q);
+        console.log('Pedidos ativos encontrados:', querySnapshot.size);
         ordersLoading.classList.add('hidden');
         if (querySnapshot.empty) {
           noOrders.classList.remove('hidden');
@@ -93,6 +93,7 @@
         ordersList.innerHTML = '';
         querySnapshot.forEach(docSnap => {
           const pedido = docSnap.data();
+          console.log('Pedido:', pedido);
           const pedidoDiv = document.createElement('div');
           pedidoDiv.className = 'border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between bg-gray-50';
           pedidoDiv.innerHTML = `
@@ -121,6 +122,11 @@
         const userRef = doc(db, 'usuarios', uid);
         const userSnap = await getDoc(userRef);
         addressLoading.classList.add('hidden');
+        if (!userSnap.exists()) {
+          console.log('Documento do usuário não existe:', uid);
+        } else {
+          console.log('Dados do usuário:', userSnap.data());
+        }
         if (!userSnap.exists() || !userSnap.data().endereco || !userSnap.data().endereco.rua) {
           noAddress.classList.remove('hidden');
           return;
