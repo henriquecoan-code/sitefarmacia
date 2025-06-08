@@ -34,6 +34,17 @@
           <div id="main-address" class="hidden"></div>
           <div id="no-address" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
         </section>
+        <section id="all-addresses-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-list mr-2"></i>Todos os Endereços</h2>
+            <a href="./formulário-endereco-novo.html" class="text-blue-600 hover:text-blue-800 text-sm">
+              <i class="fas fa-plus mr-1"></i> Novo Endereço
+            </a>
+          </div>
+          <div id="addresses-loading" class="text-center text-gray-600">Carregando endereços...</div>
+          <div id="addresses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+          <div id="no-addresses" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
+        </section>
     </main>
     <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
@@ -98,6 +109,8 @@
         if (typeof renderOrders !== 'undefined') renderOrders(pedidos);
         // Chama o carregamento do endereço principal após autenticação
         await loadMainAddress(user.uid);
+        // Chama o carregamento de todos os endereços
+        await loadAllAddresses(user.uid);
       } catch (e) {
         // Exibe erro na tela
         const errorMessage = document.getElementById('no-address');
@@ -107,7 +120,12 @@
         console.error('Erro ao carregar pedidos:', e);
       }
     });
-        async function loadMainAddress(uid) {
+        // Corrige o nome dos campos e subcoleções para português em loadAllAddresses e loadMainAddress
+    // Troca todas as referências de 'users' para 'usuarios' e 'addresses' para 'enderecos' no Firestore
+    // Atualiza campos para português: street->rua, number->numero, city->cidade, complement->complemento, telefone, cep
+
+    // --- loadMainAddress ---
+    async function loadMainAddress(uid) {
       const addressLoading = document.getElementById('address-loading');
       const mainAddressDiv = document.getElementById('main-address');
       const noAddress = document.getElementById('no-address');
@@ -116,22 +134,23 @@
       noAddress.classList.add('hidden');
       addressLoading.classList.remove('hidden');
       try {
-        // Tenta buscar endereço na subcoleção 'enderecos' primeiro
+        // Busca todos os endereços do usuário na subcoleção 'enderecos'
         const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
         const querySnapshot = await getDocs(enderecosRef);
-        let principal = null;
+        let enderecos = [];
         querySnapshot.forEach((docSnap) => {
-          const endereco = docSnap.data();
-          if (endereco.principal) principal = endereco;
+          enderecos.push({ id: docSnap.id, ...docSnap.data() });
         });
-        addressLoading.classList.add('hidden');
-        if (principal) {
+        // Exibe o primeiro endereço como principal (ou lógica futura para campo principal)
+        if (enderecos.length > 0) {
+          const principal = enderecos[0];
+          addressLoading.classList.add('hidden');
           mainAddressDiv.innerHTML = `
             <div class="space-y-1">
               <div><span class="font-semibold">Rua: ${principal.rua || ''}, ${principal.numero || ''}</span></div>
               <div>Telefone: ${principal.telefone || ''}</div>
               <div>Cidade: ${principal.cidade || ''}</div>
-              <div>Bairro: ${principal.bairro || ''} - CEP: ${principal.cep || ''}</div>
+              <div>CEP: ${principal.cep || ''}</div>
               <div>${principal.complemento ? 'Complemento: ' + principal.complemento : ''}</div>
             </div>
           `;
@@ -139,30 +158,58 @@
           noAddress.classList.add('hidden');
           return;
         }
-        // Se não houver principal na subcoleção, busca no documento raiz
-        const userRef = doc(db, 'usuarios', uid);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists() || !userSnap.data().endereco || !userSnap.data().endereco.rua) {
-          noAddress.classList.remove('hidden');
-          mainAddressDiv.classList.add('hidden');
-          return;
-        }
-        const endereco = userSnap.data().endereco;
-        mainAddressDiv.innerHTML = `
-          <div class="space-y-1">
-            <div><span class="font-semibold">Rua: ${endereco.rua || ''}, ${endereco.numero || ''}</span></div>
-            <div>Telefone: ${endereco.telefone || ''}</div>
-            <div>Cidade: ${endereco.cidade || ''}</div>
-            <div>Bairro: ${endereco.bairro || ''} - CEP: ${endereco.cep || ''}</div>
-            <div>${endereco.complemento ? 'Complemento: ' + endereco.complemento : ''}</div>
-          </div>
-        `;
-        mainAddressDiv.classList.remove('hidden');
-        noAddress.classList.add('hidden');
+        addressLoading.classList.add('hidden');
+        noAddress.classList.remove('hidden');
+        mainAddressDiv.classList.add('hidden');
       } catch (error) {
         addressLoading.textContent = 'Erro ao carregar endereço.';
         mainAddressDiv.classList.add('hidden');
         noAddress.classList.add('hidden');
+        console.error(error);
+      }
+    }
+
+    // --- loadAllAddresses ---
+    async function loadAllAddresses(uid) {
+      const addressesLoading = document.getElementById('addresses-loading');
+      const addressesList = document.getElementById('addresses-list');
+      const noAddresses = document.getElementById('no-addresses');
+      addressesList.innerHTML = '';
+      addressesLoading.classList.remove('hidden');
+      noAddresses.classList.add('hidden');
+      try {
+        const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
+        const querySnapshot = await getDocs(enderecosRef);
+        let enderecos = [];
+        querySnapshot.forEach((docSnap) => {
+          enderecos.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        addressesLoading.classList.add('hidden');
+        if (enderecos.length === 0) {
+          noAddresses.classList.remove('hidden');
+          return;
+        }
+        enderecos.forEach(endereco => {
+          const card = document.createElement('div');
+          card.className = 'border rounded-lg p-4 shadow flex flex-col gap-2 bg-gray-50';
+          card.innerHTML = `
+            <div class="flex items-center mb-2">
+              <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+              <span class="font-semibold">${endereco.rua || ''}, ${endereco.numero || ''}</span>
+            </div>
+            <div><span class="font-semibold">CEP:</span> ${endereco.cep || ''}</div>
+            <div><span class="font-semibold">Cidade:</span> ${endereco.cidade || ''}</div>
+            <div><span class="font-semibold">Telefone:</span> ${endereco.telefone || ''}</div>
+            <div>${endereco.complemento ? '<span class=\'font-semibold\'>Complemento:</span> ' + endereco.complemento : ''}</div>
+            <div class="flex gap-2 mt-2">
+              <a href="./formulario-endereco.html?id=${endereco.id}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
+            </div>
+          `;
+          addressesList.appendChild(card);
+        });
+      } catch (error) {
+        addressesLoading.textContent = 'Erro ao carregar endereços.';
+        noAddresses.classList.add('hidden');
         console.error(error);
       }
     }
