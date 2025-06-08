@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Pedidos - Farmácia São Benedito</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-50">
+  <div id="header-container"></div>
+  <div class="flex flex-col md:flex-row">
+    <!--menu esquerdo-->
+    <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
+      <nav class="flex flex-col space-y-4 px-6 mt-8">
+        <a href="./minha-conta.html" class="text-gray-700 hover:text-blue-700 transition">Minha Conta</a>
+        <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
+        <a href="./pedidos.html" class="text-blue-900 font-bold hover:text-blue-700 transition">Pedidos</a>
+        <hr class="my-2">
+      </nav>
+    </aside>
+    <!-- Conteúdo principal -->
+    <main class="flex-1 p-6">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-blue-900 mb-6">Minha Conta</h1>
+        <!-- Pedidos Ativos -->
+        <section id="active-orders-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+          <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center"><i class="fas fa-box mr-2"></i>Pedidos em Andamento</h2>
+          <div id="orders-loading" class="text-center text-gray-600">Carregando seus pedidos...</div>
+          <div id="orders-list" class="space-y-4 hidden"></div>
+          <div id="no-orders" class="text-center text-gray-500 hidden">Nenhum pedido em andamento.</div>
+        </section>
+    </main>
+  </div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    try {
+      await loadHeader('header-container', 'authContainerSecondary');
+    } catch (e) {
+      console.error('Erro ao carregar o header:', e);
+    }
+    try {
+      await loadFooter('footer-container');
+    } catch (e) {
+      console.error('Erro ao carregar o footer:', e);
+    }
+
+        const loading = document.getElementById('loading');
+    const errorMessage = document.getElementById('error-message');
+    const noOrders = document.getElementById('no-orders');
+    const ordersList = document.getElementById('orders-list');
+
+    function showError(msg) {
+      if (loading) loading.classList.add('hidden');
+      if (errorMessage) {
+        errorMessage.textContent = msg;
+        errorMessage.classList.remove('hidden');
+      }
+    }
+
+    function renderOrders(orders) {
+      ordersList.innerHTML = '';
+      if (!orders.length) {
+        noOrders.classList.remove('hidden');
+        return;
+      }
+      noOrders.classList.add('hidden');
+      orders.forEach((order, idx) => {
+        const produtosHtml = (order.produtos || []).map(p =>
+          `<tr>
+            <td class="px-2 py-1 text-center">${p.quantidade || ''}</td>
+            <td class="px-2 py-1">${p.nome || ''}</td>
+            <td class="px-2 py-1 text-right">R$ ${p.valor || ''}</td>
+            <td class="px-2 py-1 text-right">R$ ${p.subtotal || ''}</td>
+          </tr>`
+        ).join('');
+        const endereco = order.endereco || {};
+        const detailsId = `order-details-${idx}`;
+        const html = `
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between cursor-pointer" onclick="toggleOrderDetails('${detailsId}')">
+              <div>
+                <span class="font-bold text-blue-800">Pedido #${order.numeroPedido || ''}</span>
+                <span class="ml-4 text-gray-500 text-sm">${order.dataPedido || ''}</span>
+                <span class="ml-4 px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                  ${order.status || 'Pendente'}
+                </span>
+              </div>
+              <button type="button" aria-label="Ver detalhes do pedido ${order.numeroPedido || ''}" class="ml-2 focus:outline-none" aria-expanded="false" aria-controls="${detailsId}">
+                <i id="arrow-${detailsId}" class="fas fa-chevron-down transition-transform duration-200"></i>
+              </button>
+            </div>
+            <div id="${detailsId}" class="hidden mt-4" role="region" aria-labelledby="arrow-${detailsId}">
+              <div class="mb-2">
+                <span class="font-semibold">Nome:</span> ${order.nomeUsuario || ''}
+                ${order.emailUsuario ? `<span class="ml-4 font-semibold">Email:</span> ${order.emailUsuario}` : ''}
+                <span class="ml-4 font-semibold">Telefone:</span> ${order.telefone || ''}
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Endereço:</span>
+                Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''} ${endereco.complemento ? ', ' + endereco.complemento : ''}
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Forma de pagamento:</span> ${order.pagamento || ''}
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Observações:</span> ${order.observacoes || 'Nenhuma'}
+              </div>
+              <div class="overflow-x-auto mt-4">
+                <table class="min-w-full text-sm border">
+                  <thead>
+                    <tr class="bg-gray-100">
+                      <th class="px-2 py-1">Qnt</th>
+                      <th class="px-2 py-1">Produto</th>
+                      <th class="px-2 py-1 text-right">Vlr un</th>
+                      <th class="px-2 py-1 text-right">Vlr total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${produtosHtml}
+                  </tbody>
+                </table>
+              </div>
+              <div class="text-right mt-4 text-xl font-bold text-blue-900">
+                Total: R$ ${order.total || ''}
+              </div>
+            </div>
+          </div>
+        `;
+        ordersList.insertAdjacentHTML('beforeend', html);
+      });
+      window.toggleOrderDetails = function(id) {
+        const details = document.getElementById(id);
+        const arrow = document.getElementById('arrow-' + id);
+        const button = arrow?.closest('button');
+        if (details.classList.contains('hidden')) {
+          details.classList.remove('hidden');
+          if (arrow) arrow.classList.add('rotate-180');
+          if (button) button.setAttribute('aria-expanded', 'true');
+        } else {
+          details.classList.add('hidden');
+          if (arrow) arrow.classList.remove('rotate-180');
+          if (button) button.setAttribute('aria-expanded', 'false');
+        }
+      };
+    }
+
+    // OUVINTE DE AUTENTICAÇÃO FORA DO DOMContentLoaded
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        showError('Você precisa estar logado para ver seus pedidos.');
+        return;
+      }
+      console.log('UID do usuário logado:', user.uid); // Diagnóstico do UID
+      try {
+        let pedidos = [];
+        try {
+          // Consulta apenas os pedidos do usuário logado, ordenados por numeroPedido
+          const q = query(
+            collection(db, 'pedidos'),
+            where('userId', '==', user.uid),
+            orderBy('numeroPedido', 'desc')
+          );
+          const snapshot = await getDocs(q);
+          snapshot.forEach(doc => pedidos.push(doc.data()));
+        } catch (err) {
+          // Se erro de índice, busca sem orderBy
+          const q = query(
+            collection(db, 'pedidos'),
+            where('userId', '==', user.uid)
+          );
+          const snapshot = await getDocs(q);
+          snapshot.forEach(doc => pedidos.push(doc.data()));
+        }
+        console.log('Pedidos retornados do Firestore:', pedidos); // <-- Diagnóstico
+        window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
+        if (loading) loading.classList.add('hidden');
+        renderOrders(pedidos);
+      } catch (e) {
+        showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
+      }
+    });
+  </script>
+
+    <div id="footer-container"></div>
+  <script src="js/auth-mobile.js"></script>
+</body>
+</html>
