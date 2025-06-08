@@ -192,8 +192,7 @@
                 // onSnapshot para atualização em tempo real
                 if (unsubscribeCart) unsubscribeCart();
                 unsubscribeCart = window.listenCartCount(currentUser.uid, (cartData) => {
-                    // Sempre pega o array de itens do objeto do Firestore
-                    cart = (cartData && Array.isArray(cartData.itens)) ? cartData.itens : [];
+                    cart = Array.isArray(cartData) ? cartData : (cartData && Array.isArray(cartData.itens) ? cartData.itens : []);
                     renderCart();
                 }, true); // true = retorna array completo
             } else {
