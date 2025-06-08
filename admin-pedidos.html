@@ -309,6 +309,12 @@
       const busca = document.getElementById('filtro-busca').value.trim().toLowerCase();
       const status = document.getElementById('filtro-status').value;
       const data = document.getElementById('filtro-data').value;
+
+      // Se não houver busca, status ou data, oculta Cancelado e Entregue
+      if (!busca && !status && !data) {
+        filtrados = filtrados.filter(p => p.status !== 'Cancelado' && p.status !== 'Entregue');
+      }
+
       if (busca) {
         filtrados = filtrados.filter(p =>
           (p.nomeUsuario && p.nomeUsuario.toLowerCase().includes(busca)) ||
