@@ -40,43 +40,73 @@
               <th class="text-left py-2 px-4">Ações</th>
             </tr>
           </thead>
-    <tbody id="usuarios-tbody"></tbody>
-  </table>
+          <tbody id="admins-tbody">
+            <!-- Os administradores serão carregados via JS -->
+          </tbody>
+        </table>
+       <section>
+          <div class="admin" id="admin"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div id="footer-container"></div>
   <script type="module">
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { firebaseConfig } from './js/firebase-config.js';
-    const app = initializeApp(firebaseConfig);
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
     const db = getFirestore(app);
-    const status = document.getElementById('status');
-    const tbody = document.getElementById('usuarios-tbody');
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
+    let admins = [];
+
     async function carregarAdmins() {
-      status.textContent = 'Carregando...';
-      tbody.innerHTML = '';
-      try {
-        const usuariosRef = collection(db, 'usuarios');
-        const q = query(usuariosRef, where('role', '==', 'admin'));
-        const snap = await getDocs(q);
-        if (snap.empty) {
-          status.textContent = 'Nenhum usuário admin encontrado.';
-          return;
-        }
-        status.textContent = `Total encontrados: ${snap.size}`;
-        snap.forEach(doc => {
-          const data = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${doc.id}</td>
-            <td>${data.nome || '-'}</td>
-            <td>${data.email || '-'}</td>
-            <td>${data.role || '-'}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (e) {
-        status.textContent = 'Erro ao buscar: ' + e.message;
-      }
+      const lista = document.getElementById('admins-list');
+      lista.innerHTML = '<div>Carregando administradores...</div>';
+      admins = [];
+      // Busca apenas usuários com role 'admin' na coleção 'usuarios'
+      const q = query;
+      const usuariosRef = collection(db, 'usuarios');
+      const queryAdmins = q(usuariosRef, where('role', '==', 'admin'));
+      const snap = await getDocs(queryAdmins);
+      snap.forEach(doc => {
+        const data = doc.data();
+        admins.push({ id: doc.id, ...data });
+      });
+      renderizarAdmins();
     }
+
+    function renderizarAdmins() {
+      const tbody = document.getElementById('admins-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (admins.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500">Nenhum administrador encontrado.</td></tr>';
+        return;
+      }
+      admins.forEach(admin => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-4">${admin.nome || '-'}</td>
+          <td class="py-2 px-4">${admin.email || '-'}</td>
+          <td class="py-2 px-4">${admin.role || '-'}</td>
+          <td class="py-2 px-4">
+            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded edit-admin-btn" data-id="${admin.id}"><i class="fas fa-edit"></i> Editar</button>
+            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded delete-admin-btn" data-id="${admin.id}"><i class="fas fa-trash"></i> Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      // Adicione aqui lógica de edição/exclusão se necessário
+    }
+
     carregarAdmins();
   </script>
 </body>
