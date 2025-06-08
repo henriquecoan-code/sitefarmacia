@@ -374,48 +374,44 @@
         
         // Configurar formulário de endereço
         const addressForm = document.getElementById('address-form');
-        
         if (addressForm) {
-          addressForm.addEventListener('submit', (e) => {
+          addressForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const endereco = {
-              cep: document.getElementById('cep')?.value || '',
-              rua: document.getElementById('rua')?.value || '',
-              numero: document.getElementById('numero')?.value || '',
-              bairro: document.getElementById('bairro')?.value || '',
-              complemento: document.getElementById('complemento')?.value || '',
-              cidade: document.getElementById('cidade')?.value || '',
-              telefone: document.getElementById('telefone')?.value || ''
-            };
-            
-            // Atualizar endereço no Firestore
-            userDocRef.update({ endereco })
-              .then(() => {
-                // Atualizar os campos de exibição
-                const cepDisplay = document.getElementById('cep-display');
-                const ruaDisplay = document.getElementById('rua-display');
-                const numeroDisplay = document.getElementById('numero-display');
-                const bairroDisplay = document.getElementById('bairro-display');
-                const complementoDisplay = document.getElementById('complemento-display');
-                const cidadeDisplay = document.getElementById('cidade-display');
-                
-                if (cepDisplay) cepDisplay.textContent = endereco.cep;
-                if (ruaDisplay) ruaDisplay.textContent = endereco.rua;
-                if (numeroDisplay) numeroDisplay.textContent = endereco.numero;
-                if (bairroDisplay) bairroDisplay.textContent = endereco.bairro;
-                if (complementoDisplay) complementoDisplay.textContent = endereco.complemento;
-                if (cidadeDisplay) cidadeDisplay.textContent = endereco.cidade;
-                
-                // Voltar para o modo de exibição
-                resetFormToDisplayMode('address');
-                // Mostrar mensagem de sucesso
-                showToast('Endereço atualizado com sucesso! Aguarde aprovação da equipe.', 'success');
-              })
-              .catch(error => {
-                console.error("Erro ao atualizar endereço:", error);
-                showToast('Endereço recusado. Por favor, revise os dados e tente novamente.', 'error');
-              });
+            const cep = document.getElementById('cep')?.value.trim() || '';
+            const rua = document.getElementById('rua')?.value.trim() || '';
+            const numero = document.getElementById('numero')?.value.trim() || '';
+            const bairro = document.getElementById('bairro')?.value.trim() || '';
+            const complemento = document.getElementById('complemento')?.value.trim() || '';
+            const cidade = document.getElementById('cidade')?.value.trim() || '';
+            const telefone = document.getElementById('telefone')?.value.trim() || '';
+
+            // Validação básica
+            if (!cep || !rua || !numero || !bairro || !cidade || telefone.length < 10) {
+              showToast('Por favor, preencha todos os campos obrigatórios corretamente.', 'error');
+              return;
+            }
+
+            // Exibe loading se desejar
+            const saveBtn = document.getElementById('save-address-button');
+            if (saveBtn) {
+              saveBtn.disabled = true;
+              saveBtn.innerHTML = '<span class="loader mr-2"></span>Salvando...';
+            }
+
+            const endereco = { cep, rua, numero, bairro, complemento, cidade, telefone };
+            try {
+              await userDocRef.update({ endereco });
+              showToast('Endereço atualizado com sucesso! Aguarde aprovação da equipe.', 'success');
+              resetFormToDisplayMode('address');
+            } catch (error) {
+              console.error("Erro ao atualizar endereço:", error);
+              showToast('Endereço recusado. Por favor, revise os dados e tente novamente.', 'error');
+            } finally {
+              if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'Salvar Endereço';
+              }
+            }
           });
         }
       }
