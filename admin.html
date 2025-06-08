@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administração - Farmácia São Benedito</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/estilo.css">
+    <link rel="stylesheet" href="css/account-styles.css">
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-gray-50">
   <div id="header-container"></div>
   <div class="flex flex-1">
     <!-- Aside Menu Padronizado -->
@@ -26,6 +26,7 @@
     <main class="flex-1 p-8">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-blue-900">Administradores</h1>
+          <div id="status">Carregando...</div>
         <button id="btnAddAdmin" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition">
           <i class="fas fa-plus mr-2"></i>Adicionar Administrador
         </button>
@@ -40,73 +41,57 @@
               <th class="text-left py-2 px-4">Ações</th>
             </tr>
           </thead>
-          <tbody id="admins-tbody">
+          <tbody id="admins-tbody" class="divide-y divide-gray-200 bg-white text-left">
+            <tr>
+              <td colspan="4" class="text-left py-4 text-gray-500">Carregando administradores...</td>
+            </tr>
             <!-- Os administradores serão carregados via JS -->
           </tbody>
         </table>
-       <section>
-          <div class="admin" id="admin"></div>
-        </section>
       </div>
+          </div>
+    <div id="footer-container"></div>
     </main>
-  </div>
-  <div id="footer-container"></div>
+</div>
   <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { firebaseConfig } from './js/firebase-config.js';
     const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
-    const auth = getAuth(app);
     const db = getFirestore(app);
-    window.auth = auth;
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
-
-    let admins = [];
-
+    const status = document.getElementById('status');
+    const tbody = document.getElementById('admins-tbody');
     async function carregarAdmins() {
-      const lista = document.getElementById('admins-list');
-      lista.innerHTML = '<div>Carregando administradores...</div>';
-      admins = [];
-      // Busca apenas usuários com role 'admin' na coleção 'usuarios'
-      const q = query;
-      const usuariosRef = collection(db, 'usuarios');
-      const queryAdmins = q(usuariosRef, where('role', '==', 'admin'));
-      const snap = await getDocs(queryAdmins);
-      snap.forEach(doc => {
-        const data = doc.data();
-        admins.push({ id: doc.id, ...data });
-      });
-      renderizarAdmins();
-    }
-
-    function renderizarAdmins() {
-      const tbody = document.getElementById('admins-tbody');
-      if (!tbody) return;
+      status.textContent = 'Carregando...';
       tbody.innerHTML = '';
-      if (admins.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500">Nenhum administrador encontrado.</td></tr>';
-        return;
+      try {
+        const usuariosRef = collection(db, 'usuarios');
+        const q = query(usuariosRef, where('role', '==', 'admin'));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          status.textContent = 'Nenhum usuário admin encontrado.';
+          return;
+        }
+        status.textContent = `Total encontrados: ${snap.size}`;
+        snap.forEach(doc => {
+          const data = doc.data();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="py-2 px-4 text-left">${data.nome || '-'}</td>
+            <td class="py-2 px-4 text-left">${data.email || '-'}</td>
+            <td class="py-2 px-4 text-left">${data.role || '-'}</td>
+            <td class="py-2 px-4 text-left">-</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        status.textContent = 'Erro ao buscar: ' + e.message;
       }
-      admins.forEach(admin => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-2 px-4">${admin.nome || '-'}</td>
-          <td class="py-2 px-4">${admin.email || '-'}</td>
-          <td class="py-2 px-4">${admin.role || '-'}</td>
-          <td class="py-2 px-4">
-            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded edit-admin-btn" data-id="${admin.id}"><i class="fas fa-edit"></i> Editar</button>
-            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded delete-admin-btn" data-id="${admin.id}"><i class="fas fa-trash"></i> Excluir</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-      // Adicione aqui lógica de edição/exclusão se necessário
     }
-
     carregarAdmins();
   </script>
 </body>
