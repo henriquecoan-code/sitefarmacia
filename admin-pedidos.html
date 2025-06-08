@@ -344,40 +344,39 @@
         }
         // LOG: admin autenticado
         console.log('Admin autenticado:', user.email);
-        fetchAllOrders();
+        listenAllOrders();
       } catch (e) {
         showError('Erro ao verificar permissão de administrador.');
         console.error('Erro admin check:', e);
       }
     });
 
-    // Busca todos os pedidos (admin) usando modular
-    async function fetchAllOrders() {
-      try {
-        let snapshot;
-        const { collection, orderBy, getDocs, query } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+    // Listener em tempo real para todos os pedidos (admin)
+    function listenAllOrders() {
+      import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js').then(({ collection, orderBy, query, onSnapshot }) => {
+        let q;
         try {
-          const q = query(collection(db, 'pedidos'), orderBy('numeroPedido', 'desc'));
-          snapshot = await getDocs(q);
+          q = query(collection(db, 'pedidos'), orderBy('numeroPedido', 'desc'));
         } catch (err) {
-          const q = query(collection(db, 'pedidos'));
-          snapshot = await getDocs(q);
+          q = query(collection(db, 'pedidos'));
         }
-        const pedidos = [];
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          data.__docId = doc.id;
-          pedidos.push(data);
+        onSnapshot(q, (snapshot) => {
+          const pedidos = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            data.__docId = doc.id;
+            pedidos.push(data);
+          });
+          pedidos.sort((a, b) => (b.numeroPedido || 0) - (a.numeroPedido || 0));
+          if (loading) loading.classList.add('hidden');
+          allOrders = pedidos;
+          console.log('Pedidos carregados (tempo real):', pedidos.length); // LOG para depuração
+          filtrarPedidos();
+        }, (e) => {
+          showError('Erro ao carregar pedidos em tempo real.');
+          console.error('Erro snapshot pedidos:', e);
         });
-        pedidos.sort((a, b) => (b.numeroPedido || 0) - (a.numeroPedido || 0));
-        if (loading) loading.classList.add('hidden');
-        allOrders = pedidos;
-        console.log('Pedidos carregados:', pedidos.length); // LOG para depuração
-        filtrarPedidos();
-      } catch (e) {
-        showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
-        console.error('Erro ao carregar pedidos:', e);
-      }
+      });
     }
 
     // Eventos de filtro
