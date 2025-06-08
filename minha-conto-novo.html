@@ -31,12 +31,24 @@
           <div id="orders-list" class="space-y-4 hidden"></div>
           <div id="no-orders" class="text-center text-gray-500 hidden">Nenhum pedido em andamento.</div>
         </section>
+        <!-- Endereço Principal -->
+        <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
+            <a href="./endereco-entrega.html" class="text-blue-600 hover:text-blue-800 text-sm">
+              <i class="fas fa-edit mr-1"></i> Gerenciar Endereço
+            </a>
+          </div>
+          <div id="address-loading" class="text-center text-gray-600">Carregando endereço...</div>
+          <div id="main-address" class="hidden"></div>
+          <div id="no-address" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
+        </section>
     </main>
   </div>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -69,13 +81,20 @@
     }
 
     function renderOrders(orders) {
+      // Filtra apenas pedidos que NÃO são 'Entregue' ou 'Cancelado'
+      const pedidosAtivos = orders.filter(order => {
+        const status = (order.status || '').toLowerCase();
+        return status !== 'entregue' && status !== 'cancelado';
+      });
       ordersList.innerHTML = '';
-      if (!orders.length) {
+      if (!pedidosAtivos.length) {
         noOrders.classList.remove('hidden');
+        ordersList.classList.add('hidden');
         return;
       }
       noOrders.classList.add('hidden');
-      orders.forEach((order, idx) => {
+      ordersList.classList.remove('hidden');
+      pedidosAtivos.forEach((order, idx) => {
         const produtosHtml = (order.produtos || []).map(p =>
           `<tr>
             <td class="px-2 py-1 text-center">${p.quantidade || ''}</td>
@@ -186,10 +205,46 @@
         window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
         if (loading) loading.classList.add('hidden');
         renderOrders(pedidos);
+        // Chama o carregamento do endereço principal após autenticação
+        await loadMainAddress(user.uid);
       } catch (e) {
         showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
       }
     });
+        async function loadMainAddress(uid) {
+      const addressLoading = document.getElementById('address-loading');
+      const mainAddressDiv = document.getElementById('main-address');
+      const noAddress = document.getElementById('no-address');
+      // Sempre oculta o endereço e mensagem de "nenhum endereço" ao iniciar
+      mainAddressDiv.classList.add('hidden');
+      noAddress.classList.add('hidden');
+      addressLoading.classList.remove('hidden');
+      try {
+        const userRef = doc(db, 'usuarios', uid);
+        const userSnap = await getDoc(userRef);
+        addressLoading.classList.add('hidden');
+        if (!userSnap.exists() || !userSnap.data().endereco || !userSnap.data().endereco.rua) {
+          noAddress.classList.remove('hidden');
+          mainAddressDiv.classList.add('hidden');
+          return;
+        }
+        const endereco = userSnap.data().endereco;
+        mainAddressDiv.innerHTML = `
+          <div class="space-y-1">
+            <div><span class="font-semibold">${endereco.rua || ''}, ${endereco.numero || ''}</span></div>
+            <div>${endereco.bairro || ''} - CEP: ${endereco.cep || ''}</div>
+            <div>${endereco.complemento ? 'Complemento: ' + endereco.complemento : ''}</div>
+          </div>
+        `;
+        mainAddressDiv.classList.remove('hidden');
+        noAddress.classList.add('hidden');
+      } catch (error) {
+        addressLoading.textContent = 'Erro ao carregar endereço.';
+        mainAddressDiv.classList.add('hidden');
+        noAddress.classList.add('hidden');
+        console.error(error);
+      }
+    }
   </script>
 
     <div id="footer-container"></div>
