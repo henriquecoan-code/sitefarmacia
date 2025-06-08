@@ -235,5 +235,35 @@
       </nav>
     </aside>
   </div>
+  <script>
+// Atualiza contador do carrinho no header (desktop e mobile)
+document.addEventListener('DOMContentLoaded', function() {
+  function updateCartCount(count) {
+    const el = document.getElementById('cart-count');
+    const elMobile = document.getElementById('cart-count-mobile');
+    if (el) el.textContent = count;
+    if (elMobile) elMobile.textContent = count;
+  }
+  if (window.listenCartCount) {
+    window.listenCartCount(null, function(cartArr) {
+      // cartArr pode ser array ou objeto, depende da implementação
+      let count = 0;
+      if (Array.isArray(cartArr)) {
+        count = cartArr.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+      } else if (cartArr && typeof cartArr === 'object') {
+        count = Object.values(cartArr).reduce((sum, item) => sum + (item.quantidade || 1), 0);
+      }
+      updateCartCount(count);
+    });
+  } else {
+    // fallback: tenta pegar do localStorage
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const count = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+      updateCartCount(count);
+    } catch(e) {}
+  }
+});
+</script>
 </body>
 </html>
