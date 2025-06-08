@@ -261,7 +261,7 @@ input:focus, textarea:focus, select:focus {
 .toast.error { background-color: #ef4444; }
 /* Estilos painel de administração de produtos */
 .produtos-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
-.produto-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 1rem; width: 260px; display: flex; flex-direction: column; align-items: center; }
+.produto-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); padding: 1rem; width: 260px; display: flex; flex-direction: column; align-items: center; }
 .produto-card img { max-width: 120px; max-height: 120px; margin-bottom: 0.5rem; }
 .produto-card h3 { margin: 0.5rem 0 0.2rem 0; font-size: 1.1rem; }
 .produto-card p { margin: 0.2rem 0; font-size: 0.95rem; }
@@ -399,4 +399,150 @@ footer .text-center p, footer .text-gray-400 {
     font-size: 0.7rem !important;
   }
 }
-/* --- Fim Footer compact styles --- */
+
+/* --- Novos estilos para produtos --- */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -150px; height: 100%; width: 150px;
+  background: linear-gradient(90deg, transparent, rgba(200,200,200,0.15), transparent);
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+  0% { left: -150px; }
+  100% { left: 100%; }
+}
+.truncate-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+/* Cards de produto mais organizados */
+.card-produto {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px 0 rgba(30,64,175,0.06), 0 1.5px 4px 0 rgba(0,0,0,0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #f1f5f9;
+  transition: box-shadow 0.2s, transform 0.2s;
+  position: relative;
+}
+.card-produto:hover {
+  box-shadow: 0 6px 24px 0 rgba(30,64,175,0.13), 0 2px 8px 0 rgba(0,0,0,0.06);
+  transform: translateY(-2px) scale(1.01);
+}
+.card-produto .img-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to top, #f8fafc, #fff 80%);
+  height: 10rem;
+  position: relative;
+  overflow: hidden;
+}
+.card-produto img {
+  width: 7rem;
+  height: 7rem;
+  object-fit: contain;
+  transition: transform 0.2s;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.04));
+}
+.card-produto:hover img {
+  transform: scale(1.07);
+}
+.card-produto .desconto-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(to right, #dc2626, #f87171);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px 0 rgba(220,38,38,0.13);
+}
+.card-produto .info {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  justify-content: space-between;
+}
+.card-produto .nome {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+  color: #1e293b;
+}
+.card-produto .descricao {
+  color: #64748b;
+  font-size: 0.92rem;
+  margin-bottom: 0.5rem;
+  min-height: 2.2em;
+}
+.card-produto .precos {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.card-produto .preco-original {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  text-decoration: line-through;
+}
+.card-produto .preco-desconto {
+  color: #2563eb;
+  font-weight: bold;
+  font-size: 1.15rem;
+}
+.card-produto .btn-carrinho {
+  margin-top: 1rem;
+  background: #2563eb;
+  color: #fff;
+  padding: 0.6rem 0;
+  border-radius: 0.7rem;
+  width: 100%;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+  outline: none;
+  border: none;
+  box-shadow: 0 1px 2px 0 rgba(37,99,235,0.07);
+}
+.card-produto .btn-carrinho:hover {
+  background: #1d4ed8;
+}
+.card-produto .btn-carrinho:focus {
+  box-shadow: 0 0 0 2px #60a5fa;
+}
+@media (max-width: 640px) {
+  .card-produto .info {
+    padding: 0.7rem;
+  }
+  .card-produto .nome {
+    font-size: 0.98rem;
+  }
+  .card-produto .descricao {
+    font-size: 0.85rem;
+  }
+  .card-produto .preco-desconto {
+    font-size: 1rem;
+  }
+}

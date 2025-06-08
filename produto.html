@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/estilo.css">
     <!-- Removidos scripts compat e inicialização duplicada do Firebase -->
+    
+    <!-- Removido o <style> inline, agora está em estilo.css -->
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -67,43 +69,43 @@
                 </div>
 
                 <!-- Loading Skeleton -->
-                <div id="loading-skeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
+                <div id="loading-skeleton" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
+                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
+                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
+                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden skeleton">
-                        <div class="bg-gray-200 h-48 w-full"></div>
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
+                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                            <div class="h-10 bg-gray-200 rounded"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Lista de Produtos -->
-                <div id="lista-produtos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div id="lista-produtos" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Os produtos serão inseridos via Firebase -->
                 </div>
 
@@ -276,7 +278,7 @@
       applyFilters();
     });
 
-    // Função para renderizar produtos (simplificada, adapte conforme seu template)
+    // Função para renderizar produtos (substitua a função renderProducts existente)
     function renderProducts(produtos) {
       const productsContainer = document.getElementById('lista-produtos');
       productsContainer.innerHTML = '';
@@ -285,36 +287,50 @@
         if (Array.isArray(product.fotos) && product.fotos.length > 0) {
           fotoSrc = product.fotos[0] || 'img/medicamento.png';
         }
+        const temDesconto = product.desconto && product.desconto > 0;
+        const precoOriginal = Number(product.precoMaximo).toFixed(2);
+        const precoDesconto = Number(product.valorComDesconto).toFixed(2);
         const productElement = document.createElement('div');
-        productElement.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition flex flex-col h-full';
+        productElement.className = 'card-produto group';
         productElement.innerHTML = `
-          <div class="flex justify-center">
-            <div class="relative">
-              <div class="flex justify-center items-center w-48 h-32 bg-gray-100 rounded">
-                <img src="${fotoSrc}" alt="Imagem do Produto" class="w-32 h-32 object-contain mb-2 rounded" onerror="this.onerror=null;this.src='img/medicamento.png';" />
-                ${product.desconto ? `<span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">${Math.round(product.desconto * 100)}% OFF</span>` : ''}
-              </div>
-            </div>
+          <div class="img-area">
+            <img src="${fotoSrc}" alt="Imagem do Produto" onerror="this.onerror=null;this.src='img/medicamento.png';" />
+            ${temDesconto ? `<span class=\"desconto-badge\">${Math.round(product.desconto * 100)}% OFF</span>` : ''}
           </div>
-          <div class="p-4 flex flex-col flex-1 justify-between">
+          <div class="info flex flex-col flex-1 justify-between">
             <div>
-              <h3 class="font-semibold text-lg mb-1 truncate-2-lines" title="${product.nome}">${product.nome}</h3>
-              <p class="text-gray-500 text-sm mb-2 truncate-2-lines" title="${product.descricao || ''}">${product.descricao || ''}</p>
-              <div class="flex justify-between mt-auto">
-                <a class="text-blue-700 font-bold text-xl">R$ ${Number(product.precoMaximo).toFixed(2)}</a>
-                <span class="text-blue-700 font-bold text-sm ml-auto mt-1.5">Desc.</span>
-                <a class="text-blue-700 font-bold text-xl">R$ ${Number(product.valorComDesconto).toFixed(2)}</a>
+              <h3 class="nome truncate-2-lines" title="${product.nome}">${product.nome}</h3>
+              <p class="descricao truncate-2-lines" title="${product.descricao || ''}">${product.descricao || ''}</p>
+              <div class="precos">
+                ${temDesconto ? `<span class=\"preco-original\">R$ ${precoOriginal}</span>` : ''}
+                <span class="preco-desconto">R$ ${precoDesconto}</span>
               </div>
             </div>
-            <button class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full transition flex items-center justify-center">
-              <i class="fas fa-cart-plus mr-2"></i> Adicionar ao Carrinho
+            <button class="btn-carrinho add-cart-btn">
+              <span class="cart-btn-text"><i class="fas fa-cart-plus"></i> Adicionar ao Carrinho</span>
+              <span class="cart-btn-loading hidden"><i class='fas fa-spinner fa-spin'></i></span>
+              <span class="cart-btn-ok hidden"><i class='fas fa-check text-green-400'></i></span>
             </button>
           </div>
         `;
         productsContainer.appendChild(productElement);
-        // Adiciona o evento ao botão
-        const btn = productElement.querySelector('button');
-        btn.addEventListener('click', () => addToCart(product));
+        // Botão com feedback visual
+        const btn = productElement.querySelector('.add-cart-btn');
+        const btnText = btn.querySelector('.cart-btn-text');
+        const btnLoading = btn.querySelector('.cart-btn-loading');
+        const btnOk = btn.querySelector('.cart-btn-ok');
+        btn.addEventListener('click', async () => {
+          btnText.classList.add('hidden');
+          btnLoading.classList.remove('hidden');
+          await new Promise(r => setTimeout(r, 400)); // Simula loading
+          addToCart(product);
+          btnLoading.classList.add('hidden');
+          btnOk.classList.remove('hidden');
+          setTimeout(() => {
+            btnOk.classList.add('hidden');
+            btnText.classList.remove('hidden');
+          }, 900);
+        });
       });
     }
 
@@ -338,6 +354,18 @@
         const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
         cartCount.textContent = total;
       }
+    }
+
+    // Ajusta grid de produtos para 2 colunas no mobile
+    const productsContainer = document.getElementById('lista-produtos');
+    if (productsContainer) {
+      productsContainer.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
+    }
+
+    // Também ajusta o skeleton para manter o padrão
+    const loadingSkeleton = document.getElementById('loading-skeleton');
+    if (loadingSkeleton) {
+      loadingSkeleton.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
     }
 
     // Inicialização
