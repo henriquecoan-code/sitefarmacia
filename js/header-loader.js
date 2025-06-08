@@ -72,30 +72,43 @@ async function getCartFromFirestore() {
   return [];
 }
 
-// Atualiza o contador do carrinho em tempo real
+// Atualiza o contador do carrinho em tempo real para desktop e mobile
 function listenCartCount() {
-  const userId = getUserId();
+  const userId = window.getUserId ? window.getUserId() : (window.auth && window.auth.currentUser ? window.auth.currentUser.uid : null);
   const cartCount = document.getElementById('cart-count');
-  if (!cartCount) return;
-  if (!userId) {
-    // Fallback: localStorage
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-    cartCount.textContent = total;
+  const cartCountMobile = document.getElementById('cart-count-mobile');
+  if (!cartCount && !cartCountMobile) return;
+
+  // Função para atualizar o contador na tela
+  function setCount(total) {
+    if (cartCount) cartCount.textContent = total;
+    if (cartCountMobile) cartCountMobile.textContent = total;
+  }
+
+  // Se usuário logado, escuta Firestore
+  if (userId && window.firestore) {
+    const { doc, onSnapshot } = window;
+    const cartRef = doc(window.firestore, 'carrinhos', userId);
+    onSnapshot(cartRef, (snap) => {
+      const itens = snap.exists() ? (snap.data().itens || []) : [];
+      const total = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+      setCount(total);
+    });
     return;
   }
-  const cartRef = doc(firestore, 'carrinhos', userId);
-  onSnapshot(cartRef, (snap) => {
-    const itens = snap.exists() ? (snap.data().itens || []) : [];
-    const total = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-    cartCount.textContent = total;
-  });
+
+  // Se não logado, tenta localStorage
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+  setCount(total);
 }
 
-// Exponibiliza para uso global após carregar o header
-document.addEventListener('headerLoaded', () => {
-  listenCartCount();
-});
+// Garante atualização ao carregar header e ao mudar de página
+window.listenCartCount = listenCartCount;
+document.addEventListener('headerLoaded', () => listenCartCount());
+window.addEventListener('DOMContentLoaded', () => listenCartCount());
+window.addEventListener('pageshow', () => listenCartCount());
+document.addEventListener('DOMContentLoaded', () => listenCartCount());
 window.listenCartCount = listenCartCount;
 window.saveCartToFirestore = saveCartToFirestore;
 window.getCartFromFirestore = getCartFromFirestore;
