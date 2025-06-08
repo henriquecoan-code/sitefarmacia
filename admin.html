@@ -80,6 +80,7 @@
         const data = doc.data();
         admins.push({ id: doc.id, ...data });
       });
+      console.log('admins carregados:', admins); // <-- Adicionado para debug
       renderizarAdmins();
     }
 

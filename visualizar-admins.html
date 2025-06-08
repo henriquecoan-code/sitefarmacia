@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualização de Usuários Admin</title>
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <h1>Visualização de Usuários com role = "admin"</h1>
+  <div id="status">Carregando...</div>
+  <table border="1" style="margin-top:20px; min-width:400px;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody id="usuarios-tbody"></tbody>
+  </table>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const status = document.getElementById('status');
+    const tbody = document.getElementById('usuarios-tbody');
+    async function carregarAdmins() {
+      status.textContent = 'Carregando...';
+      tbody.innerHTML = '';
+      try {
+        const usuariosRef = collection(db, 'usuarios');
+        const q = query(usuariosRef, where('role', '==', 'admin'));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          status.textContent = 'Nenhum usuário admin encontrado.';
+          return;
+        }
+        status.textContent = `Total encontrados: ${snap.size}`;
+        snap.forEach(doc => {
+          const data = doc.data();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${doc.id}</td>
+            <td>${data.nome || '-'}</td>
+            <td>${data.email || '-'}</td>
+            <td>${data.role || '-'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        status.textContent = 'Erro ao buscar: ' + e.message;
+      }
+    }
+    carregarAdmins();
+  </script>
+</body>
+</html>
