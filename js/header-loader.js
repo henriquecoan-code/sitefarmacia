@@ -103,6 +103,33 @@ function listenCartCount() {
   setCount(total);
 }
 
+// Adiciona ao carrinho: sempre salva no Firestore se logado, senão localStorage
+async function addToCart(product, quantidade = 1) {
+  let cart = [];
+  const userId = getUserId();
+  if (userId) {
+    cart = await getCartFromFirestore();
+    const index = cart.findIndex(item => item.id === product.id);
+    if (index > -1) {
+      cart[index].quantidade += quantidade;
+    } else {
+      cart.push({ ...product, quantidade });
+    }
+    await saveCartToFirestore(cart);
+  } else {
+    cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const index = cart.findIndex(item => item.id === product.id);
+    if (index > -1) {
+      cart[index].quantidade += quantidade;
+    } else {
+      cart.push({ ...product, quantidade });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }
+  listenCartCount();
+}
+window.addToCart = addToCart;
+
 // Garante atualização ao carregar header e ao mudar de página
 window.listenCartCount = listenCartCount;
 document.addEventListener('headerLoaded', () => listenCartCount());
