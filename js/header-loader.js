@@ -109,6 +109,7 @@ async function addToCart(product, quantidade = 1) {
   const userId = getUserId();
   if (userId) {
     cart = await getCartFromFirestore();
+    if (!Array.isArray(cart)) cart = [];
     const index = cart.findIndex(item => item.id === product.id);
     if (index > -1) {
       cart[index].quantidade += quantidade;
