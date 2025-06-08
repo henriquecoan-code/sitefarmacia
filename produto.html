@@ -126,7 +126,7 @@
     <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, getDocs, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -306,12 +306,7 @@
                 <span class="preco-desconto">R$ ${precoDesconto}</span>
               </div>
             </div>
-            <div class="flex items-center gap-2 mt-3 select-none">
-              <button type="button" class="qtd-btn decrement bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold transition">-</button>
-              <input type="number" min="1" max="99" value="1" class="qtd-input w-12 text-center border border-gray-200 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-200 py-1 appearance-none" />
-              <button type="button" class="qtd-btn increment bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold transition">+</button>
-            </div>
-            <button class="btn-carrinho add-cart-btn mt-3">
+            <button class="btn-carrinho add-cart-btn">
               <span class="cart-btn-text"><i class="fas fa-cart-plus"></i> Adicionar ao Carrinho</span>
               <span class="cart-btn-loading hidden"><i class='fas fa-spinner fa-spin'></i></span>
               <span class="cart-btn-ok hidden"><i class='fas fa-check text-green-400'></i></span>
@@ -319,23 +314,6 @@
           </div>
         `;
         productsContainer.appendChild(productElement);
-        // Controle de quantidade
-        const input = productElement.querySelector('.qtd-input');
-        const btnDec = productElement.querySelector('.decrement');
-        const btnInc = productElement.querySelector('.increment');
-        btnDec.addEventListener('click', () => {
-          let val = parseInt(input.value) || 1;
-          if (val > 1) input.value = val - 1;
-        });
-        btnInc.addEventListener('click', () => {
-          let val = parseInt(input.value) || 1;
-          if (val < 99) input.value = val + 1;
-        });
-        input.addEventListener('input', () => {
-          let val = parseInt(input.value) || 1;
-          if (val < 1) input.value = 1;
-          if (val > 99) input.value = 99;
-        });
         // Botão com feedback visual
         const btn = productElement.querySelector('.add-cart-btn');
         const btnText = btn.querySelector('.cart-btn-text');
@@ -345,9 +323,7 @@
           btnText.classList.add('hidden');
           btnLoading.classList.remove('hidden');
           await new Promise(r => setTimeout(r, 400)); // Simula loading
-          if (window.addToCart) {
-            await window.addToCart(product, parseInt(input.value) || 1);
-          }
+          addToCart(product);
           btnLoading.classList.add('hidden');
           btnOk.classList.remove('hidden');
           setTimeout(() => {
@@ -358,80 +334,27 @@
       });
     }
 
-    // Função para obter o ID do usuário logado (ou null)
-    function getUserId() {
-      return auth.currentUser ? auth.currentUser.uid : null;
-    }
-
-    // Função para salvar o carrinho no Firestore
-    async function saveCartToFirestore(cart) {
-      const userId = getUserId();
-      if (!userId) return;
-      const cartRef = doc(db, 'carrinhos', userId);
-      await setDoc(cartRef, { itens: cart }, { merge: true });
-    }
-
-    // Função para ler o carrinho do Firestore
-    async function getCartFromFirestore() {
-      const userId = getUserId();
-      if (!userId) return null;
-      const cartRef = doc(db, 'carrinhos', userId);
-      const snap = await getDoc(cartRef);
-      if (snap.exists()) return snap.data().itens || [];
-      return [];
-    }
-
-    // Atualiza o contador do carrinho em tempo real
-    function listenCartCount() {
-      const userId = getUserId();
-      const cartCount = document.getElementById('cart-count');
-      if (!cartCount) return;
-      if (!userId) {
-        // Fallback: localStorage
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-        cartCount.textContent = total;
-        return;
-      }
-      const cartRef = doc(db, 'carrinhos', userId);
-      onSnapshot(cartRef, (snap) => {
-        const itens = snap.exists() ? (snap.data().itens || []) : [];
-        const total = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-        cartCount.textContent = total;
-      });
-    }
-
-    // Modifica addToCart para salvar no Firestore se logado
-    // Ao adicionar ao carrinho, atualize o Firestore se logado, senão localStorage
-    async function addToCart(product, quantidade = 1) {
-      let cart = [];
-      const userId = auth.currentUser ? auth.currentUser.uid : null;
-      if (userId && window.getCartFromFirestore && window.saveCartToFirestore) {
-        cart = await window.getCartFromFirestore();
-      } else {
-        cart = JSON.parse(localStorage.getItem('cart')) || [];
-      }
+    // Função para adicionar ao carrinho (simplificada)
+    function addToCart(product) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
       const index = cart.findIndex(item => item.id === product.id);
       if (index > -1) {
-        cart[index].quantidade += quantidade;
+        cart[index].quantidade += 1;
       } else {
-        cart.push({ ...product, quantidade });
+        cart.push({ ...product, quantidade: 1 });
       }
-      if (userId && window.saveCartToFirestore) {
-        await window.saveCartToFirestore(cart);
-      } else {
-        localStorage.setItem('cart', JSON.stringify(cart));
-      }
-      if (window.listenCartCount) window.listenCartCount();
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
     }
 
-    // Atualiza o contador do carrinho (chama listenCartCount)
     function updateCartCount() {
-      listenCartCount();
+      const cartCount = document.getElementById('cart-count');
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (cartCount) {
+        const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+        cartCount.textContent = total;
+      }
     }
-
-    // Ao carregar a página, escuta o carrinho
-    listenCartCount();
 
     // Ajusta grid de produtos para 2 colunas no mobile
     const productsContainer = document.getElementById('lista-produtos');

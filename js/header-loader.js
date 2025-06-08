@@ -1,4 +1,6 @@
 import { handleAuthState } from './auth-handler.js';
+import { firestore, auth } from './firebase-config.js';
+import { doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
 
 export function loadHeader(headerContainerId, authContainerId) {
   return fetch('partials/header.html')
@@ -46,3 +48,54 @@ export function loadHeader(headerContainerId, authContainerId) {
     })
     .catch((error) => console.error('Erro ao carregar o header:', error));
 }
+
+// Função para obter o ID do usuário logado (ou null)
+function getUserId() {
+  return auth.currentUser ? auth.currentUser.uid : null;
+}
+
+// Função para salvar o carrinho no Firestore
+async function saveCartToFirestore(cart) {
+  const userId = getUserId();
+  if (!userId) return;
+  const cartRef = doc(firestore, 'carrinhos', userId);
+  await setDoc(cartRef, { itens: cart }, { merge: true });
+}
+
+// Função para ler o carrinho do Firestore
+async function getCartFromFirestore() {
+  const userId = getUserId();
+  if (!userId) return null;
+  const cartRef = doc(firestore, 'carrinhos', userId);
+  const snap = await getDoc(cartRef);
+  if (snap.exists()) return snap.data().itens || [];
+  return [];
+}
+
+// Atualiza o contador do carrinho em tempo real
+function listenCartCount() {
+  const userId = getUserId();
+  const cartCount = document.getElementById('cart-count');
+  if (!cartCount) return;
+  if (!userId) {
+    // Fallback: localStorage
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+    cartCount.textContent = total;
+    return;
+  }
+  const cartRef = doc(firestore, 'carrinhos', userId);
+  onSnapshot(cartRef, (snap) => {
+    const itens = snap.exists() ? (snap.data().itens || []) : [];
+    const total = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+    cartCount.textContent = total;
+  });
+}
+
+// Exponibiliza para uso global após carregar o header
+document.addEventListener('headerLoaded', () => {
+  listenCartCount();
+});
+window.listenCartCount = listenCartCount;
+window.saveCartToFirestore = saveCartToFirestore;
+window.getCartFromFirestore = getCartFromFirestore;
