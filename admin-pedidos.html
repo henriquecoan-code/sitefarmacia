@@ -124,7 +124,7 @@
         if (order.status === 'Pendente') {
           msgEmpresa =
             'Pedido: ' + (order.numeroPedido || '') + ' || Pedido recebido\n' +
-            'Cliente: ' + (order.nomeUsuario || '') + ' Pedido: ' + (order.numeroPedido || '') + '\n' +
+            'Cliente: ' + (order.nomeUsuario || '') + '\n' +
             'Telefone: ' + (order.telefone || '') + '\n' +
             'Endereço: Rua ' + (endereco.rua || '') + ', Nº ' + (endereco.numero || '') + ', ' + (endereco.bairro || '') + ', ' + (endereco.cidade || '') + (endereco.complemento ? ', ' + endereco.complemento : '') + '\n' +
             'Forma de pagamento: ' + (order.pagamento || '') + '\n' +
@@ -181,7 +181,7 @@
             '<span class="font-semibold">Pedido:</span> ', order.numeroPedido || '',
           '<span class="font-semibold"> | Nome:</span> ', order.nomeUsuario || '',
           //(order.emailUsuario ? '<span class="ml-4 font-semibold">Email:</span> ' + order.emailUsuario : ''),
-          '<span class="ml-4 font-semibold">/nTelefone:</span> ', order.telefone || '',
+          '<span class="ml-4 font-semibold"> | Telefone:</span> ', order.telefone || '',
           '</div>',
           '<div class="mb-2">',
           '<span class="font-semibold">\nEndereço:</span> Rua ', endereco.rua || '', ', Nº ', endereco.numero || '', ', ', endereco.bairro || '', ', ', endereco.cidade || '', (endereco.complemento ? ', ' + endereco.complemento : ''),
