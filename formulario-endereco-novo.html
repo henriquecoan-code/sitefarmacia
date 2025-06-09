@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Minha Conta - Farmácia São Benedito - Gerencie seus dados pessoais e endereço.">
-  <title>Editar Endereço - Farmácia São Benedito</title>
+  <title>Novo Endereço - Farmácia São Benedito</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="css/account-styles.css">
+  <!-- Adicione aqui o seu CSS do Tailwind gerado localmente, por exemplo: -->
+  <!-- <link rel="stylesheet" href="css/tailwind.css"> -->
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
@@ -25,8 +26,8 @@
     <!-- Conteúdo principal -->
     <main class="flex-1 p-6 bg-gray-50">
       <section id="address-form-section" class="bg-white p-8 rounded-xl shadow-lg mb-8 max-w-2xl mx-auto">
-        <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center"><i class="fas fa-map-marker-alt mr-3 text-blue-600"></i>Editar Endereço</h2>
-        <form id="address-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center"><i class="fas fa-map-marker-alt mr-3 text-blue-600"></i>Novo Endereço</h2>
+        <form id="addressForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="col-span-1">
             <label for="cep" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-location-arrow mr-2 text-blue-500"></i>CEP</label>
             <input type="text" id="cep" name="cep" required maxlength="9" placeholder="00000-000" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
@@ -36,20 +37,24 @@
             <input type="text" id="telefone" name="telefone" required maxlength="15" placeholder="(00) 00000-0000" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
           </div>
           <div class="col-span-1 md:col-span-2">
-            <label for="street" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-road mr-2 text-blue-500"></i>Rua</label>
-            <input type="text" id="street" name="street" required placeholder="Nome da rua" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+            <label for="rua" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-road mr-2 text-blue-500"></i>Rua</label>
+            <input type="text" id="rua" name="rua" required placeholder="Nome da rua" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
           </div>
           <div class="col-span-1">
-            <label for="number" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-hashtag mr-2 text-blue-500"></i>Número</label>
-            <input type="text" id="number" name="number" required placeholder="Número" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+            <label for="numero" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-hashtag mr-2 text-blue-500"></i>Número</label>
+            <input type="text" id="numero" name="numero" required placeholder="Número" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
           </div>
           <div class="col-span-1">
-            <label for="complement" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-building mr-2 text-blue-500"></i>Complemento</label>
-            <input type="text" id="complement" name="complement" placeholder="Apto, bloco, etc." class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+            <label for="bairro" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-building mr-2 text-blue-500"></i>Bairro</label>
+            <input type="text" id="bairro" name="bairro" required placeholder="Bairro" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
           </div>
           <div class="col-span-1 md:col-span-2">
-            <label for="city" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-city mr-2 text-blue-500"></i>Cidade</label>
-            <input type="text" id="city" name="city" required placeholder="Cidade" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+            <label for="cidade" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-city mr-2 text-blue-500"></i>Cidade</label>
+            <input type="text" id="cidade" name="cidade" required placeholder="Cidade" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1 md:col-span-2">
+            <label for="complemento" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-building mr-2 text-blue-500"></i>Complemento</label>
+            <input type="text" id="complemento" name="complemento" placeholder="Apto, bloco, etc." class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
           </div>
           <div class="col-span-1 md:col-span-2 mt-2">
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center text-lg"><i class="fas fa-save mr-2"></i>Salvar Endereço</button>
@@ -59,72 +64,168 @@
       </section>
     </main>
   </div>
-    <script type="module">
-      
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-        import { getFirestore, doc, setDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
-        import { loadHeader } from './js/header-loader.js';
-        import { loadFooter } from './js/footer-loader.js';
-        import { firebaseConfig } from './js/firebase-config.js';
-    
-        const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        window.auth = auth;
-    
-        await loadHeader('header-container', 'authContainerSecondary');
-        await loadFooter('footer-container');
-    
-        document.addEventListener('DOMContentLoaded', function() {
-        console.log("DOM carregado, inicializando formulário de endereço");
-        const addressForm = document.getElementById('address-form');
-        const formMessage = document.getElementById('form-message');
-    
-        addressForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            formMessage.classList.add('hidden');
-            formMessage.textContent = '';
-    
-            try {
-              const user = auth.currentUser;
-              if (!user) {
-                throw new Error("Usuário não autenticado.");
-              }
-    
-              // Monta o objeto com todos os campos do formulário em português, igual padrão do cadastro3.html
-              const enderecoData = {
-                cep: addressForm.cep.value,
-                telefone: addressForm.telefone.value,
-                rua: addressForm.rua ? addressForm.rua.value : '',
-                numero: addressForm.numero ? addressForm.numero.value : '',
-                bairro: addressForm.bairro ? addressForm.bairro.value : '',
-                cidade: addressForm.cidade ? addressForm.cidade.value : '',
-                complemento: addressForm.complemento ? addressForm.complemento.value : '',
-                criadoEm: new Date().toISOString()
-              };
-    
-              // Cria um novo documento com ID automático na subcoleção 'enderecos' de 'usuarios'
-              const enderecosCol = collection(db, 'usuarios', user.uid, 'enderecos');
-              await addDoc(enderecosCol, enderecoData);
-    
-              formMessage.textContent = "Endereço salvo com sucesso!";
-              formMessage.classList.remove('hidden');
-              formMessage.classList.remove('text-red-600');
-              formMessage.classList.add('text-green-600');
-              addressForm.reset();
-            } catch (error) {
-              console.error("Erro ao salvar endereço:", error);
-              formMessage.textContent = "Erro ao salvar endereço: " + error.message;
-              formMessage.classList.remove('hidden');
-              formMessage.classList.remove('text-green-600');
-              formMessage.classList.add('text-red-600');
-            }
-        });
-        });
-    </script>
-    </main>
-<div id="footer-container" class="mt-auto w-full"></div>
+  <div id="footer-container" class="mt-auto w-full"></div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
+    function maskCep(value) {
+      return value.replace(/\D/g, '').replace(/(\d{5})(\d)/, '$1-$2').slice(0, 9);
+    }
+    function maskPhone(value) {
+      value = value.replace(/\D/g, '');
+      if (value.length <= 10) {
+        return value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      } else {
+        return value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const addressForm = document.getElementById('addressForm');
+      const formMessage = document.getElementById('form-message');
+      const section = document.getElementById('address-form-section');
+
+      // Verificação de autenticação
+      auth.onAuthStateChanged(function(user) {
+        if (!user) {
+          if (addressForm) addressForm.classList.add('hidden');
+          if (formMessage) {
+            formMessage.textContent = 'Você precisa estar logado para cadastrar um endereço.';
+            formMessage.classList.remove('hidden', 'text-green-600');
+            formMessage.classList.add('text-red-600');
+          }
+          if (section) section.classList.add('opacity-60');
+          return;
+        } else {
+          if (addressForm) addressForm.classList.remove('hidden');
+          if (formMessage) formMessage.classList.add('hidden');
+          if (section) section.classList.remove('opacity-60');
+        }
+      });
+
+      // Mensagens de erro por campo
+      const errorFields = {
+        cep: 'CEP inválido',
+        telefone: 'Telefone inválido',
+        rua: 'Preencha a rua',
+        numero: 'Preencha o número',
+        bairro: 'Preencha o bairro',
+        cidade: 'Preencha a cidade'
+      };
+      // Cria elementos de erro
+      Object.keys(errorFields).forEach(id => {
+        let el = document.getElementById(id);
+        if (el && !document.getElementById(id+'Error')) {
+          const p = document.createElement('p');
+          p.id = id+'Error';
+          p.className = 'error-message text-red-600 text-xs mt-1 hidden';
+          p.textContent = errorFields[id];
+          el.parentNode.appendChild(p);
+        }
+      });
+      // Máscara CEP
+      cepInput.addEventListener('input', function() {
+        this.value = maskCep(this.value);
+        document.getElementById('cepError').classList.add('hidden');
+      });
+      // Máscara telefone
+      telefoneInput.addEventListener('input', function() {
+        this.value = maskPhone(this.value);
+        document.getElementById('telefoneError').classList.add('hidden');
+      });
+      // Esconde erro ao digitar
+      ['rua','numero','bairro','cidade'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', () => {
+            const errorEl = document.getElementById(id+'Error');
+            if (errorEl) errorEl.classList.add('hidden');
+          });
+        }
+      });
+      addressForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formMessage.classList.add('hidden');
+        formMessage.textContent = '';
+        // Validação
+        let valid = true;
+        const cep = cepInput.value.trim();
+        const telefone = telefoneInput.value.replace(/\D/g, '');
+        const rua = addressForm.rua.value.trim();
+        const numero = addressForm.numero.value.trim();
+        const bairro = addressForm.bairro.value.trim();
+        const cidade = addressForm.cidade.value.trim();
+        // CEP: 8 dígitos
+        if (!/^\d{5}-?\d{3}$/.test(cep)) {
+          document.getElementById('cepError').classList.remove('hidden');
+          valid = false;
+        }
+        // Telefone: 10 ou 11 dígitos
+        if (!(telefone.length === 10 || telefone.length === 11)) {
+          document.getElementById('telefoneError').classList.remove('hidden');
+          valid = false;
+        }
+        if (!rua) {
+          document.getElementById('ruaError').classList.remove('hidden');
+          valid = false;
+        }
+        if (!numero) {
+          document.getElementById('numeroError').classList.remove('hidden');
+          valid = false;
+        }
+        if (!bairro) {
+          document.getElementById('bairroError').classList.remove('hidden');
+          valid = false;
+        }
+        if (!cidade) {
+          document.getElementById('cidadeError').classList.remove('hidden');
+          valid = false;
+        }
+        if (!valid) {
+          formMessage.textContent = 'Corrija os campos destacados.';
+          formMessage.classList.remove('hidden', 'text-green-600');
+          formMessage.classList.add('text-red-600');
+          return;
+        }
+        try {
+          const user = auth.currentUser;
+          if (!user) throw new Error('Usuário não autenticado.');
+          const complemento = addressForm.complemento.value.trim();
+          const enderecosCol = collection(db, 'usuarios', user.uid, 'enderecos');
+          await addDoc(enderecosCol, {
+            cep,
+            telefone,
+            rua,
+            numero,
+            bairro,
+            cidade,
+            complemento,
+            criadoEm: new Date().toISOString()
+          });
+          formMessage.textContent = 'Endereço salvo com sucesso!';
+          formMessage.classList.remove('hidden', 'text-red-600');
+          formMessage.classList.add('text-green-600');
+          addressForm.reset();
+        } catch (error) {
+          formMessage.textContent = 'Erro ao salvar endereço: ' + error.message;
+          formMessage.classList.remove('hidden', 'text-green-600');
+          formMessage.classList.add('text-red-600');
+        }
+      });
+    });
+  </script>
   <script src="js/auth-mobile.js"></script>
 </body>
 </html>
