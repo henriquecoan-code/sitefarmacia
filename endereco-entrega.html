@@ -26,7 +26,7 @@
         <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
-            <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
+            <a href="./formulario-endereco-novo.html" class="text-blue-600 hover:text-blue-800 text-sm">
               <i class="fas fa-edit mr-1"></i> Editar
             </a>
           </div>
@@ -37,7 +37,7 @@
         <section id="all-addresses-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-list mr-2"></i>Todos os Endereços</h2>
-            <a href="./formulário-endereco-novo.html" class="text-blue-600 hover:text-blue-800 text-sm">
+            <a href="./formulario-endereco-novo.html" class="text-blue-600 hover:text-blue-800 text-sm">
               <i class="fas fa-plus mr-1"></i> Novo Endereço
             </a>
           </div>
@@ -49,7 +49,7 @@
     <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -107,6 +107,8 @@
         window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
         if (typeof loading !== 'undefined' && loading) loading.classList.add('hidden');
         if (typeof renderOrders !== 'undefined') renderOrders(pedidos);
+        // Chama a migração antes de carregar os endereços
+        await migrateOldAddressIfNeeded(user.uid);
         // Chama o carregamento do endereço principal após autenticação
         await loadMainAddress(user.uid);
         // Chama o carregamento de todos os endereços
@@ -148,9 +150,10 @@
           mainAddressDiv.innerHTML = `
             <div class="space-y-1">
               <div><span class="font-semibold">Rua: ${principal.rua || ''}, ${principal.numero || ''}</span></div>
-              <div>Telefone: ${principal.telefone || ''}</div>
+              <div>Bairro: ${principal.bairro || ''}</div>
               <div>Cidade: ${principal.cidade || ''}</div>
               <div>CEP: ${principal.cep || ''}</div>
+              <div>Telefone: ${principal.telefone || ''}</div>
               <div>${principal.complemento ? 'Complemento: ' + principal.complemento : ''}</div>
             </div>
           `;
@@ -197,12 +200,13 @@
               <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
               <span class="font-semibold">${endereco.rua || ''}, ${endereco.numero || ''}</span>
             </div>
-            <div><span class="font-semibold">CEP:</span> ${endereco.cep || ''}</div>
+            <div><span class="font-semibold">Bairro:</span> ${endereco.bairro || ''}</div>
             <div><span class="font-semibold">Cidade:</span> ${endereco.cidade || ''}</div>
+            <div><span class="font-semibold">CEP:</span> ${endereco.cep || ''}</div>
             <div><span class="font-semibold">Telefone:</span> ${endereco.telefone || ''}</div>
             <div>${endereco.complemento ? '<span class=\'font-semibold\'>Complemento:</span> ' + endereco.complemento : ''}</div>
             <div class="flex gap-2 mt-2">
-              <a href="./formulario-endereco.html?id=${endereco.id}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
+              <a href="./formulario-endereco-novo.html?id=${endereco.id}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
             </div>
           `;
           addressesList.appendChild(card);
@@ -213,6 +217,34 @@
         console.error(error);
       }
     }
+
+    // --- MIGRAÇÃO DE ENDEREÇO ANTIGO (campo unico) PARA SUBCOLEÇÃO ---
+      async function migrateOldAddressIfNeeded(uid) {
+        const userDocRef = doc(db, 'usuarios', uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (!userDocSnap.exists()) return;
+        const userData = userDocSnap.data();
+        // Só migra se existir o campo 'endereco' e a subcoleção 'enderecos' estiver vazia
+        if (userData.endereco) {
+          const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
+          const querySnapshot = await getDocs(enderecosRef);
+          if (querySnapshot.empty) {
+            // Adiciona o endereço antigo na subcoleção
+            const enderecoAntigo = userData.endereco;
+            // Garante que todos os campos estejam presentes
+            await addDoc(enderecosRef, {
+              rua: enderecoAntigo.rua || '',
+              numero: enderecoAntigo.numero || '',
+              bairro: enderecoAntigo.bairro || '',
+              cidade: enderecoAntigo.cidade || '',
+              complemento: enderecoAntigo.complemento || '',
+              telefone: userData.telefone || '',
+              cep: enderecoAntigo.cep || ''
+            });
+            console.log('Endereço antigo migrado para subcoleção enderecos.');
+          }
+        }
+      }
   </script>
     </div>
   <div id="footer-container"></div>
