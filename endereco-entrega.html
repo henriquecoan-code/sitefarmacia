@@ -10,9 +10,24 @@
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
-  <div class="flex flex-col md:flex-row">
+  <!-- Navbar mobile (só aparece em telas pequenas) -->
+  <nav class="md:hidden fixed top-0 left-0 right-0 z-40 bg-white shadow flex items-center justify-between px-4 py-2">
+    <button id="open-navbar-menu" class="p-2 rounded focus:outline-none" aria-label="Abrir menu">
+      <i class="fas fa-bars text-xl text-blue-800"></i>
+    </button>
+    <span class="font-bold text-blue-800">Menu</span>
+    <div></div>
+    <!-- Espaço para centralizar o título -->
+    <!-- Dropdown do menu -->
+    <div id="navbar-dropdown" class="absolute left-2 top-12 w-48 bg-white rounded shadow-lg border border-gray-100 py-2 hidden transition-all">
+      <a href="./minha-conta.html" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Minha Conta</a>
+      <a href="./endereco-entrega.html" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Endereços de Entrega</a>
+      <a href="./pedidos.html" class="block px-4 py-2 text-blue-900 font-bold hover:bg-blue-50">Pedidos</a>
+    </div>
+  </nav>
+  <div class="flex flex-col md:flex-row pt-12 md:pt-0">
     <!--menu esquerdo-->
-    <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
+    <aside id="aside-menu" class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto flex-col">
       <nav class="flex flex-col space-y-4 px-6 mt-8">
         <a href="./minha-conta.html" class="text-gray-700 hover:text-blue-700 transition">Minha Conta</a>
         <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
@@ -275,6 +290,21 @@ function showToast(message, type = 'success') {
     toast.style.opacity = '0';
     setTimeout(() => toast.classList.add('hidden'), 300);
   }, 2500);
+}
+
+// Menu mobile: navbar com dropdown
+const openNavbarMenu = document.getElementById('open-navbar-menu');
+const navbarDropdown = document.getElementById('navbar-dropdown');
+if (openNavbarMenu && navbarDropdown) {
+  openNavbarMenu.addEventListener('click', () => {
+    navbarDropdown.classList.toggle('hidden');
+  });
+  // Fecha o dropdown ao clicar fora
+  document.addEventListener('click', (e) => {
+    if (!navbarDropdown.contains(e.target) && !openNavbarMenu.contains(e.target)) {
+      navbarDropdown.classList.add('hidden');
+    }
+  });
 }
   </script>
     </div>
