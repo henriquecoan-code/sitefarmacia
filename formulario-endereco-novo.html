@@ -76,6 +76,9 @@
     const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
     const auth = getAuth(app);
     const db = getFirestore(app);
+    // Garante que window.auth está disponível para scripts externos
+    window.auth = auth;
+    window.db = db;
 
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
@@ -135,15 +138,24 @@
           el.parentNode.appendChild(p);
         }
       });
+      // Seletores dos campos (garante que existem antes de usar)
+      const cepInput = document.getElementById('cep');
+      const telefoneInput = document.getElementById('telefone');
+      if (!cepInput || !telefoneInput) {
+        console.error('Campos de CEP ou Telefone não encontrados no DOM!');
+        return;
+      }
       // Máscara CEP
       cepInput.addEventListener('input', function() {
         this.value = maskCep(this.value);
-        document.getElementById('cepError').classList.add('hidden');
+        const error = document.getElementById('cepError');
+        if (error) error.classList.add('hidden');
       });
       // Máscara telefone
       telefoneInput.addEventListener('input', function() {
         this.value = maskPhone(this.value);
-        document.getElementById('telefoneError').classList.add('hidden');
+        const error = document.getElementById('telefoneError');
+        if (error) error.classList.add('hidden');
       });
       // Esconde erro ao digitar
       ['rua','numero','bairro','cidade'].forEach(id => {
@@ -169,28 +181,34 @@
         const cidade = addressForm.cidade.value.trim();
         // CEP: 8 dígitos
         if (!/^\d{5}-?\d{3}$/.test(cep)) {
-          document.getElementById('cepError').classList.remove('hidden');
+          const error = document.getElementById('cepError');
+          if (error) error.classList.remove('hidden');
           valid = false;
         }
         // Telefone: 10 ou 11 dígitos
         if (!(telefone.length === 10 || telefone.length === 11)) {
-          document.getElementById('telefoneError').classList.remove('hidden');
+          const error = document.getElementById('telefoneError');
+          if (error) error.classList.remove('hidden');
           valid = false;
         }
         if (!rua) {
-          document.getElementById('ruaError').classList.remove('hidden');
+          const error = document.getElementById('ruaError');
+          if (error) error.classList.remove('hidden');
           valid = false;
         }
         if (!numero) {
-          document.getElementById('numeroError').classList.remove('hidden');
+          const error = document.getElementById('numeroError');
+          if (error) error.classList.remove('hidden');
           valid = false;
         }
         if (!bairro) {
-          document.getElementById('bairroError').classList.remove('hidden');
+          const error = document.getElementById('bairroError');
+          if (error) error.classList.remove('hidden');
           valid = false;
         }
         if (!cidade) {
-          document.getElementById('cidadeError').classList.remove('hidden');
+          const error = document.getElementById('cidadeError');
+          if (error) error.classList.remove('hidden');
           valid = false;
         }
         if (!valid) {
@@ -204,7 +222,8 @@
           if (!user) throw new Error('Usuário não autenticado.');
           const complemento = addressForm.complemento.value.trim();
           const enderecosCol = collection(db, 'usuarios', user.uid, 'enderecos');
-          await addDoc(enderecosCol, {
+          console.log('Tentando adicionar endereço:', {cep, telefone, rua, numero, bairro, cidade, complemento});
+          const docRef = await addDoc(enderecosCol, {
             cep,
             telefone,
             rua,
@@ -214,11 +233,13 @@
             complemento,
             criadoEm: new Date().toISOString()
           });
+          console.log('Endereço salvo com sucesso! ID:', docRef.id);
           formMessage.textContent = 'Endereço salvo com sucesso!';
           formMessage.classList.remove('hidden', 'text-red-600');
           formMessage.classList.add('text-green-600');
           addressForm.reset();
         } catch (error) {
+          console.error('Erro ao salvar endereço:', error);
           formMessage.textContent = 'Erro ao salvar endereço: ' + error.message;
           formMessage.classList.remove('hidden', 'text-green-600');
           formMessage.classList.add('text-red-600');

@@ -134,8 +134,8 @@
       noAddress.classList.add('hidden');
       addressLoading.classList.remove('hidden');
       try {
-        // Busca todos os endereços do usuário na subcoleção 'enderecos'
-        const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
+        // Busca todos os endereços do usuário na subcoleção 'endereco'
+        const enderecosRef = collection(db, 'usuarios', uid, 'endereco');
         const querySnapshot = await getDocs(enderecosRef);
         let enderecos = [];
         querySnapshot.forEach((docSnap) => {
@@ -179,7 +179,7 @@
       addressesLoading.classList.remove('hidden');
       noAddresses.classList.add('hidden');
       try {
-        const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
+        const enderecosRef = collection(db, 'usuarios', uid, 'endereco');
         const querySnapshot = await getDocs(enderecosRef);
         let enderecos = [];
         querySnapshot.forEach((docSnap) => {
