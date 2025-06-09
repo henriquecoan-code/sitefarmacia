@@ -196,8 +196,9 @@
           card.innerHTML = `
             <div class="flex items-center mb-2">
               <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
-              <span class="font-semibold">${endereco.rua || ''}, ${endereco.numero || ''}</span>
+              <span class="font-semibold">Endereço</span>
             </div>
+            <div><span class="font-semibold">Rua:</span> ${endereco.rua || ''}, ${endereco.numero || ''}</div>
             <div><span class="font-semibold">Bairro:</span> ${endereco.bairro || ''}</div>
             <div><span class="font-semibold">Cidade:</span> ${endereco.cidade || ''}</div>
             <div><span class="font-semibold">CEP:</span> ${endereco.cep || ''}</div>
