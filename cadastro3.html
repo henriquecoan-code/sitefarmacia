@@ -338,21 +338,28 @@
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await updateProfile(userCredential.user, { displayName: fullName });
+                // Salva dados principais do usuário (sem campo 'endereco')
                 await setDoc(doc(firestore, 'usuarios', userCredential.user.uid), {
                     nome: fullName,
                     email: email,
                     cpf: cpfRaw,
                     telefone: phone,
-                    endereco: {
-                        rua: rua,
-                        numero: numero,
-                        bairro: bairro,
-                        cidade: cidade,
-                        complemento: complemento
-                    },
                     role: "user",
                     dataCadastro: new Date().toISOString(),
                     emailVerificado: false
+                });
+                // Salva o endereço inicial na subcoleção 'enderecos'
+                const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+                const enderecosCol = collection(firestore, 'usuarios', userCredential.user.uid, 'enderecos');
+                await addDoc(enderecosCol, {
+                    cep: '', // Se quiser adicionar campo de CEP no cadastro, ajuste aqui
+                    rua: rua,
+                    numero: numero,
+                    bairro: bairro,
+                    cidade: cidade,
+                    complemento: complemento,
+                    telefone: phone,
+                    criadoEm: new Date().toISOString()
                 });
                 showToast('Cadastro realizado! Verifique seu e-mail para ativar a conta.', 'success');
                 await signOut(auth);

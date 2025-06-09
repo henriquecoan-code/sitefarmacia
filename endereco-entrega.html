@@ -107,8 +107,6 @@
         window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
         if (typeof loading !== 'undefined' && loading) loading.classList.add('hidden');
         if (typeof renderOrders !== 'undefined') renderOrders(pedidos);
-        // Chama a migração antes de carregar os endereços
-        await migrateOldAddressIfNeeded(user.uid);
         // Chama o carregamento do endereço principal após autenticação
         await loadMainAddress(user.uid);
         // Chama o carregamento de todos os endereços
@@ -217,34 +215,6 @@
         console.error(error);
       }
     }
-
-    // --- MIGRAÇÃO DE ENDEREÇO ANTIGO (campo unico) PARA SUBCOLEÇÃO ---
-      async function migrateOldAddressIfNeeded(uid) {
-        const userDocRef = doc(db, 'usuarios', uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (!userDocSnap.exists()) return;
-        const userData = userDocSnap.data();
-        // Só migra se existir o campo 'endereco' e a subcoleção 'enderecos' estiver vazia
-        if (userData.endereco) {
-          const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
-          const querySnapshot = await getDocs(enderecosRef);
-          if (querySnapshot.empty) {
-            // Adiciona o endereço antigo na subcoleção
-            const enderecoAntigo = userData.endereco;
-            // Garante que todos os campos estejam presentes
-            await addDoc(enderecosRef, {
-              rua: enderecoAntigo.rua || '',
-              numero: enderecoAntigo.numero || '',
-              bairro: enderecoAntigo.bairro || '',
-              cidade: enderecoAntigo.cidade || '',
-              complemento: enderecoAntigo.complemento || '',
-              telefone: userData.telefone || '',
-              cep: enderecoAntigo.cep || ''
-            });
-            console.log('Endereço antigo migrado para subcoleção enderecos.');
-          }
-        }
-      }
   </script>
     </div>
   <div id="footer-container"></div>

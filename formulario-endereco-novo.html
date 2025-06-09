@@ -96,11 +96,11 @@
               const enderecoData = {
                 cep: addressForm.cep.value,
                 telefone: addressForm.telefone.value,
-                rua: addressForm.street.value,
-                numero: addressForm.number.value,
+                rua: addressForm.rua ? addressForm.rua.value : '',
+                numero: addressForm.numero ? addressForm.numero.value : '',
                 bairro: addressForm.bairro ? addressForm.bairro.value : '',
-                cidade: addressForm.city.value,
-                complemento: addressForm.complement.value,
+                cidade: addressForm.cidade ? addressForm.cidade.value : '',
+                complemento: addressForm.complemento ? addressForm.complemento.value : '',
                 criadoEm: new Date().toISOString()
               };
     
