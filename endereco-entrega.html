@@ -49,7 +49,7 @@
     <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -205,10 +205,34 @@
             <div><span class="font-semibold">Telefone:</span> ${endereco.telefone || ''}</div>
             <div>${endereco.complemento ? '<span class=\'font-semibold\'>Complemento:</span> ' + endereco.complemento : ''}</div>
             <div class="flex gap-2 mt-2">
-              <a href="./formulario-endereco-novo.html?id=${endereco.id}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
+              <a href="./formulario-endereco.html?id=${endereco.id}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
+              <button class="text-green-600 hover:text-green-800 text-sm flex items-center set-main-address-btn" data-id="${endereco.id}"><i class="fas fa-star mr-1"></i>Tornar Principal</button>
             </div>
           `;
           addressesList.appendChild(card);
+        });
+        // Adiciona evento para tornar principal
+        addressesList.querySelectorAll('.set-main-address-btn').forEach(btn => {
+          btn.addEventListener('click', async function() {
+            const enderecoId = this.getAttribute('data-id');
+            if (!enderecoId) return;
+            try {
+              // Busca o endereço selecionado
+              const enderecoRef = collection(db, 'usuarios', auth.currentUser.uid, 'enderecos');
+              const enderecoDoc = await getDoc(doc(enderecoRef, enderecoId));
+              if (!enderecoDoc.exists()) return alert('Endereço não encontrado.');
+              const enderecoData = enderecoDoc.data();
+              // Atualiza o campo endereco principal no documento do usuário
+              await updateDoc(doc(db, 'usuarios', auth.currentUser.uid), {
+                endereco: enderecoData
+              });
+              alert('Endereço principal atualizado com sucesso!');
+              await loadMainAddress(auth.currentUser.uid);
+            } catch (e) {
+              alert('Erro ao definir endereço principal.');
+              console.error(e);
+            }
+          });
         });
       } catch (error) {
         addressesLoading.textContent = 'Erro ao carregar endereços.';
