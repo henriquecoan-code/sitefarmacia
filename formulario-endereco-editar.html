@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Endereço - Farmácia São Benedito</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/account-styles.css">
+</head>
+<body class="bg-gray-50">
+  <div id="header-container"></div>
+  <div class="flex flex-col md:flex-row">
+    <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
+      <nav class="flex flex-col space-y-4 px-6 mt-8">
+        <a href="./minha-conta.html" class="text-blue-900 font-bold hover:text-blue-700 transition">Minha Conta</a>
+        <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
+        <a href="./pedidos.html" class="text-gray-700 hover:text-blue-700 transition">Pedidos</a>
+        <hr class="my-2">
+      </nav>
+    </aside>
+    <main class="flex-1 p-6 bg-gray-50">
+      <section id="address-form-section" class="bg-white p-8 rounded-xl shadow-lg mb-8 max-w-2xl mx-auto">
+        <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center"><i class="fas fa-map-marker-alt mr-3 text-blue-600"></i>Editar Endereço</h2>
+        <form id="addressForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="col-span-1">
+            <label for="cep" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-location-arrow mr-2 text-blue-500"></i>CEP</label>
+            <input type="text" id="cep" name="cep" required maxlength="9" placeholder="00000-000" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1">
+            <label for="telefone" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-phone mr-2 text-blue-500"></i>Telefone</label>
+            <input type="text" id="telefone" name="telefone" required maxlength="15" placeholder="(00) 00000-0000" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1 md:col-span-2">
+            <label for="rua" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-road mr-2 text-blue-500"></i>Rua</label>
+            <input type="text" id="rua" name="rua" required placeholder="Nome da rua" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1">
+            <label for="numero" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-hashtag mr-2 text-blue-500"></i>Número</label>
+            <input type="text" id="numero" name="numero" required placeholder="Número" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1">
+            <label for="bairro" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-building mr-2 text-blue-500"></i>Bairro</label>
+            <input type="text" id="bairro" name="bairro" required placeholder="Bairro" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1 md:col-span-2">
+            <label for="cidade" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-city mr-2 text-blue-500"></i>Cidade</label>
+            <input type="text" id="cidade" name="cidade" required placeholder="Cidade" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1 md:col-span-2">
+            <label for="complemento" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-building mr-2 text-blue-500"></i>Complemento</label>
+            <input type="text" id="complemento" name="complemento" placeholder="Apto, bloco, etc." class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2">
+          </div>
+          <div class="col-span-1 md:col-span-2 mt-2">
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center text-lg"><i class="fas fa-save mr-2"></i>Salvar Alteração</button>
+          </div>
+        </form>
+        <div id="form-message" class="mt-4 text-sm text-gray-600 hidden"></div>
+      </section>
+    </main>
+  </div>
+  <div id="footer-container" class="mt-auto w-full"></div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
+    function maskCep(value) {
+      return value.replace(/\D/g, '').replace(/(\d{5})(\d)/, '$1-$2').slice(0, 9);
+    }
+    function maskPhone(value) {
+      value = value.replace(/\D/g, '');
+      if (value.length <= 10) {
+        return value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      } else {
+        return value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      }
+    }
+
+    // Utilitário para pegar parâmetro da URL
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      const addressForm = document.getElementById('addressForm');
+      const formMessage = document.getElementById('form-message');
+      const section = document.getElementById('address-form-section');
+      const cepInput = document.getElementById('cep');
+      const telefoneInput = document.getElementById('telefone');
+      // Verificação de autenticação
+      auth.onAuthStateChanged(async function(user) {
+        if (!user) {
+          if (addressForm) addressForm.classList.add('hidden');
+          if (formMessage) {
+            formMessage.textContent = 'Você precisa estar logado para editar um endereço.';
+            formMessage.classList.remove('hidden', 'text-green-600');
+            formMessage.classList.add('text-red-600');
+          }
+          if (section) section.classList.add('opacity-60');
+          return;
+        } else {
+          if (addressForm) addressForm.classList.remove('hidden');
+          if (formMessage) formMessage.classList.add('hidden');
+          if (section) section.classList.remove('opacity-60');
+        }
+        // Carrega dados do endereço
+        const enderecoId = getParam('id');
+        if (!enderecoId) {
+          formMessage.textContent = 'Endereço não encontrado.';
+          formMessage.classList.remove('hidden', 'text-green-600');
+          formMessage.classList.add('text-red-600');
+          addressForm.classList.add('hidden');
+          return;
+        }
+        try {
+          const enderecoRef = doc(db, 'usuarios', user.uid, 'enderecos', enderecoId);
+          const snap = await getDoc(enderecoRef);
+          if (!snap.exists()) throw new Error('Endereço não encontrado.');
+          const data = snap.data();
+          cepInput.value = data.cep || '';
+          telefoneInput.value = data.telefone || '';
+          addressForm.rua.value = data.rua || '';
+          addressForm.numero.value = data.numero || '';
+          addressForm.bairro.value = data.bairro || '';
+          addressForm.cidade.value = data.cidade || '';
+          addressForm.complemento.value = data.complemento || '';
+        } catch (err) {
+          formMessage.textContent = 'Erro ao carregar endereço: ' + err.message;
+          formMessage.classList.remove('hidden', 'text-green-600');
+          formMessage.classList.add('text-red-600');
+          addressForm.classList.add('hidden');
+        }
+      });
+      // Máscara CEP
+      cepInput.addEventListener('input', function() {
+        this.value = maskCep(this.value);
+      });
+      // Máscara telefone
+      telefoneInput.addEventListener('input', function() {
+        this.value = maskPhone(this.value);
+      });
+      addressForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formMessage.classList.add('hidden');
+        formMessage.textContent = '';
+        // Validação
+        let valid = true;
+        const cep = cepInput.value.trim();
+        const telefone = telefoneInput.value.replace(/\D/g, '');
+        const rua = addressForm.rua.value.trim();
+        const numero = addressForm.numero.value.trim();
+        const bairro = addressForm.bairro.value.trim();
+        const cidade = addressForm.cidade.value.trim();
+        if (!/^\d{5}-?\d{3}$/.test(cep)) {
+          valid = false;
+        }
+        if (!(telefone.length === 10 || telefone.length === 11)) {
+          valid = false;
+        }
+        if (!rua || !numero || !bairro || !cidade) {
+          valid = false;
+        }
+        if (!valid) {
+          formMessage.textContent = 'Corrija os campos destacados.';
+          formMessage.classList.remove('hidden', 'text-green-600');
+          formMessage.classList.add('text-red-600');
+          return;
+        }
+        try {
+          const user = auth.currentUser;
+          if (!user) throw new Error('Usuário não autenticado.');
+          const complemento = addressForm.complemento.value.trim();
+          const enderecoId = getParam('id');
+          const enderecoRef = doc(db, 'usuarios', user.uid, 'enderecos', enderecoId);
+          await updateDoc(enderecoRef, {
+            cep,
+            telefone,
+            rua,
+            numero,
+            bairro,
+            cidade,
+            complemento
+          });
+          formMessage.textContent = 'Endereço alterado com sucesso!';
+          formMessage.classList.remove('hidden', 'text-red-600');
+          formMessage.classList.add('text-green-600');
+        } catch (error) {
+          formMessage.textContent = 'Erro ao alterar endereço: ' + error.message;
+          formMessage.classList.remove('hidden', 'text-green-600');
+          formMessage.classList.add('text-red-600');
+        }
+      });
+    });
+  </script>
+  <script src="js/auth-mobile.js"></script>
+</body>
+</html>
