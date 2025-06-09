@@ -1,140 +1,162 @@
+<!-- Exemplo de tela de adição de endereço -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Novo Endereço - Farmácia São Benedito</title>
+  <title>Adicionar Endereço</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link rel="stylesheet" href="css/account-styles.css">
-  <!-- Adicione aqui o seu CSS do Tailwind gerado localmente, por exemplo: -->
-  <link rel="stylesheet" href="css/tailwind.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8fafc; }
+    .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+    .form-group { margin-bottom: 18px; }
+    label { font-weight: bold; display: block; margin-bottom: 6px; }
+    input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
+    .btn { width: 100%; background: #2563eb; color: #fff; font-weight: bold; border: none; padding: 12px; border-radius: 4px; cursor: pointer; }
+    .btn:hover { background: #1d4ed8; }
+    .error { color: #dc2626; font-size: 0.95em; margin-top: 4px; }
+    .success { color: #16a34a; font-size: 1em; margin-top: 8px; text-align: center; }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-  <div id="header-container"></div>
-
-  <div class="flex flex-col md:flex-row">
-    <!--menu esquerdo-->
-    <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
-      <nav class="flex flex-col space-y-4 px-6 mt-8">
-        <a href="./minha-conta.html" class="text-blue-900 font-bold hover:text-blue-700 transition">Minha Conta</a>
-        <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
-        <a href="./pedidos.html" class="text-gray-700 hover:text-blue-700 transition">Pedidos</a>
-        <hr class="my-2">
-      </nav>
-    </aside>
-    <!-- Conteúdo principal -->
-    <main class="flex-1 p-6 bg-white rounded-r-lg shadow-lg mt-8 mb-8">
-      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-        <h1 class="text-2xl font-bold mb-6 text-blue-900 text-center">Adicionar Novo Endereço</h1>
-        <form id="address-form" class="space-y-5">
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-800 mb-1">Nome Completo <span class="text-red-500">*</span></label>
-            <input type="text" id="name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Digite seu nome completo">
-          </div>
-          <div>
-            <label for="street" class="block text-sm font-medium text-gray-800 mb-1">Rua <span class="text-red-500">*</span></label>
-            <input type="text" id="street" name="street" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Ex: Av. Brasil, 123">
-          </div>
-          <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-            <div class="flex-1">
-              <label for="city" class="block text-sm font-medium text-gray-800 mb-1">Cidade <span class="text-red-500">*</span></label>
-              <input type="text" id="city" name="city" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Ex: Belo Horizonte">
-            </div>
-            <div class="flex-1">
-              <label for="state" class="block text-sm font-medium text-gray-800 mb-1">Estado <span class="text-red-500">*</span></label>
-              <input type="text" id="state" name="state" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Ex: MG">
-            </div>
-            <div class="flex-1">
-              <label for="zip" class="block text-sm font-medium text-gray-800 mb-1">CEP <span class="text-red-500">*</span></label>
-              <input type="text" id="zip" name="zip" required maxlength="9" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="00000-000">
-            </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="submit" class="bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow hover:bg-blue-800 transition">Adicionar Endereço</button>
-          </div>
-        </form>
+<body>
+  <div class="container">
+    <h2 style="text-align:center;margin-bottom:24px;"><i class="fas fa-map-marker-alt"></i> Novo Endereço</h2>
+    <form id="addressForm" autocomplete="off">
+      <div class="form-group">
+        <label for="cep">CEP</label>
+        <input type="text" id="cep" maxlength="9" placeholder="00000-000" required>
+        <div id="cepError" class="error" style="display:none;">CEP inválido</div>
       </div>
-    </main>
+      <div class="form-group">
+        <label for="telefone">Telefone</label>
+        <input type="text" id="telefone" maxlength="15" placeholder="(00) 00000-0000" required>
+        <div id="telefoneError" class="error" style="display:none;">Telefone inválido</div>
+      </div>
+      <div class="form-group">
+        <label for="rua">Rua</label>
+        <input type="text" id="rua" required>
+        <div id="ruaError" class="error" style="display:none;">Preencha a rua</div>
+      </div>
+      <div class="form-group">
+        <label for="numero">Número</label>
+        <input type="text" id="numero" required>
+        <div id="numeroError" class="error" style="display:none;">Preencha o número</div>
+      </div>
+      <div class="form-group">
+        <label for="bairro">Bairro</label>
+        <input type="text" id="bairro" required>
+        <div id="bairroError" class="error" style="display:none;">Preencha o bairro</div>
+      </div>
+      <div class="form-group">
+        <label for="cidade">Cidade</label>
+        <input type="text" id="cidade" required>
+        <div id="cidadeError" class="error" style="display:none;">Preencha a cidade</div>
+      </div>
+      <div class="form-group">
+        <label for="complemento">Complemento</label>
+        <input type="text" id="complemento" placeholder="Apto, bloco, etc.">
+      </div>
+      <button type="submit" class="btn">Salvar Endereço</button>
+      <div id="formMessage" class="success" style="display:none;"></div>
+    </form>
   </div>
-  <div id="footer-container"></div>
-
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, addDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
-    import { loadHeader } from './js/header-loader.js';
-    import { loadFooter } from './js/footer-loader.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { firebaseConfig } from './js/firebase-config.js';
-    
-    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+
+    // Inicialização Firebase
+    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    window.auth = auth;
-    try {
-      await loadHeader('header-container', 'authContainerSecondary');
-    } catch (e) {
-      console.error('Erro ao carregar o header:', e);
-    }
-    try {
-      await loadFooter('footer-container');
-    } catch (e) {
-      console.error('Erro ao carregar o footer:', e);
-    }
-        const loading = document.getElementById('loading');
-    const errorMessage = document.getElementById('error-message');
-    const noOrders = document.getElementById('no-orders');
-    const ordersList = document.getElementById('orders-list');
 
-    function showError(msg) {
-      if (loading) loading.classList.add('hidden');
-      if (errorMessage) {
-        errorMessage.textContent = msg;
-        errorMessage.classList.remove('hidden');
+    // Máscaras
+    function maskCep(value) {
+      return value.replace(/\D/g, '').replace(/(\d{5})(\d)/, '$1-$2').slice(0, 9);
+    }
+    function maskPhone(value) {
+      value = value.replace(/\D/g, '');
+      if (value.length <= 10) {
+        return value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      } else {
+        return value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
       }
     }
 
-        // OUVINTE DE AUTENTICAÇÃO FORA DO DOMContentLoaded
-    onAuthStateChanged(auth, async user => {
+    // Eventos de máscara
+    document.getElementById('cep').addEventListener('input', function() {
+      this.value = maskCep(this.value);
+      document.getElementById('cepError').style.display = 'none';
+    });
+    document.getElementById('telefone').addEventListener('input', function() {
+      this.value = maskPhone(this.value);
+      document.getElementById('telefoneError').style.display = 'none';
+    });
+
+    // Esconde erros ao digitar
+    ['rua','numero','bairro','cidade'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        document.getElementById(id+'Error').style.display = 'none';
+      });
+    });
+
+    // Submit do formulário
+    document.getElementById('addressForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let valid = true;
+      const cep = document.getElementById('cep').value.trim();
+      const telefone = document.getElementById('telefone').value.replace(/\D/g, '');
+      const rua = document.getElementById('rua').value.trim();
+      const numero = document.getElementById('numero').value.trim();
+      const bairro = document.getElementById('bairro').value.trim();
+      const cidade = document.getElementById('cidade').value.trim();
+      const complemento = document.getElementById('complemento').value.trim();
+      // Validação simples
+      if (!/^\d{5}-?\d{3}$/.test(cep)) {
+        document.getElementById('cepError').style.display = 'block'; valid = false;
+      }
+      if (!(telefone.length === 10 || telefone.length === 11)) {
+        document.getElementById('telefoneError').style.display = 'block'; valid = false;
+      }
+      if (!rua) { document.getElementById('ruaError').style.display = 'block'; valid = false; }
+      if (!numero) { document.getElementById('numeroError').style.display = 'block'; valid = false; }
+      if (!bairro) { document.getElementById('bairroError').style.display = 'block'; valid = false; }
+      if (!cidade) { document.getElementById('cidadeError').style.display = 'block'; valid = false; }
+      if (!valid) return;
+
+      // Autenticação
+      const user = auth.currentUser;
+      const formMessage = document.getElementById('formMessage');
       if (!user) {
-        showError('Você precisa estar logado para ver seus pedidos.');
+        formMessage.textContent = 'Você precisa estar logado para cadastrar um endereço.';
+        formMessage.style.display = 'block';
+        formMessage.className = 'error';
         return;
       }
-      console.log('UID do usuário logado:', user.uid); // Diagnóstico do UID
+
       try {
-        let pedidos = [];
-        try {
-          // Consulta apenas os pedidos do usuário logado, ordenados por numeroPedido
-          const q = query(
-            collection(db, 'pedidos'),
-            where('userId', '==', user.uid),
-            orderBy('numeroPedido', 'desc')
-          );
-          const snapshot = await getDocs(q);
-          snapshot.forEach(doc => pedidos.push(doc.data()));
-        } catch (err) {
-          // Se erro de índice, busca sem orderBy
-          const q = query(
-            collection(db, 'pedidos'),
-            where('userId', '==', user.uid)
-          );
-          const snapshot = await getDocs(q);
-          snapshot.forEach(doc => pedidos.push(doc.data()));
-        }
-        console.log('Pedidos retornados do Firestore:', pedidos); // <-- Diagnóstico
-        window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
-        if (loading) loading.classList.add('hidden');
-        renderOrders(pedidos);
-        // Chama o carregamento do endereço principal após autenticação
-        await loadMainAddress(user.uid);
-      } catch (e) {
-        showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
+        const enderecosCol = collection(db, 'usuarios', user.uid, 'enderecos');
+        await addDoc(enderecosCol, {
+          cep,
+          telefone,
+          rua,
+          numero,
+          bairro,
+          cidade,
+          complemento,
+          criadoEm: new Date().toISOString()
+        });
+        formMessage.textContent = 'Endereço salvo com sucesso!';
+        formMessage.style.display = 'block';
+        formMessage.className = 'success';
+        e.target.reset();
+      } catch (error) {
+        formMessage.textContent = 'Erro ao salvar endereço: ' + error.message;
+        formMessage.style.display = 'block';
+        formMessage.className = 'error';
       }
     });
-    // ...existing code...
-        
   </script>
-  <script src="js/auth-mobile.js"></script>
 </body>
 </html>
