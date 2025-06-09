@@ -154,16 +154,23 @@
   </header>
   <!-- Menu Mobile Off-canvas Alpine.js -->
   <div x-data="{ mobileMenuOpen: false }" class="md:hidden bg-white shadow-sm sticky top-0 z-50">
-    <div class="flex items-center justify-between px-2 py-1">
-      <!-- 5. Botão do menu mobile à esquerda (maior) -->
-      <button @click="mobileMenuOpen = true" class="text-blue-900 text-3xl focus:outline-none mr-3 flex-shrink-0">
+    <!-- Menu Mobile Topbar -->
+    <div class="md:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow flex items-center px-2 py-2">
+      <button @click="mobileMenuOpen = true" class="text-blue-900 text-2xl focus:outline-none mr-2 flex-shrink-0">
         <i class="fas fa-bars"></i>
       </button>
+      <form class="flex-1 flex justify-center" onsubmit="event.preventDefault();">
+        <div class="relative w-full max-w-xs">
+          <input type="text" placeholder="Buscar medicamentos..." class="w-full px-3 py-1.5 rounded-full border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <button class="absolute right-0 top-0 h-full px-3 text-white bg-blue-700 rounded-r-full hover:bg-blue-800 text-sm">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="flex items-center justify-between px-2 py-1">
+      <!-- 5. Botão do menu mobile à esquerda (maior) -->
       <!-- 2. Logo centralizado, maior -->
-      <div class="flex-1 flex justify-center items-center">
-        <img src="img/logo.png" width="52" height="52" alt="Home" class="block" />
-        <span class="ml-2 text-xl font-bold text-blue-900 hidden xs:inline md:inline">Farmácia</span>
-      </div>
       <!-- 6. Usuário (avatar/entrar) à direita -->
       <div id="authContainerSecondaryMobile" class="flex-shrink-0 flex justify-end items-center min-w-[48px]"></div>
       <!-- Carrinho à direita no mobile (maior) -->
@@ -171,16 +178,6 @@
         <i class="fas fa-shopping-cart"></i>
         <span id="cart-count-mobile" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
       </a>
-    </div>
-    <!-- 4. Barra de busca menor -->
-    <div class="px-2 pb-1">
-
-      <div class="relative w-full">
-        <input type="text" placeholder="Buscar..." class="w-full px-3 py-1.5 rounded-full border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <button class="absolute right-0 top-0 h-full px-3 text-white bg-blue-700 rounded-r-full hover:bg-blue-800 text-sm">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
     </div>
     <!-- Overlay -->
     <div 
@@ -239,6 +236,8 @@
       </nav>
     </aside>
   </div>
+  <!-- Ajusta o espaçamento do conteúdo para não ficar atrás da barra -->
+  <div class="h-16"></div>
   <script>
 // Atualiza contador do carrinho no header (desktop e mobile)
 document.addEventListener('DOMContentLoaded', function() {
