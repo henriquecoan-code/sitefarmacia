@@ -6,65 +6,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Adicionar Endereço</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body { font-family: Arial, sans-serif; background: #f8fafc; }
-    .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
-    .form-group { margin-bottom: 18px; }
-    label { font-weight: bold; display: block; margin-bottom: 6px; }
-    input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
-    .btn { width: 100%; background: #2563eb; color: #fff; font-weight: bold; border: none; padding: 12px; border-radius: 4px; cursor: pointer; }
-    .btn:hover { background: #1d4ed8; }
-    .error { color: #dc2626; font-size: 0.95em; margin-top: 4px; }
-    .success { color: #16a34a; font-size: 1em; margin-top: 8px; text-align: center; }
-  </style>
+  <link rel="stylesheet" href="css/account-styles.css">
+  <link rel="stylesheet" href="css/endereco.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body>
-  <div class="container">
-    <h2 style="text-align:center;margin-bottom:24px;"><i class="fas fa-map-marker-alt"></i> Novo Endereço</h2>
-    <form id="addressForm" autocomplete="off">
-      <div class="form-group">
-        <label for="cep">CEP</label>
-        <input type="text" id="cep" maxlength="9" placeholder="00000-000" required>
-        <div id="cepError" class="error" style="display:none;">CEP inválido</div>
+<body class="bg-gray-50">
+  <div id="header-container"></div>
+  <div class="flex flex-col md:flex-row">
+    <!-- Aside Minha Conta -->
+    <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
+      <nav class="flex flex-col space-y-4 px-6 mt-8">
+        <a href="./minha-conta.html" class="text-gray-700 hover:text-blue-700 transition">Minha Conta</a>
+        <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
+        <a href="./pedidos.html" class="text-gray-700 hover:text-blue-700 transition">Pedidos</a>
+        <hr class="my-2">
+      </nav>
+    </aside>
+    <main class="flex-1 p-6 flex justify-center items-start">
+      <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-xl">
+        <h2 class="text-2xl font-bold text-blue-900 mb-6 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i> Novo Endereço</h2>
+        <form id="addressForm" autocomplete="off">
+          <div class="form-group">
+            <label for="cep">CEP</label>
+            <input type="text" id="cep" maxlength="9" placeholder="00000-000" required>
+            <div id="cepError" class="error" style="display:none;">CEP inválido</div>
+          </div>
+          <div class="form-group">
+            <label for="telefone">Telefone</label>
+            <input type="text" id="telefone" maxlength="15" placeholder="(00) 00000-0000" required>
+            <div id="telefoneError" class="error" style="display:none;">Telefone inválido</div>
+          </div>
+          <div class="form-group">
+            <label for="rua">Rua</label>
+            <input type="text" id="rua" required>
+            <div id="ruaError" class="error" style="display:none;">Preencha a rua</div>
+          </div>
+          <div class="form-group">
+            <label for="numero">Número</label>
+            <input type="text" id="numero" required>
+            <div id="numeroError" class="error" style="display:none;">Preencha o número</div>
+          </div>
+          <div class="form-group">
+            <label for="bairro">Bairro</label>
+            <input type="text" id="bairro" required>
+            <div id="bairroError" class="error" style="display:none;">Preencha o bairro</div>
+          </div>
+          <div class="form-group">
+            <label for="cidade">Cidade</label>
+            <input type="text" id="cidade" required>
+            <div id="cidadeError" class="error" style="display:none;">Preencha a cidade</div>
+          </div>
+          <div class="form-group">
+            <label for="complemento">Complemento</label>
+            <input type="text" id="complemento" placeholder="Apto, bloco, etc.">
+          </div>
+          <button type="submit" class="btn">Salvar Endereço</button>
+          <div id="formMessage" class="success" style="display:none;"></div>
+        </form>
       </div>
-      <div class="form-group">
-        <label for="telefone">Telefone</label>
-        <input type="text" id="telefone" maxlength="15" placeholder="(00) 00000-0000" required>
-        <div id="telefoneError" class="error" style="display:none;">Telefone inválido</div>
-      </div>
-      <div class="form-group">
-        <label for="rua">Rua</label>
-        <input type="text" id="rua" required>
-        <div id="ruaError" class="error" style="display:none;">Preencha a rua</div>
-      </div>
-      <div class="form-group">
-        <label for="numero">Número</label>
-        <input type="text" id="numero" required>
-        <div id="numeroError" class="error" style="display:none;">Preencha o número</div>
-      </div>
-      <div class="form-group">
-        <label for="bairro">Bairro</label>
-        <input type="text" id="bairro" required>
-        <div id="bairroError" class="error" style="display:none;">Preencha o bairro</div>
-      </div>
-      <div class="form-group">
-        <label for="cidade">Cidade</label>
-        <input type="text" id="cidade" required>
-        <div id="cidadeError" class="error" style="display:none;">Preencha a cidade</div>
-      </div>
-      <div class="form-group">
-        <label for="complemento">Complemento</label>
-        <input type="text" id="complemento" placeholder="Apto, bloco, etc.">
-      </div>
-      <button type="submit" class="btn">Salvar Endereço</button>
-      <div id="formMessage" class="success" style="display:none;"></div>
-    </form>
+    </main>
   </div>
+  <div id="footer-container"></div>
   <script type="module">
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
     import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { firebaseConfig } from './js/firebase-config.js';
+
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
 
     // Inicialização Firebase
     const app = initializeApp(firebaseConfig);
