@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editar Endereço - Farmácia São Benedito</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/account-styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
@@ -21,6 +23,10 @@
     <main class="flex-1 p-6 bg-gray-50">
       <section id="address-form-section" class="bg-white p-8 rounded-xl shadow-lg mb-8 max-w-2xl mx-auto">
         <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center"><i class="fas fa-map-marker-alt mr-3 text-blue-600"></i>Editar Endereço</h2>
+        <div class="flex justify-between items-center mb-6">
+          <a href="endereco-entrega.html" class="bg-gray-200 hover:bg-gray-300 text-blue-800 font-semibold py-2 px-4 rounded flex items-center"><i class="fas fa-arrow-left mr-2"></i>Voltar para Endereços</a>
+          <a href="formulario-endereco-editar.html" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded flex items-center"><i class="fas fa-plus mr-2"></i>Novo Endereço</a>
+        </div>
         <form id="addressForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="col-span-1">
             <label for="cep" class="block text-sm font-semibold text-gray-700 mb-1 flex items-center"><i class="fas fa-location-arrow mr-2 text-blue-500"></i>CEP</label>
@@ -98,12 +104,14 @@
       const section = document.getElementById('address-form-section');
       const cepInput = document.getElementById('cep');
       const telefoneInput = document.getElementById('telefone');
+      const title = document.querySelector('h2');
+      const submitBtn = addressForm.querySelector('button[type="submit"]');
       // Verificação de autenticação
       auth.onAuthStateChanged(async function(user) {
         if (!user) {
           if (addressForm) addressForm.classList.add('hidden');
           if (formMessage) {
-            formMessage.textContent = 'Você precisa estar logado para editar um endereço.';
+            formMessage.textContent = 'Você precisa estar logado para acessar.';
             formMessage.classList.remove('hidden', 'text-green-600');
             formMessage.classList.add('text-red-600');
           }
@@ -114,15 +122,20 @@
           if (formMessage) formMessage.classList.add('hidden');
           if (section) section.classList.remove('opacity-60');
         }
-        // Carrega dados do endereço
+        // Carrega dados do endereço SOMENTE SE HOUVER id
         const enderecoId = getParam('id');
         if (!enderecoId) {
-          formMessage.textContent = 'Endereço não encontrado.';
-          formMessage.classList.remove('hidden', 'text-green-600');
-          formMessage.classList.add('text-red-600');
-          addressForm.classList.add('hidden');
+          // Modo INSERÇÃO
+          if (title) title.innerHTML = '<i class="fas fa-map-marker-alt mr-3 text-blue-600"></i>Novo Endereço';
+          if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Salvar Endereço';
+          addressForm.reset();
+          // Foco automático no campo CEP ao inserir novo endereço
+          setTimeout(() => { if (cepInput) cepInput.focus(); }, 100);
           return;
         }
+        // Modo EDIÇÃO
+        if (title) title.innerHTML = '<i class="fas fa-map-marker-alt mr-3 text-blue-600"></i>Editar Endereço';
+        if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Salvar Alteração';
         try {
           const enderecoRef = doc(db, 'usuarios', user.uid, 'enderecos', enderecoId);
           const snap = await getDoc(enderecoRef);
@@ -154,6 +167,10 @@
         e.preventDefault();
         formMessage.classList.add('hidden');
         formMessage.textContent = '';
+        // Limpa destaques anteriores
+        [cepInput, telefoneInput, addressForm.rua, addressForm.numero, addressForm.bairro, addressForm.cidade].forEach(input => {
+          input.classList.remove('border-red-500');
+        });
         // Validação
         let valid = true;
         const cep = cepInput.value.trim();
@@ -164,12 +181,27 @@
         const cidade = addressForm.cidade.value.trim();
         if (!/^\d{5}-?\d{3}$/.test(cep)) {
           valid = false;
+          cepInput.classList.add('border-red-500');
         }
         if (!(telefone.length === 10 || telefone.length === 11)) {
           valid = false;
+          telefoneInput.classList.add('border-red-500');
         }
-        if (!rua || !numero || !bairro || !cidade) {
+        if (!rua) {
           valid = false;
+          addressForm.rua.classList.add('border-red-500');
+        }
+        if (!numero) {
+          valid = false;
+          addressForm.numero.classList.add('border-red-500');
+        }
+        if (!bairro) {
+          valid = false;
+          addressForm.bairro.classList.add('border-red-500');
+        }
+        if (!cidade) {
+          valid = false;
+          addressForm.cidade.classList.add('border-red-500');
         }
         if (!valid) {
           formMessage.textContent = 'Corrija os campos destacados.';
@@ -182,6 +214,26 @@
           if (!user) throw new Error('Usuário não autenticado.');
           const complemento = addressForm.complemento.value.trim();
           const enderecoId = getParam('id');
+          if (!enderecoId) {
+            // INSERÇÃO: Novo endereço
+            const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+            const enderecosCol = collection(db, 'usuarios', user.uid, 'enderecos');
+            await addDoc(enderecosCol, {
+              cep,
+              telefone,
+              rua,
+              numero,
+              bairro,
+              cidade,
+              complemento
+            });
+            formMessage.textContent = 'Endereço cadastrado com sucesso!';
+            formMessage.classList.remove('hidden', 'text-red-600');
+            formMessage.classList.add('text-green-600');
+            addressForm.reset();
+            return;
+          }
+          // EDIÇÃO: Atualiza endereço existente
           const enderecoRef = doc(db, 'usuarios', user.uid, 'enderecos', enderecoId);
           await updateDoc(enderecoRef, {
             cep,
@@ -196,7 +248,8 @@
           formMessage.classList.remove('hidden', 'text-red-600');
           formMessage.classList.add('text-green-600');
         } catch (error) {
-          formMessage.textContent = 'Erro ao alterar endereço: ' + error.message;
+          console.error('Erro ao salvar endereço:', error);
+          formMessage.textContent = 'Erro ao salvar endereço: ' + error.message;
           formMessage.classList.remove('hidden', 'text-green-600');
           formMessage.classList.add('text-red-600');
         }
