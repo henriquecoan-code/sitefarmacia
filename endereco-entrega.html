@@ -10,60 +10,36 @@
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
-  <!-- Navbar mobile (só aparece em telas pequenas) -->
-  <nav class="md:hidden fixed top-0 left-0 right-0 z-40 bg-white shadow flex items-center justify-between px-4 py-2">
-    <button id="open-navbar-menu" class="p-2 rounded focus:outline-none" aria-label="Abrir menu">
-      <i class="fas fa-bars text-xl text-blue-800"></i>
-    </button>
-    <span class="font-bold text-blue-800">Menu</span>
-    <div></div>
-    <!-- Espaço para centralizar o título -->
-    <!-- Dropdown do menu -->
-    <div id="navbar-dropdown" class="absolute left-2 top-12 w-48 bg-white rounded shadow-lg border border-gray-100 py-2 hidden transition-all">
-      <a href="./minha-conta.html" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Minha Conta</a>
-      <a href="./endereco-entrega.html" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Endereços de Entrega</a>
-      <a href="./pedidos.html" class="block px-4 py-2 text-blue-900 font-bold hover:bg-blue-50">Pedidos</a>
-    </div>
-  </nav>
-  <div class="flex flex-col md:flex-row pt-12 md:pt-0">
-    <!--menu esquerdo-->
-    <aside id="aside-menu" class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto flex-col">
-      <nav class="flex flex-col space-y-4 px-6 mt-8">
-        <a href="./minha-conta.html" class="text-gray-700 hover:text-blue-700 transition">Minha Conta</a>
-        <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
-        <a href="./pedidos.html" class="text-blue-900 font-bold hover:text-blue-700 transition">Pedidos</a>
-        <hr class="my-2">
-      </nav>
-    </aside>
-    <!-- Conteúdo principal -->
-    <!-- Endereço Principal -->
-    <main class="flex-1 p-6 bg-gray-50">
-        <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
-            <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
-              <i class="fas fa-edit mr-1"></i> Editar
-            </a>
-          </div>
-          <div id="address-loading" class="text-center text-gray-600">Carregando endereço...</div>
-          <div id="main-address" class="hidden"></div>
-          <div id="no-address" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
-        </section>
-        <section id="all-addresses-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-list mr-2"></i>Todos os Endereços</h2>
-            <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
-              <i class="fas fa-plus mr-1"></i> Novo Endereço
-            </a>
-          </div>
-          <div id="addresses-loading" class="text-center text-gray-600">Carregando endereços...</div>
-          <div id="addresses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-          <div id="no-addresses" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
-        </section>
-    </main>
+  <!-- Conteúdo principal sem menu lateral -->
+  <main class="flex-1 p-6 bg-gray-50 max-w-4xl mx-auto">
+    <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
+        <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
+          <i class="fas fa-edit mr-1"></i> Editar
+        </a>
+      </div>
+      <div id="address-loading" class="text-center text-gray-600">Carregando endereço...</div>
+      <div id="main-address" class="hidden"></div>
+      <div id="no-address" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
+    </section>
+    <section id="all-addresses-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-list mr-2"></i>Todos os Endereços</h2>
+        <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
+          <i class="fas fa-plus mr-1"></i> Novo Endereço
+        </a>
+      </div>
+      <div id="addresses-loading" class="text-center text-gray-600">Carregando endereços...</div>
+      <div id="addresses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <div id="no-addresses" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
+    </section>
     <!-- Toast visual para feedback -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-green-600 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 transition-opacity duration-300"></div>
-    <script type="module">
+  </main>
+  <div id="footer-container"></div>
+  <script src="js/auth-mobile.js"></script>
+  <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
     import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
@@ -290,21 +266,6 @@ function showToast(message, type = 'success') {
     toast.style.opacity = '0';
     setTimeout(() => toast.classList.add('hidden'), 300);
   }, 2500);
-}
-
-// Menu mobile: navbar com dropdown
-const openNavbarMenu = document.getElementById('open-navbar-menu');
-const navbarDropdown = document.getElementById('navbar-dropdown');
-if (openNavbarMenu && navbarDropdown) {
-  openNavbarMenu.addEventListener('click', () => {
-    navbarDropdown.classList.toggle('hidden');
-  });
-  // Fecha o dropdown ao clicar fora
-  document.addEventListener('click', (e) => {
-    if (!navbarDropdown.contains(e.target) && !openNavbarMenu.contains(e.target)) {
-      navbarDropdown.classList.add('hidden');
-    }
-  });
 }
   </script>
     </div>
