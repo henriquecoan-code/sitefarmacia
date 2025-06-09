@@ -99,3 +99,553 @@ https://github.com/JoPCardoso2203/App-agendamento/tree/7c0707f48ddbaf6a5af89402d
             value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1
 ```
 
+# Code Citations
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+ 
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+ 
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar End
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+ 
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <link
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <link rel
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <link rel="
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <link rel="stylesheet
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <link rel="stylesheet"
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <link rel="stylesheet" href
+```
+
+
+## License: unknown
+https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c31522e4f88956499/endereco.php
+
+```
+>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Endereço</title>
+  <link rel="stylesheet" href="
+```
+
