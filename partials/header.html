@@ -152,57 +152,31 @@
     window.openAuthModal = openAuthModal;
     </script>
   </header>
-  <!-- Menu Mobile Off-canvas Alpine.js -->
-  <div x-data="{ mobileMenuOpen: false }" class="md:hidden bg-white shadow-sm sticky top-0 z-50">
-    <!-- Menu Mobile Topbar -->
-    <div class="md:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow flex items-center px-2 py-2">
-      <button @click="mobileMenuOpen = true" class="text-blue-900 text-2xl focus:outline-none mr-2 flex-shrink-0">
-        <i class="fas fa-bars"></i>
-      </button>
-      <form class="flex-1 flex justify-center" onsubmit="event.preventDefault();">
-        <div class="relative w-full max-w-xs">
-          <input type="text" placeholder="Buscar medicamentos..." class="w-full px-3 py-1.5 rounded-full border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <button class="absolute right-0 top-0 h-full px-3 text-white bg-blue-700 rounded-r-full hover:bg-blue-800 text-sm">
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
-      </form>
-    </div>
-    <div class="flex items-center justify-between px-2 py-1">
-      <!-- 5. Botão do menu mobile à esquerda (maior) -->
-      <!-- 2. Logo centralizado, maior -->
-      <!-- 6. Usuário (avatar/entrar) à direita -->
-      <div id="authContainerSecondaryMobile" class="flex-shrink-0 flex justify-end items-center min-w-[48px]"></div>
-      <!-- Carrinho à direita no mobile (maior) -->
-      <a href="./carrinho-novo.html" id="cart-icon-mobile" class="ml-3 text-blue-900 text-3xl flex items-center relative">
-        <i class="fas fa-shopping-cart"></i>
-        <span id="cart-count-mobile" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+  <!-- Menu Topbar (MOBILE: sempre visível; DESKTOP: aparece só após rolar) -->
+  <div id="topbar-fixed" x-data="{ mobileMenuOpen: false }"
+    class="fixed top-0 left-0 right-0 z-50 bg-white shadow flex items-center px-2 py-2 md:hidden">
+    <button @click="mobileMenuOpen = true" class="text-blue-900 text-2xl focus:outline-none mr-2 flex-shrink-0 md:mr-4">
+      <i class="fas fa-bars"></i>
+    </button>
+    <form class="flex-1 flex justify-center" id="header-search-form">
+      <div class="relative w-full max-w-lg">
+        <input type="text" id="header-search-input" placeholder="Buscar medicamentos..." class="w-full px-4 py-2 rounded-full border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button type="submit" class="absolute right-0 top-0 h-full px-4 text-white bg-blue-700 rounded-r-full hover:bg-blue-800 text-base">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </form>
+    <div class="flex items-center ml-2">
+      <div id="authContainerSecondary" class="text-center relative"></div>
+      <a href="./carrinho-novo.html" id="cart-icon" class="ml-4 text-gray-700 hover:text-blue-700 relative">
+        <i class="fas fa-shopping-cart text-xl"></i>
+        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
       </a>
     </div>
     <!-- Overlay -->
-    <div 
-      x-show="mobileMenuOpen"
-      @click="mobileMenuOpen = false"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200"
-      x-transition.opacity
-      x-cloak
-      style="display: none;"
-    ></div>
-    <!-- Menu lateral -->
-    <aside
-      x-show="mobileMenuOpen"
-      @keydown.escape.window="mobileMenuOpen = false"
-      class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-200"
-      x-transition:enter="transition transform duration-200"
-      x-transition:enter-start="-translate-x-full"
-      x-transition:enter-end="translate-x-0"
-      x-transition:leave="transition transform duration-200"
-      x-transition:leave-start="translate-x-0"
-      x-transition:leave-end="-translate-x-full"
-      x-cloak
-      tabindex="-1"
-      style="display: none;"
-    >
+    <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200" x-transition.opacity x-cloak style="display: none;"></div>
+    <!-- Menu lateral (drawer) FIXADO NO HEADER -->
+    <aside x-show="mobileMenuOpen" @keydown.escape.window="mobileMenuOpen = false" class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-200" x-transition:enter="transition transform duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" x-cloak tabindex="-1" style="display: none;">
       <div class="flex items-center justify-between px-4 py-4 border-b">
         <span class="font-bold text-blue-900 text-lg">Menu</span>
         <button @click="mobileMenuOpen = false" class="text-gray-700 text-2xl focus:outline-none">
@@ -236,8 +210,39 @@
       </nav>
     </aside>
   </div>
-  <!-- Ajusta o espaçamento do conteúdo para não ficar atrás da barra -->
-  <div class="h-16"></div>
+<!-- Ajusta o espaçamento do conteúdo para não ficar atrás da barra -->
+<div id="topbar-spacer" class="h-16" style="display:none"></div>
+<script>
+// DEBUG: Força exibição do topbar-fixed para testar se o elemento está sendo renderizado
+console.log('topbar-fixed:', document.getElementById('topbar-fixed'));
+// Exibe o topbar mobile sempre em telas < md, e no desktop só após scroll
+function updateTopbarVisibility() {
+  const topbar = document.getElementById('topbar-fixed');
+  const spacer = document.getElementById('topbar-spacer');
+  if (!topbar || !spacer) return;
+  // Remove qualquer classe 'hidden' e display:none do elemento
+  topbar.classList.remove('hidden');
+  topbar.style.removeProperty('display');
+  // Garante que o elemento está visível no mobile
+  const isMobile = window.matchMedia('(max-width: 767px)').matches;
+  if (isMobile) {
+    topbar.style.display = 'flex';
+    spacer.style.display = 'block';
+    // Força visibilidade para Alpine/JS
+    topbar.removeAttribute('hidden');
+    topbar.removeAttribute('aria-hidden');
+  } else {
+    topbar.style.display = 'none';
+    spacer.style.display = 'none';
+  }
+}
+window.addEventListener('resize', updateTopbarVisibility);
+window.addEventListener('orientationchange', updateTopbarVisibility);
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(updateTopbarVisibility, 0);
+  setTimeout(updateTopbarVisibility, 300);
+});
+</script>
   <script>
 // Atualiza contador do carrinho no header (desktop e mobile)
 document.addEventListener('DOMContentLoaded', function() {
@@ -267,6 +272,23 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(e) {}
   }
 });
+</script>
+  <script>
+// Busca global: direciona para produto.html ao pesquisar
+function handleHeaderSearch(e) {
+  e.preventDefault();
+  var input = document.getElementById('header-search-input');
+  if (!input) return;
+  var search = input.value.trim();
+  if (search.length === 0) return;
+  // Sempre redireciona para produto.html, mesmo se não estiver nela
+  window.location.href = './produto.html?busca=' + encodeURIComponent(search);
+}
+// Garante que o form do header está com o listener correto
+var headerSearchForm = document.getElementById('header-search-form');
+if (headerSearchForm) {
+  headerSearchForm.addEventListener('submit', handleHeaderSearch);
+}
 </script>
 </body>
 </html>

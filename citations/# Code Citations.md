@@ -2246,3 +2246,1124 @@ https://github.com/Jeni1336/projetoquartosemestre/blob/9c75db5bc974b9d3edfded4c3
   <link rel="stylesheet" href="css
 ```
 
+# Code Citations
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                           
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                           
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                               
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                               
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                           
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                           
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                       
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                       
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                       
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                       
+```
+
+
+## License: MIT
+https://github.com/rriverak/gogo/blob/61363256b386d7e380a665ad8513c2a183de3542/web/templates/views/app/session.page.html
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <
+```
+
+
+## License: unknown
+https://github.com/jaydee153/FloraFusionMarket/blob/303c4ecda8587811366984ec3eaf9b06dd4d4089/Customer/products.php
+
+```
+/select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <
+```
+

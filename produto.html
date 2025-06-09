@@ -78,17 +78,6 @@
                                 <option value="">Todas as subcategorias</option>
                             </select>
                         </div>
-                        <div class="relative w-full sm:w-auto">
-                            <input 
-                                type="text" 
-                                id="busca-produto" 
-                                placeholder="Buscar produtos..." 
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
-                            >
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -250,6 +239,37 @@
     const subcatSelect = document.getElementById('filtro-subcategoria');
     const searchInput = document.getElementById('busca-produto');
 
+    // Integra busca do header/topbar ao filtro local
+    function listenHeaderSearch() {
+      // Observa mudanças na URL (popstate e pushState)
+      function onUrlChange() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const buscaParam = urlParams.get('busca');
+        if (buscaParam) {
+          currentSearch = buscaParam;
+          searchInput.value = buscaParam;
+          applyFilters();
+        } else {
+          currentSearch = '';
+          searchInput.value = '';
+          applyFilters();
+        }
+      }
+      window.addEventListener('popstate', onUrlChange);
+      // Monkey patch pushState/replaceState para detectar navegação via JS
+      const origPushState = history.pushState;
+      history.pushState = function() {
+        origPushState.apply(this, arguments);
+        onUrlChange();
+      };
+      const origReplaceState = history.replaceState;
+      history.replaceState = function() {
+        origReplaceState.apply(this, arguments);
+        onUrlChange();
+      };
+    }
+    listenHeaderSearch();
+
     // Menu lateral esquerdo
     const asideLinks = document.querySelectorAll('aside nav a[data-categoria], #aside-todos');
 
@@ -294,11 +314,6 @@
 
     subcatSelect.addEventListener('change', e => {
       currentSubcategory = e.target.value;
-      applyFilters();
-    });
-
-    searchInput.addEventListener('input', e => {
-      currentSearch = e.target.value;
       applyFilters();
     });
 
@@ -373,7 +388,16 @@
     }
 
     // Inicialização
-    fetchProducts();
+    // Se houver busca na query string, aplica na busca
+    const urlParams = new URLSearchParams(window.location.search);
+    const buscaParam = urlParams.get('busca');
+    if (buscaParam) {
+      currentSearch = buscaParam;
+      searchInput.value = buscaParam;
+      applyFilters();
+    } else {
+      fetchProducts();
+    }
     </script>
     <script src="js/auth-mobile.js"></script>
 </body>
