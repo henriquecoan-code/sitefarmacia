@@ -46,10 +46,12 @@
           <div id="no-addresses" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
         </section>
     </main>
+    <!-- Toast visual para feedback -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-green-600 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 transition-opacity duration-300"></div>
     <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -134,16 +136,11 @@
       noAddress.classList.add('hidden');
       addressLoading.classList.remove('hidden');
       try {
-        // Busca todos os endereços do usuário na subcoleção 'endereco'
-        const enderecosRef = collection(db, 'usuarios', uid, 'enderecos');
-        const querySnapshot = await getDocs(enderecosRef);
-        let enderecos = [];
-        querySnapshot.forEach((docSnap) => {
-          enderecos.push({ id: docSnap.id, ...docSnap.data() });
-        });
-        // Exibe o primeiro endereço como principal (ou lógica futura para campo principal)
-        if (enderecos.length > 0) {
-          const principal = enderecos[0];
+        // Busca o campo 'endereco' do documento do usuário
+        const userDocRef = doc(db, 'usuarios', uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists() && userDocSnap.data().endereco) {
+          const principal = userDocSnap.data().endereco;
           addressLoading.classList.add('hidden');
           mainAddressDiv.innerHTML = `
             <div class="space-y-1">
@@ -159,6 +156,7 @@
           noAddress.classList.add('hidden');
           return;
         }
+        // Se não houver campo endereco, exibe mensagem
         addressLoading.classList.add('hidden');
         noAddress.classList.remove('hidden');
         mainAddressDiv.classList.add('hidden');
@@ -207,6 +205,7 @@
             <div class="flex gap-2 mt-2">
               <a href="./formulario-endereco.html?id=${endereco.id}&rua=${encodeURIComponent(endereco.rua||'')}&numero=${encodeURIComponent(endereco.numero||'')}&bairro=${encodeURIComponent(endereco.bairro||'')}&cidade=${encodeURIComponent(endereco.cidade||'')}&cep=${encodeURIComponent(endereco.cep||'')}&telefone=${encodeURIComponent(endereco.telefone||'')}&complemento=${encodeURIComponent(endereco.complemento||'')}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
               <button class="text-green-600 hover:text-green-800 text-sm flex items-center set-main-address-btn" data-id="${endereco.id}"><i class="fas fa-star mr-1"></i>Tornar Principal</button>
+              <button class="text-red-600 hover:text-red-800 text-sm flex items-center delete-address-btn" data-id="${endereco.id}"><i class="fas fa-trash mr-1"></i>Deletar</button>
             </div>
           `;
           addressesList.appendChild(card);
@@ -220,16 +219,38 @@
               // Busca o endereço selecionado
               const enderecoRef = collection(db, 'usuarios', auth.currentUser.uid, 'enderecos');
               const enderecoDoc = await getDoc(doc(enderecoRef, enderecoId));
-              if (!enderecoDoc.exists()) return alert('Endereço não encontrado.');
+              if (!enderecoDoc.exists()) {
+                showToast('Endereço não encontrado.', 'error');
+                return;
+              }
               const enderecoData = enderecoDoc.data();
               // Atualiza o campo endereco principal no documento do usuário
               await updateDoc(doc(db, 'usuarios', auth.currentUser.uid), {
                 endereco: enderecoData
               });
-              alert('Endereço principal atualizado com sucesso!');
+              showToast('Endereço principal atualizado com sucesso!', 'success');
+              // Atualiza o card principal imediatamente
               await loadMainAddress(auth.currentUser.uid);
             } catch (e) {
-              alert('Erro ao definir endereço principal.');
+              showToast('Erro ao definir endereço principal.', 'error');
+              console.error(e);
+            }
+          });
+        });
+        // Adiciona evento para deletar endereço
+        addressesList.querySelectorAll('.delete-address-btn').forEach(btn => {
+          btn.addEventListener('click', async function() {
+            const enderecoId = this.getAttribute('data-id');
+            if (!enderecoId) return;
+            if (!confirm('Tem certeza que deseja deletar este endereço?')) return;
+            try {
+              const enderecoRef = doc(db, 'usuarios', auth.currentUser.uid, 'enderecos', enderecoId);
+              await deleteDoc(enderecoRef);
+              showToast('Endereço deletado com sucesso!', 'success');
+              await loadAllAddresses(auth.currentUser.uid);
+              await loadMainAddress(auth.currentUser.uid);
+            } catch (e) {
+              showToast('Erro ao deletar endereço.', 'error');
               console.error(e);
             }
           });
@@ -240,6 +261,21 @@
         console.error(error);
       }
     }
+
+    // Função para exibir toast visual
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = '';
+  toast.innerHTML = `<i class="fas fa-$
+{type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+  toast.className = `fixed bottom-6 right-6 z-50 bg-${type === 'success' ? 'green' : 'red'}-600 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 transition-opacity duration-300`;
+  toast.classList.remove('hidden');
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.classList.add('hidden'), 300);
+  }, 2500);
+}
   </script>
     </div>
   <div id="footer-container"></div>
