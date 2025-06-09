@@ -110,8 +110,8 @@ function setupAuthMobile() {
 }
 
 // Expor funções no escopo global
-window.renderAuthMobileMenu = renderAuthMobileMenu;
 window.renderMobileAuth = renderMobileAuth;
+window.renderAuthMobileMenu = renderAuthMobileMenu;
 window.setupAuthMobile = setupAuthMobile;
 window.observeMobileMenuAuth = observeMobileMenuAuth;
 
