@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novo Endereço - Farmácia São Benedito</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="css/account-styles.css">
+  <!-- Adicione aqui o seu CSS do Tailwind gerado localmente, por exemplo: -->
+  <link rel="stylesheet" href="css/tailwind.css">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <div id="header-container"></div>
+
+  <div class="flex flex-col md:flex-row">
+    <!--menu esquerdo-->
+    <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
+      <nav class="flex flex-col space-y-4 px-6 mt-8">
+        <a href="./minha-conta.html" class="text-blue-900 font-bold hover:text-blue-700 transition">Minha Conta</a>
+        <a href="./endereco-entrega.html" class="text-gray-700 hover:text-blue-700 transition">Endereços de Entrega</a>
+        <a href="./pedidos.html" class="text-gray-700 hover:text-blue-700 transition">Pedidos</a>
+        <hr class="my-2">
+      </nav>
+    </aside>
+    <!-- Conteúdo principal -->
+    <main class="flex-1 p-6 bg-white rounded-r-lg shadow-lg mt-8 mb-8">
+      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold mb-6 text-blue-900 text-center">Adicionar Novo Endereço</h1>
+        <form id="address-form" class="space-y-5">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-800 mb-1">Nome Completo <span class="text-red-500">*</span></label>
+            <input type="text" id="name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Digite seu nome completo">
+          </div>
+          <div>
+            <label for="street" class="block text-sm font-medium text-gray-800 mb-1">Rua <span class="text-red-500">*</span></label>
+            <input type="text" id="street" name="street" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Ex: Av. Brasil, 123">
+          </div>
+          <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+            <div class="flex-1">
+              <label for="city" class="block text-sm font-medium text-gray-800 mb-1">Cidade <span class="text-red-500">*</span></label>
+              <input type="text" id="city" name="city" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Ex: Belo Horizonte">
+            </div>
+            <div class="flex-1">
+              <label for="state" class="block text-sm font-medium text-gray-800 mb-1">Estado <span class="text-red-500">*</span></label>
+              <input type="text" id="state" name="state" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="Ex: MG">
+            </div>
+            <div class="flex-1">
+              <label for="zip" class="block text-sm font-medium text-gray-800 mb-1">CEP <span class="text-red-500">*</span></label>
+              <input type="text" id="zip" name="zip" required maxlength="9" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-600 focus:ring-blue-600 px-3 py-2 transition bg-gray-50" placeholder="00000-000">
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow hover:bg-blue-800 transition">Adicionar Endereço</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+  <div id="footer-container"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    try {
+      await loadHeader('header-container', 'authContainerSecondary');
+    } catch (e) {
+      console.error('Erro ao carregar o header:', e);
+    }
+    try {
+      await loadFooter('footer-container');
+    } catch (e) {
+      console.error('Erro ao carregar o footer:', e);
+    }
+        const loading = document.getElementById('loading');
+    const errorMessage = document.getElementById('error-message');
+    const noOrders = document.getElementById('no-orders');
+    const ordersList = document.getElementById('orders-list');
+
+    function showError(msg) {
+      if (loading) loading.classList.add('hidden');
+      if (errorMessage) {
+        errorMessage.textContent = msg;
+        errorMessage.classList.remove('hidden');
+      }
+    }
+
+        // OUVINTE DE AUTENTICAÇÃO FORA DO DOMContentLoaded
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        showError('Você precisa estar logado para ver seus pedidos.');
+        return;
+      }
+      console.log('UID do usuário logado:', user.uid); // Diagnóstico do UID
+      try {
+        let pedidos = [];
+        try {
+          // Consulta apenas os pedidos do usuário logado, ordenados por numeroPedido
+          const q = query(
+            collection(db, 'pedidos'),
+            where('userId', '==', user.uid),
+            orderBy('numeroPedido', 'desc')
+          );
+          const snapshot = await getDocs(q);
+          snapshot.forEach(doc => pedidos.push(doc.data()));
+        } catch (err) {
+          // Se erro de índice, busca sem orderBy
+          const q = query(
+            collection(db, 'pedidos'),
+            where('userId', '==', user.uid)
+          );
+          const snapshot = await getDocs(q);
+          snapshot.forEach(doc => pedidos.push(doc.data()));
+        }
+        console.log('Pedidos retornados do Firestore:', pedidos); // <-- Diagnóstico
+        window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
+        if (loading) loading.classList.add('hidden');
+        renderOrders(pedidos);
+        // Chama o carregamento do endereço principal após autenticação
+        await loadMainAddress(user.uid);
+      } catch (e) {
+        showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
+      }
+    });
+    // ...existing code...
+        
+  </script>
+  <script src="js/auth-mobile.js"></script>
+</body>
+</html>
