@@ -114,6 +114,20 @@
       });
     });
 
+    // Preenche o formulário se houver parâmetros na URL
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+    const id = getParam('id');
+    document.getElementById('cep').value = getParam('cep');
+    document.getElementById('telefone').value = getParam('telefone');
+    document.getElementById('rua').value = getParam('rua');
+    document.getElementById('numero').value = getParam('numero');
+    document.getElementById('bairro').value = getParam('bairro');
+    document.getElementById('cidade').value = getParam('cidade');
+    document.getElementById('complemento').value = getParam('complemento');
+
     // Submit do formulário
     document.getElementById('addressForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -147,23 +161,25 @@
         formMessage.className = 'error';
         return;
       }
-
       try {
         const enderecosCol = collection(db, 'usuarios', user.uid, 'enderecos');
-        await addDoc(enderecosCol, {
-          cep,
-          telefone,
-          rua,
-          numero,
-          bairro,
-          cidade,
-          complemento,
-          criadoEm: new Date().toISOString()
-        });
-        formMessage.textContent = 'Endereço salvo com sucesso!';
+        if (id) {
+          // Atualiza endereço existente
+          const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+          await updateDoc(doc(enderecosCol, id), {
+            cep, telefone, rua, numero, bairro, cidade, complemento
+          });
+          formMessage.textContent = 'Endereço atualizado com sucesso!';
+        } else {
+          // Cria novo endereço
+          await addDoc(enderecosCol, {
+            cep, telefone, rua, numero, bairro, cidade, complemento, criadoEm: new Date().toISOString()
+          });
+          formMessage.textContent = 'Endereço salvo com sucesso!';
+          e.target.reset();
+        }
         formMessage.style.display = 'block';
         formMessage.className = 'success';
-        e.target.reset();
       } catch (error) {
         formMessage.textContent = 'Erro ao salvar endereço: ' + error.message;
         formMessage.style.display = 'block';

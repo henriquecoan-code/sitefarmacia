@@ -26,7 +26,7 @@
         <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
-            <a href="./formulario-endereco-novo.html" class="text-blue-600 hover:text-blue-800 text-sm">
+            <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
               <i class="fas fa-edit mr-1"></i> Editar
             </a>
           </div>
@@ -37,7 +37,7 @@
         <section id="all-addresses-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-list mr-2"></i>Todos os Endereços</h2>
-            <a href="./formulario-endereco-novo.html" class="text-blue-600 hover:text-blue-800 text-sm">
+            <a href="./formulario-endereco.html" class="text-blue-600 hover:text-blue-800 text-sm">
               <i class="fas fa-plus mr-1"></i> Novo Endereço
             </a>
           </div>
@@ -205,7 +205,7 @@
             <div><span class="font-semibold">Telefone:</span> ${endereco.telefone || ''}</div>
             <div>${endereco.complemento ? '<span class=\'font-semibold\'>Complemento:</span> ' + endereco.complemento : ''}</div>
             <div class="flex gap-2 mt-2">
-              <a href="./formulario-endereco.html?id=${endereco.id}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
+              <a href="./formulario-endereco.html?id=${endereco.id}&rua=${encodeURIComponent(endereco.rua||'')}&numero=${encodeURIComponent(endereco.numero||'')}&bairro=${encodeURIComponent(endereco.bairro||'')}&cidade=${encodeURIComponent(endereco.cidade||'')}&cep=${encodeURIComponent(endereco.cep||'')}&telefone=${encodeURIComponent(endereco.telefone||'')}&complemento=${encodeURIComponent(endereco.complemento||'')}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center"><i class="fas fa-edit mr-1"></i>Editar</a>
               <button class="text-green-600 hover:text-green-800 text-sm flex items-center set-main-address-btn" data-id="${endereco.id}"><i class="fas fa-star mr-1"></i>Tornar Principal</button>
             </div>
           `;
