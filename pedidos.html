@@ -70,6 +70,20 @@
       }
     }
 
+    // Elemento de filtro moderno apenas para status, em fila única
+    const filterDiv = document.createElement('div');
+    filterDiv.className = 'mb-8 flex flex-wrap gap-2 items-center';
+    filterDiv.innerHTML = `
+      <label for="status-filter" class="block text-sm font-semibold text-blue-900 mr-2 mb-0">Filtrar por status:</label>
+      <button type="button" class="status-btn bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold border-2 border-blue-200 hover:bg-blue-200 transition active" data-status="Pendente">Pendente</button>
+      <button type="button" class="status-btn bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold border-2 border-blue-200 hover:bg-blue-200 transition active" data-status="Em andamento">Em andamento</button>
+      <button type="button" class="status-btn bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold border-2 border-blue-200 hover:bg-blue-200 transition" data-status="Entregue">Entregue</button>
+      <button type="button" class="status-btn bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold border-2 border-blue-200 hover:bg-blue-200 transition" data-status="Cancelado">Cancelado</button>
+      <span class="text-xs text-gray-500 ml-2">Clique para ativar/desativar status</span>
+    `;
+    const mainContainer = document.querySelector('main .max-w-4xl');
+    if (mainContainer) mainContainer.insertBefore(filterDiv, mainContainer.children[1]);
+    let allOrders = [];
     function renderOrders(orders) {
       ordersList.innerHTML = '';
       if (!orders.length) {
@@ -77,6 +91,20 @@
         return;
       }
       noOrders.classList.add('hidden');
+      // Ordena por dataPedido (ou numeroPedido) decrescente
+      orders.sort((a, b) => {
+        // Tenta ordenar por timestamp, senão por numeroPedido
+        if (a.dataPedido && b.dataPedido) {
+          // dataPedido: '11/06/2025, 15:30:00'
+          const parse = s => {
+            const [d, t] = s.split(',');
+            const [dia, mes, ano] = d.trim().split('/').map(Number);
+            return new Date(ano, mes - 1, dia, ...(t ? t.trim().split(':').map(Number) : [0,0,0])).getTime();
+          };
+          return parse(b.dataPedido) - parse(a.dataPedido);
+        }
+        return (b.numeroPedido || 0) - (a.numeroPedido || 0);
+      });
       orders.forEach((order, idx) => {
         const produtosHtml = (order.produtos || []).map(p =>
           `<tr>
@@ -156,27 +184,58 @@
         }
       };
     }
+    // Filtro de status com botões
+    function getSelectedStatuses() {
+      return Array.from(document.querySelectorAll('.status-btn.active')).map(btn => btn.getAttribute('data-status'));
+    }
+    function updateStatusBtnStyles() {
+      document.querySelectorAll('.status-btn').forEach(btn => {
+        if (btn.classList.contains('active')) {
+          btn.classList.add('bg-blue-600','text-white','border-blue-600');
+          btn.classList.remove('bg-blue-100','text-blue-800','border-blue-200');
+        } else {
+          btn.classList.remove('bg-blue-600','text-white','border-blue-600');
+          btn.classList.add('bg-blue-100','text-blue-800','border-blue-200');
+        }
+      });
+    }
+    document.querySelectorAll('.status-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        btn.classList.toggle('active');
+        // Garante que pelo menos um status fique ativo
+        if (getSelectedStatuses().length === 0) {
+          btn.classList.add('active');
+        }
+        updateStatusBtnStyles();
+        applyFilters();
+      });
+    });
+    updateStatusBtnStyles();
 
+    function applyFilters() {
+      const selectedStatuses = getSelectedStatuses();
+      const filtrados = allOrders.filter(order =>
+        selectedStatuses.includes(order.status || 'Pendente')
+      );
+      renderOrders(filtrados);
+    }
     // OUVINTE DE AUTENTICAÇÃO FORA DO DOMContentLoaded
     onAuthStateChanged(auth, async user => {
       if (!user) {
         showError('Você precisa estar logado para ver seus pedidos.');
         return;
       }
-      console.log('UID do usuário logado:', user.uid); // Diagnóstico do UID
       try {
         let pedidos = [];
         try {
-          // Consulta apenas os pedidos do usuário logado, ordenados por numeroPedido
           const q = query(
             collection(db, 'pedidos'),
-            where('userId', '==', user.uid),
-            orderBy('numeroPedido', 'desc')
+            where('userId', '==', user.uid)
           );
           const snapshot = await getDocs(q);
           snapshot.forEach(doc => pedidos.push(doc.data()));
         } catch (err) {
-          // Se erro de índice, busca sem orderBy
+          // fallback
           const q = query(
             collection(db, 'pedidos'),
             where('userId', '==', user.uid)
@@ -184,10 +243,9 @@
           const snapshot = await getDocs(q);
           snapshot.forEach(doc => pedidos.push(doc.data()));
         }
-        console.log('Pedidos retornados do Firestore:', pedidos); // <-- Diagnóstico
-        window.pedidos = pedidos; // Torna os pedidos acessíveis no console para debug
+        allOrders = pedidos;
         if (loading) loading.classList.add('hidden');
-        renderOrders(pedidos);
+        applyFilters();
       } catch (e) {
         showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
       }
