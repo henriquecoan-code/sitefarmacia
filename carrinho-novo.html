@@ -223,7 +223,7 @@
                 if (idx > -1) {
                     newCart[idx].quantidade += delta;
                     if (newCart[idx].quantidade < 1) newCart[idx].quantidade = 1;
-                    await window.saveCartToFirestore(currentUser.uid, newCart);
+                    await window.saveCartToFirestore(newCart);
                 }
             } else {
                 const idx = cart.findIndex(item => item.id === id);
@@ -243,7 +243,7 @@
                 const idx = newCart.findIndex(item => item.id === id);
                 if (idx > -1) {
                     newCart.splice(idx, 1);
-                    await window.saveCartToFirestore(currentUser.uid, newCart);
+                    await window.saveCartToFirestore(newCart);
                 }
             } else {
                 const idx = cart.findIndex(item => item.id === id);
@@ -258,7 +258,7 @@
         async function limparCarrinho() {
             const currentUser = auth.currentUser;
             if (currentUser && window.saveCartToFirestore) {
-                await window.saveCartToFirestore(currentUser.uid, []);
+                await window.saveCartToFirestore([]);
             } else {
                 cart = [];
                 localStorage.setItem('cart', JSON.stringify(cart));
@@ -391,7 +391,7 @@
             // Limpa o carrinho
             const currentUser = auth.currentUser;
             if (currentUser && window.saveCartToFirestore) {
-                await window.saveCartToFirestore(currentUser.uid, []);
+                await window.saveCartToFirestore([]);
             } else {
                 localStorage.removeItem('cart');
             }
