@@ -42,7 +42,6 @@
         </div>
     </main>
     <div id="footer-container"></div>
-    <!-- Removido window.BASE_URL pois não é necessário para Firebase -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
         import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
@@ -203,6 +202,7 @@
                 // onSnapshot para atualização em tempo real
                 if (unsubscribeCart) unsubscribeCart();
                 unsubscribeCart = window.listenCartCount(currentUser.uid, (cartData) => {
+                    console.log('[DEBUG] Dados recebidos do Firestore para o carrinho:', cartData); // <-- Diagnóstico
                     cart = Array.isArray(cartData) ? cartData : (cartData && Array.isArray(cartData.itens) ? cartData.itens : []);
                     renderCart();
                 }, true); // true = retorna array completo
