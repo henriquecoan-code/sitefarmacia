@@ -73,35 +73,72 @@ async function getCartFromFirestore() {
 }
 
 // Atualiza o contador do carrinho em tempo real para desktop e mobile
-function listenCartCount() {
-  const userId = window.getUserId ? window.getUserId() : (window.auth && window.auth.currentUser ? window.auth.currentUser.uid : null);
-  const cartCount = document.getElementById('cart-count');
-  const cartCountMobile = document.getElementById('cart-count-mobile');
-  if (!cartCount && !cartCountMobile) return;
-
-  // Função para atualizar o contador na tela
-  function setCount(total) {
-    if (cartCount) cartCount.textContent = total;
-    if (cartCountMobile) cartCountMobile.textContent = total;
+function listenCartCount(uidOrCallback, callback, returnArray) {
+  // Se chamado como listenCartCount(callback), listenCartCount(uid, callback, returnArray) ou listenCartCount()
+  let uid = null;
+  let cb = null;
+  let retArr = false;
+  if (typeof uidOrCallback === 'function') {
+    cb = uidOrCallback;
+  } else if (typeof uidOrCallback === 'string') {
+    uid = uidOrCallback;
+    cb = callback;
+    retArr = !!returnArray;
   }
-
-  // Se usuário logado, escuta Firestore
-  if (userId && window.firestore) {
-    const { doc, onSnapshot } = window;
-    const cartRef = doc(window.firestore, 'carrinhos', userId);
-    onSnapshot(cartRef, (snap) => {
-      const itens = snap.exists() ? (snap.data().itens || []) : [];
-      const total = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-      setCount(total);
-    });
+  // Se não passar callback, só atualiza o contador do header normalmente
+  if (!cb) {
+    const userId = window.getUserId ? window.getUserId() : (window.auth && window.auth.currentUser ? window.auth.currentUser.uid : null);
+    const cartCount = document.getElementById('cart-count');
+    const cartCountMobile = document.getElementById('cart-count-mobile');
+    if (!cartCount && !cartCountMobile) return;
+    // Função para atualizar o contador na tela
+    function setCount(total) {
+      if (cartCount) cartCount.textContent = total;
+      if (cartCountMobile) cartCountMobile.textContent = total;
+    }
+    // Se usuário logado, escuta Firestore
+    if (userId && window.firestore) {
+      const { doc, onSnapshot } = window;
+      const cartRef = doc(window.firestore, 'carrinhos', userId);
+      onSnapshot(cartRef, (snap) => {
+        const itens = snap.exists() ? (snap.data().itens || []) : [];
+        const total = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+        setCount(total);
+      });
+      return;
+    }
+    // Se não logado, tenta localStorage
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+    setCount(total);
     return;
   }
-
-  // Se não logado, tenta localStorage
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-  setCount(total);
+  // Se passar callback, escuta o documento do carrinho e retorna os itens
+  if (uid && window.firestore) {
+    const { doc, onSnapshot } = window;
+    const cartRef = doc(window.firestore, 'carrinhos', uid);
+    return onSnapshot(cartRef, (snap) => {
+      const itens = snap.exists() ? (snap.data().itens || []) : [];
+      if (retArr) {
+        cb(itens);
+      } else {
+        const total = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+        cb(total);
+      }
+    });
+  } else {
+    // Não logado: localStorage
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (retArr) {
+      cb(cart);
+    } else {
+      const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+      cb(total);
+    }
+    return () => {};
+  }
 }
+window.listenCartCount = listenCartCount;
 
 // Adiciona ao carrinho: sempre salva no Firestore se logado, senão localStorage
 async function addToCart(product, quantidade = 1) {
