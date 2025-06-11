@@ -42,10 +42,7 @@
         </div>
     </main>
     <div id="footer-container"></div>
-    <script>
-        // Set the base URL dynamically based on the environment
-        window.BASE_URL = window.location.origin.includes('localhost') ? 'http://localhost:3000' : 'https://your-production-url.com';
-    </script>
+    <!-- Removido window.BASE_URL pois não é necessário para Firebase -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
         import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
