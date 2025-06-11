@@ -189,8 +189,6 @@
                 const unsub = auth.onAuthStateChanged(u => { unsub(); resolve(u); });
             });
             if (currentUser && window.getCartFromFirestore) {
-                // MIGRAÇÃO: garante que o carrinho local seja migrado ao logar
-                await migrateLocalCartToFirestoreIfNeeded(currentUser);
                 // onSnapshot para atualização em tempo real
                 if (unsubscribeCart) unsubscribeCart();
                 unsubscribeCart = window.listenCartCount(currentUser.uid, (cartData) => {
@@ -201,34 +199,6 @@
                 cart = JSON.parse(localStorage.getItem('cart')) || [];
                 renderCart();
             }
-        }
-
-        // Função para migrar carrinho local para Firestore ao login
-        async function migrateLocalCartToFirestoreIfNeeded(user) {
-            if (!user || !window.saveCartToFirestore) return;
-            const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
-            if (!localCart.length) return;
-            // Busca o carrinho atual do Firestore
-            let firestoreCart = [];
-            try {
-                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
-                const cartDoc = await getDoc(doc(db, 'carrinhos', user.uid));
-                if (cartDoc.exists() && Array.isArray(cartDoc.data().itens)) {
-                    firestoreCart = cartDoc.data().itens;
-                }
-            } catch (e) {}
-            // Mescla os itens: soma quantidades de produtos iguais (pelo id ou nome)
-            const mergedCart = [...firestoreCart];
-            localCart.forEach(localItem => {
-                const idx = mergedCart.findIndex(item => item.id === localItem.id || item.nome === localItem.nome);
-                if (idx >= 0) {
-                    mergedCart[idx].quantidade = (mergedCart[idx].quantidade || 1) + (localItem.quantidade || 1);
-                } else {
-                    mergedCart.push(localItem);
-                }
-            });
-            await window.saveCartToFirestore(user.uid, mergedCart);
-            localStorage.removeItem('cart');
         }
 
         async function updateQty(idx, delta) {
@@ -404,43 +374,6 @@
                 localStorage.removeItem('cart');
             }
         });
-        // Migração automática do carrinho local para Firestore ao login
-        async function migrateLocalCartToFirestoreIfNeeded(user) {
-            if (!user || !window.saveCartToFirestore) return;
-            const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
-            if (!localCart.length) return;
-            // Busca o carrinho atual do Firestore
-            let firestoreCart = [];
-            try {
-                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
-                const cartDoc = await getDoc(doc(db, 'carrinhos', user.uid));
-                if (cartDoc.exists() && Array.isArray(cartDoc.data().itens)) {
-                    firestoreCart = cartDoc.data().itens;
-                }
-            } catch (e) {}
-            // Mescla os itens: soma quantidades de produtos iguais (pelo id ou nome)
-            const mergedCart = [...firestoreCart];
-            localCart.forEach(localItem => {
-                const idx = mergedCart.findIndex(item => item.id === localItem.id || item.nome === localItem.nome);
-                if (idx >= 0) {
-                    mergedCart[idx].quantidade = (mergedCart[idx].quantidade || 1) + (localItem.quantidade || 1);
-                } else {
-                    mergedCart.push(localItem);
-                }
-            });
-            await window.saveCartToFirestore(user.uid, mergedCart);
-            localStorage.removeItem('cart');
-        }
-
-        // Detecta login e faz migração do carrinho local
-        let lastMigratedUid = null;
-        auth.onAuthStateChanged(async user => {
-            if (user && user.uid !== lastMigratedUid) {
-                await migrateLocalCartToFirestoreIfNeeded(user);
-                lastMigratedUid = user.uid;
-            }
-        });
-
         // Inicialização
         loadCart();
         window.updateQty = updateQty;
