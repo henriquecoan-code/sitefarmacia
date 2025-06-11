@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Carrinho Moderno</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .skeleton { animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen">
+    <div id="header-container"></div>
+    <main class="container mx-auto px-4 py-10">
+        <h2 class="text-4xl font-extrabold text-blue-900 mb-10 text-center drop-shadow">Meu Carrinho</h2>
+        <div id="cart-list" class="space-y-8"></div>
+        <div id="cart-total" class="text-right mt-10 text-3xl font-bold text-blue-900"></div>
+        <div id="empty-cart" class="text-center text-gray-400 mt-24 hidden">
+            <i class="fas fa-shopping-cart text-7xl mb-6 animate-bounce"></i>
+            <p class="text-xl">Seu carrinho está vazio.</p>
+        </div>
+        <div class="mt-16 flex justify-end gap-6">
+            <button id="limpar-carrinho" class="bg-gray-200 text-gray-700 px-8 py-4 rounded-lg shadow hover:bg-gray-300 font-bold transition">Limpar Carrinho</button>
+            <button id="finalizar-compra" class="bg-blue-700 text-white px-8 py-4 rounded-lg shadow hover:bg-blue-800 font-bold transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Finalizar Compra</button>
+        </div>
+    </main>
+    <div id="footer-container"></div>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+        import { loadHeader } from './js/header-loader.js';
+        import { loadFooter } from './js/footer-loader.js';
+        import { firebaseConfig } from './js/firebase-config.js';
+        const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        await loadHeader('header-container', 'authContainerSecondary');
+        await loadFooter('footer-container');
+
+        let cart = [];
+        let userId = null;
+
+        async function fetchCartFromFirestore() {
+            return new Promise(resolve => {
+                const unsub = auth.onAuthStateChanged(async user => {
+                    if (user) {
+                        userId = user.uid;
+                        const cartRef = doc(db, 'carrinhos', user.uid);
+                        const cartSnap = await getDoc(cartRef);
+                        if (cartSnap.exists() && Array.isArray(cartSnap.data().itens)) {
+                            cart = cartSnap.data().itens;
+                        } else {
+                            cart = [];
+                        }
+                        renderCart();
+                    } else {
+                        cart = [];
+                        renderCart();
+                    }
+                    unsub();
+                    resolve();
+                });
+            });
+        }
+
+        async function updateCartInFirestore(newCart) {
+            if (!userId) return;
+            const cartRef = doc(db, 'carrinhos', userId);
+            await setDoc(cartRef, { itens: newCart }, { merge: true });
+            cart = newCart;
+            renderCart();
+        }
+
+        function renderCart() {
+            const cartList = document.getElementById('cart-list');
+            const cartTotal = document.getElementById('cart-total');
+            const emptyCart = document.getElementById('empty-cart');
+            const finalizarBtn = document.getElementById('finalizar-compra');
+            cartList.innerHTML = '';
+            let total = 0;
+            if (!cart || cart.length === 0) {
+                emptyCart.classList.remove('hidden');
+                cartTotal.textContent = '';
+                finalizarBtn.disabled = true;
+                return;
+            } else {
+                emptyCart.classList.add('hidden');
+                finalizarBtn.disabled = false;
+            }
+            cart.forEach((item, idx) => {
+                const preco = item.valorComDesconto || item.precoMaximo || 0;
+                const subtotal = item.quantidade * preco;
+                total += subtotal;
+                const el = document.createElement('div');
+                el.className = "flex flex-col md:flex-row items-center bg-white rounded-2xl shadow-2xl p-6 gap-8 border border-blue-100 hover:shadow-blue-200 transition-all duration-200";
+                const imgUrl = (item.fotos && item.fotos.length > 0 && item.fotos[0]) ? item.fotos[0] : '/img/medicamento.png';
+                el.innerHTML = `
+                    <img src="${imgUrl}"
+                        alt="${item.nome}"
+                        class="w-32 h-32 object-contain rounded-xl bg-blue-50 border border-blue-200 shadow mb-4 md:mb-0">
+                    <div class="flex-1 w-full flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-2xl text-blue-900 mb-1">${item.nome}</h3>
+                            <p class="text-gray-500 text-base mb-3 line-clamp-2">${item.descricao || ''}</p>
+                        </div>
+                        <div class="flex items-center gap-3 mt-2">
+                            <button class="btn-qty bg-blue-100 px-4 py-2 rounded-lg text-xl font-bold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${item.id}" data-delta="-1" aria-label="Diminuir quantidade">-</button>
+                            <span class="mx-2 min-w-[36px] text-center text-lg font-semibold">${item.quantidade}</span>
+                            <button class="btn-qty bg-blue-100 px-4 py-2 rounded-lg text-xl font-bold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${item.id}" data-delta="1" aria-label="Aumentar quantidade">+</button>
+                            <span class="ml-6 text-blue-700 font-bold text-lg">R$ ${preco.toFixed(2)}</span>
+                            <button class="btn-remove ml-8 text-red-600 hover:text-red-800 transition-colors px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400" data-id="${item.id}" aria-label="Remover item">
+                                <i class="fas fa-trash"></i> <span class="hidden md:inline">Remover</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-right font-bold text-xl w-36 min-w-[120px] text-blue-900">
+                        Subtotal:<br><span class="text-2xl">R$ ${subtotal.toFixed(2)}</span>
+                    </div>
+                `;
+                cartList.appendChild(el);
+            });
+            cartTotal.innerHTML = `<span class="text-gray-700">Total:</span> <span class="text-4xl text-blue-900 font-extrabold">R$ ${total.toFixed(2)}</span>`;
+            // Listeners
+            cartList.querySelectorAll('.btn-qty').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.getAttribute('data-id');
+                    const delta = parseInt(btn.getAttribute('data-delta'), 10);
+                    let newCart = [...cart];
+                    const idx = newCart.findIndex(item => item.id === id);
+                    if (idx > -1) {
+                        newCart[idx].quantidade += delta;
+                        if (newCart[idx].quantidade < 1) newCart[idx].quantidade = 1;
+                        await updateCartInFirestore(newCart);
+                    }
+                });
+            });
+            cartList.querySelectorAll('.btn-remove').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.getAttribute('data-id');
+                    let newCart = cart.filter(item => item.id !== id);
+                    await updateCartInFirestore(newCart);
+                });
+            });
+        }
+
+        document.getElementById('limpar-carrinho').addEventListener('click', async () => {
+            await updateCartInFirestore([]);
+        });
+
+        document.getElementById('finalizar-compra').addEventListener('click', () => {
+            alert('Funcionalidade de finalização de compra não implementada neste teste.');
+        });
+
+        fetchCartFromFirestore();
+    </script>
+</body>
+</html>
