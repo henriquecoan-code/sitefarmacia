@@ -202,8 +202,17 @@
                 // onSnapshot para atualização em tempo real
                 if (unsubscribeCart) unsubscribeCart();
                 unsubscribeCart = window.listenCartCount(currentUser.uid, (cartData) => {
-                    console.log('[DEBUG] Dados recebidos do Firestore para o carrinho:', cartData); // <-- Diagnóstico
-                    cart = Array.isArray(cartData) ? cartData : (cartData && Array.isArray(cartData.itens) ? cartData.itens : []);
+                    // Normaliza para garantir que cart seja sempre um array de itens
+                    let arr = [];
+                    if (Array.isArray(cartData)) {
+                        arr = cartData;
+                    } else if (cartData && Array.isArray(cartData.itens)) {
+                        arr = cartData.itens;
+                    } else if (cartData && typeof cartData === 'object' && Object.values(cartData).every(v => typeof v === 'object')) {
+                        // Caso raro: Firestore retorna objeto indexado
+                        arr = Object.values(cartData);
+                    }
+                    cart = arr;
                     renderCart();
                 }, true); // true = retorna array completo
             } else {
