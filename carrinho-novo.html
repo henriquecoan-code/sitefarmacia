@@ -148,7 +148,7 @@
                 finalizarBtn.disabled = false;
                 finalizarBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
-            cart.forEach((item, idx) => {
+            cart.forEach((item) => {
                 const subtotal = item.quantidade * (item.valorComDesconto || item.precoMaximo || 0);
                 total += subtotal;
                 const el = document.createElement('div');
@@ -165,11 +165,11 @@
                             <p class="text-gray-500 text-sm mb-2 line-clamp-2">${item.descricao || ''}</p>
                         </div>
                         <div class="flex items-center gap-2 mt-2">
-                            <button class="bg-gray-200 px-3 py-1 rounded text-lg font-bold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Diminuir quantidade" onclick="updateQty(${idx}, -1)">-</button>
+                            <button class="btn-qty bg-gray-200 px-3 py-1 rounded text-lg font-bold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${item.id}" data-delta="-1" aria-label="Diminuir quantidade">-</button>
                             <span class="mx-2 min-w-[32px] text-center text-base font-medium">${item.quantidade}</span>
-                            <button class="bg-gray-200 px-3 py-1 rounded text-lg font-bold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Aumentar quantidade" onclick="updateQty(${idx}, 1)">+</button>
+                            <button class="btn-qty bg-gray-200 px-3 py-1 rounded text-lg font-bold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${item.id}" data-delta="1" aria-label="Aumentar quantidade">+</button>
                             <span class="ml-4 text-blue-700 font-bold text-base">R$ ${(item.valorComDesconto || item.precoMaximo).toFixed(2)}</span>
-                            <button class="ml-6 text-red-600 hover:text-red-800 transition-colors px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-400" aria-label="Remover item" onclick="removeItem(${idx})">
+                            <button class="btn-remove ml-6 text-red-600 hover:text-red-800 transition-colors px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-400" data-id="${item.id}" aria-label="Remover item">
                                 <i class="fas fa-trash"></i> <span class="hidden md:inline">Remover</span>
                             </button>
                         </div>
@@ -181,6 +181,20 @@
                 cartList.appendChild(el);
             });
             cartTotal.innerHTML = `<span class="text-gray-700">Total:</span> <span class="text-3xl text-blue-900 font-extrabold">R$ ${total.toFixed(2)}</span>`;
+            // Adiciona listeners para os botões de quantidade e remover
+            cartList.querySelectorAll('.btn-qty').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.getAttribute('data-id');
+                    const delta = parseInt(btn.getAttribute('data-delta'), 10);
+                    await updateQtyById(id, delta);
+                });
+            });
+            cartList.querySelectorAll('.btn-remove').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.getAttribute('data-id');
+                    await removeItemById(id);
+                });
+            });
         }
 
         async function loadCart() {
@@ -201,17 +215,19 @@
             }
         }
 
-        async function updateQty(idx, delta) {
+        async function updateQtyById(id, delta) {
             const currentUser = auth.currentUser;
             if (currentUser && window.saveCartToFirestore) {
                 let newCart = [...cart];
-                if (newCart[idx]) {
+                const idx = newCart.findIndex(item => item.id === id);
+                if (idx > -1) {
                     newCart[idx].quantidade += delta;
                     if (newCart[idx].quantidade < 1) newCart[idx].quantidade = 1;
                     await window.saveCartToFirestore(currentUser.uid, newCart);
                 }
             } else {
-                if (cart[idx]) {
+                const idx = cart.findIndex(item => item.id === id);
+                if (idx > -1) {
                     cart[idx].quantidade += delta;
                     if (cart[idx].quantidade < 1) cart[idx].quantidade = 1;
                     localStorage.setItem('cart', JSON.stringify(cart));
@@ -220,16 +236,22 @@
             }
         }
 
-        async function removeItem(idx) {
+        async function removeItemById(id) {
             const currentUser = auth.currentUser;
             if (currentUser && window.saveCartToFirestore) {
                 let newCart = [...cart];
-                newCart.splice(idx, 1);
-                await window.saveCartToFirestore(currentUser.uid, newCart);
+                const idx = newCart.findIndex(item => item.id === id);
+                if (idx > -1) {
+                    newCart.splice(idx, 1);
+                    await window.saveCartToFirestore(currentUser.uid, newCart);
+                }
             } else {
-                cart.splice(idx, 1);
-                localStorage.setItem('cart', JSON.stringify(cart));
-                renderCart();
+                const idx = cart.findIndex(item => item.id === id);
+                if (idx > -1) {
+                    cart.splice(idx, 1);
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    renderCart();
+                }
             }
         }
 
@@ -376,8 +398,6 @@
         });
         // Inicialização
         loadCart();
-        window.updateQty = updateQty;
-        window.removeItem = removeItem;
     </script>
     <script src="js/auth-mobile.js"></script>
 </body>
