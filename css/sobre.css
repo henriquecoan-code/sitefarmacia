@@ -1,0 +1,17 @@
+/* Estilos exclusivos da página Sobre */
+.hero-gradient {
+  background: linear-gradient(120deg, #1e3a8a 0%, #2563eb 60%, #38bdf8 100%);
+}
+.floating-img {
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.text-blue-900 { color: #1e3a8a; }
+.bg-blue-900 { background-color: #1e3a8a; }
+.text-blue-800 { color: #2563eb; }
+.bg-blue-800 { background-color: #2563eb; }
+.border-blue-900 { border-color: #1e3a8a; }
+.border-blue-800 { border-color: #2563eb; }

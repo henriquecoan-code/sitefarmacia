@@ -3,63 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sobre Nós - Farmácia São Benedito</title>
+  <meta name="description" content="Farmácia São Benedito - Produtos farmacêuticos com atendimento personalizado e preços competitivos.">
+  <title>Sobre - Farmácia São Benedito</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="bg-gray-50">
-  <div id="header-container"></div>
-  <main class="container mx-auto px-4 py-8 min-h-[60vh]">
-    <h1 class="text-3xl font-bold text-blue-900 mb-6 flex items-center"><i class="fas fa-info-circle mr-2"></i>Sobre Nós</h1>
-    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-      <p class="text-lg text-gray-700 mb-4">
-        A <span class="font-bold text-blue-700">Farmácia São Benedito</span> é referência em saúde, cuidado e confiança em toda a região. Atuando há mais de 20 anos, oferecemos uma ampla variedade de medicamentos, dermocosméticos, vitaminas, produtos de higiene e muito mais, sempre com atendimento humanizado e preços justos.
-      </p>
-      <p class="text-gray-600 mb-2">
-        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Equipe qualificada e pronta para te ajudar
-      </p>
-      <p class="text-gray-600 mb-2">
-        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Entrega rápida e segura para toda a cidade
-      </p>
-      <p class="text-gray-600 mb-2">
-        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Atendimento presencial, online e por telefone
-      </p>
-      <p class="text-gray-600 mb-2">
-        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Promoções exclusivas e programa de fidelidade
-      </p>
-      <p class="text-gray-600 mb-2">
-        <i class="fas fa-check-circle text-blue-700 mr-2"></i>Compromisso com sua saúde e bem-estar
-      </p>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div>
-        <h2 class="text-xl font-semibold text-blue-800 mb-2">Nossa Missão</h2>
-        <p class="text-gray-700">Promover saúde, bem-estar e qualidade de vida, oferecendo produtos e serviços farmacêuticos com ética, respeito e excelência.</p>
-      </div>
-      <div>
-        <h2 class="text-xl font-semibold text-blue-800 mb-2">Nossa Visão</h2>
-        <p class="text-gray-700">Ser reconhecida como a farmácia mais confiável e inovadora da região, superando as expectativas dos nossos clientes.</p>
-      </div>
-    </div>
-    <div class="mt-8">
-      <h2 class="text-xl font-semibold text-blue-800 mb-2">Nossos Valores</h2>
-      <ul class="list-disc pl-6 text-gray-700">
-        <li>Ética e transparência</li>
-        <li>Respeito ao cliente</li>
-        <li>Inovação e melhoria contínua</li>
-        <li>Compromisso social</li>
-        <li>Responsabilidade ambiental</li>
-      </ul>
-    </div>
-  </main>
-  <div id="footer-container"></div>
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="stylesheet" href="css/sobre.css">
   <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
   </script>
+  <script src="js/auth-mobile.js"></script>
+</head>
+<body class="bg-gray-50">
+  <div id="header-container"></div>
+  <main class="container mx-auto px-4 py-10 min-h-[60vh]">
+    <!-- Hero Section -->
+    <section class="hero-gradient rounded-3xl shadow-xl text-white mb-12 overflow-hidden">
+      <div class="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-8">
+        <div class="md:w-1/2 mb-8 md:mb-0">
+          <h2 class="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg">Cuidando da sua saúde com excelência</h2>
+          <p class="text-xl mb-8 opacity-90">Na Farmácia São Benedito, você encontra os melhores produtos farmacêuticos com atendimento personalizado e humano.</p>
+          <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+            <a href="index.html#produtos" class="bg-white text-blue-800 px-7 py-3 rounded-full font-bold shadow hover:bg-gray-100 transition duration-300 flex items-center justify-center">
+              <i class="fas fa-shopping-basket mr-2"></i> Compre agora
+            </a>
+            <a href="#sobre-nos" class="border-2 border-white text-white px-7 py-3 rounded-full font-bold hover:bg-blue-900 transition duration-300 flex items-center justify-center">
+              <i class="fas fa-info-circle mr-2"></i> Saiba mais
+            </a>
+          </div>
+        </div>
+        <div class="md:w-1/2 flex justify-center">
+          <img src="img/frente.jpg" alt="Fachada da Farmácia São Benedito" class="w-full max-w-md floating-img rounded-2xl shadow-lg border-4 border-white">
+        </div>
+      </div>
+    </section>
+    <section id="sobre-nos">
+      <h1 class="text-3xl font-extrabold text-blue-900 mb-8 flex items-center"><i class="fas fa-info-circle mr-3"></i>Sobre Nós</h1>
+      <div class="bg-white rounded-2xl shadow-lg p-8 mb-10">
+        <p class="text-lg text-gray-700 mb-4">
+          A <span class="font-bold text-blue-700">Farmácia São Benedito</span> é referência em saúde, cuidado e confiança em toda a região. Atuando há mais de 20 anos, oferecemos uma ampla variedade de medicamentos, dermocosméticos, vitaminas, produtos de higiene e muito mais, sempre com atendimento humanizado e preços justos.
+        </p>
+        <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+          <li class="flex items-center text-gray-600"><i class="fas fa-check-circle text-blue-700 mr-2"></i>Equipe qualificada e pronta para te ajudar</li>
+          <li class="flex items-center text-gray-600"><i class="fas fa-check-circle text-blue-700 mr-2"></i>Entrega rápida e segura para toda a cidade</li>
+          <li class="flex items-center text-gray-600"><i class="fas fa-check-circle text-blue-700 mr-2"></i>Atendimento presencial, online e por telefone</li>
+          <li class="flex items-center text-gray-600"><i class="fas fa-check-circle text-blue-700 mr-2"></i>Promoções exclusivas e programa de fidelidade</li>
+          <li class="flex items-center text-gray-600"><i class="fas fa-check-circle text-blue-700 mr-2"></i>Compromisso com sua saúde e bem-estar</li>
+        </ul>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          <div>
+            <h2 class="text-xl font-bold text-blue-800 mb-2">Nossa Missão</h2>
+            <p class="text-gray-700">Promover saúde, bem-estar e qualidade de vida, oferecendo produtos e serviços farmacêuticos com ética, respeito e excelência.</p>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-blue-800 mb-2">Nossa Visão</h2>
+            <p class="text-gray-700">Ser reconhecida como a farmácia mais confiável e inovadora da região, superando as expectativas dos nossos clientes.</p>
+          </div>
+        </div>
+        <div class="mt-8">
+          <h2 class="text-xl font-bold text-blue-800 mb-2">Nossos Valores</h2>
+          <ul class="list-disc pl-6 text-gray-700 space-y-1">
+            <li>Ética e transparência</li>
+            <li>Respeito ao cliente</li>
+            <li>Inovação e melhoria contínua</li>
+            <li>Compromisso social</li>
+            <li>Responsabilidade ambiental</li>
+          </ul>
+        </div>
+      </div>
+      <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow p-8 flex flex-col md:flex-row items-center gap-8">
+        <div class="flex-1">
+          <h2 class="text-2xl font-bold text-blue-800 mb-2">Entre em contato</h2>
+          <p class="text-gray-700 mb-2">Estamos sempre prontos para te atender! Fale conosco para dúvidas, sugestões ou informações sobre nossos serviços.</p>
+          <ul class="text-gray-700 mb-2">
+            <li><i class="fas fa-phone-alt text-blue-700 mr-2"></i> (99) 9999-9999</li>
+            <li><i class="fas fa-envelope text-blue-700 mr-2"></i> contato@farmaciasaobenedito.com.br</li>
+            <li><i class="fab fa-whatsapp text-green-600 mr-2"></i> (99) 99999-9999</li>
+            <li><i class="fas fa-map-marker-alt text-blue-700 mr-2"></i> Rua Exemplo, 123 - Centro, Sua Cidade</li>
+          </ul>
+          <a href="contato.html" class="inline-block mt-4 px-6 py-3 bg-blue-700 text-white rounded-full font-bold shadow hover:bg-blue-800 transition">Fale Conosco</a>
+        </div>
+        <div class="flex-1 flex justify-center">
+          <img src="img/logo.png" alt="Logo Farmácia São Benedito" class="w-40 md:w-56 rounded-xl shadow-lg bg-white p-2">
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="footer-container"></div>
   <script src="js/auth-mobile.js"></script>
 </body>
 </html>
