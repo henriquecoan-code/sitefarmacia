@@ -6,6 +6,9 @@ const admin = require("firebase-admin");
 const cors = require('cors');
 const helmet = require("helmet"); // Adiciona helmet para segurança
 const csv = require('csv-parser'); // Adiciona parser de CSV
+const nodemailer = require("nodemailer");
+require('dotenv').config();
+const axios = require('axios');
 
 // CAMINHO PARA A CHAVE DE SERVIÇO DO FIREBASE
 // O usuário informou que o arquivo se chama 'firebase-config'
@@ -248,6 +251,51 @@ app.post('/produtos/upload-csv', uploadCsv.single('csv'), async (req, res) => {
         .on('error', (err) => {
             res.status(500).json({ error: 'Erro ao processar CSV.' });
         });
+});
+
+// Rota de contato: recebe POST do formulário e envia e-mail para a farmácia
+app.post("/contato", async (req, res) => {
+    const { nome, email, mensagem, recaptchaToken } = req.body;
+    if (!nome || !email || !mensagem || !recaptchaToken) {
+        return res.status(400).json({ error: "Preencha todos os campos obrigatórios e confirme o reCAPTCHA." });
+    }
+    // Validação do reCAPTCHA v2/v3
+    try {
+        const recaptchaSecret = process.env.RECAPTCHA_SECRET;
+        const recaptchaResp = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
+            params: {
+                secret: recaptchaSecret,
+                response: recaptchaToken
+            }
+        });
+        if (!recaptchaResp.data.success || (recaptchaResp.data.score !== undefined && recaptchaResp.data.score < 0.5)) {
+            return res.status(400).json({ error: "Falha na verificação do reCAPTCHA. Tente novamente." });
+        }
+    } catch (err) {
+        return res.status(400).json({ error: "Erro ao validar reCAPTCHA." });
+    }
+    // Configuração do transporte (exemplo com Gmail, use variáveis de ambiente em produção)
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+    const mailOptions = {
+        from: `Contato Site <${process.env.EMAIL_USER}>`,
+        to: process.env.EMAIL_USER,
+        subject: "Nova mensagem de contato do site",
+        text: `Nome: ${nome}\nE-mail: ${email}\nMensagem: ${mensagem}`,
+        html: `<b>Nome:</b> ${nome}<br><b>E-mail:</b> ${email}<br><b>Mensagem:</b><br>${mensagem.replace(/\n/g, '<br>')}`
+    };
+    try {
+        await transporter.sendMail(mailOptions);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Erro ao enviar e-mail de contato:", error);
+        res.status(500).json({ error: "Erro ao enviar mensagem. Tente novamente mais tarde." });
+    }
 });
 
 app.listen(port, "0.0.0.0", () => {

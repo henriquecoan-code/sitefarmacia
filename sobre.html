@@ -89,10 +89,26 @@
           <h2 class="text-2xl font-bold text-blue-800 mb-2">Entre em contato</h2>
           <p class="text-gray-700 mb-2">Estamos sempre prontos para te atender! Fale conosco para dúvidas, sugestões ou informações sobre nossos serviços.</p>
           <ul class="text-gray-700 mb-2">
-            <li><i class="fas fa-phone-alt text-blue-700 mr-2"></i> (99) 9999-9999</li>
-            <li><i class="fas fa-envelope text-blue-700 mr-2"></i> contato@farmaciasaobenedito.com.br</li>
-            <li><i class="fab fa-whatsapp text-green-600 mr-2"></i> (99) 99999-9999</li>
-            <li><i class="fas fa-map-marker-alt text-blue-700 mr-2"></i> Rua Exemplo, 123 - Centro, Sua Cidade</li>
+            <li>
+              <a href="tel:+554834643201" class="flex items-center hover:text-blue-800 transition" aria-label="Ligar para (48) 3464-3201">
+                <i class="fas fa-phone-alt text-blue-700 mr-2"></i>(48) 3464-3201
+              </a>
+            </li>
+            <li>
+              <button type="button" onclick="navigator.clipboard.writeText('fciasaobenedito@gmail.com');this.innerHTML='<i class=\'fas fa-envelope text-blue-700 mr-2\'></i> E-mail copiado!'" class="flex items-center hover:text-blue-800 transition focus:outline-none" aria-label="Copiar e-mail">
+                <i class="fas fa-envelope text-blue-700 mr-2"></i> fciasaobenedito@gmail.com
+              </button>
+            </li>
+            <li>
+              <a href="https://wa.me/554834643201" target="_blank" rel="noopener" class="flex items-center hover:text-green-700 transition" aria-label="WhatsApp">
+                <i class="fab fa-whatsapp text-green-600 mr-2"></i> (48) 3464-3201
+              </a>
+            </li>
+            <li>
+              <a href="https://www.google.com/maps/search/?api=1&query=Rua+Walter+Vetterli,+102,+Centro,+Lauro+Müller,+SC" target="_blank" rel="noopener" class="flex items-center hover:text-blue-800 transition" aria-label="Abrir endereço no Google Maps">
+                <i class="fas fa-map-marker-alt text-blue-700 mr-2"></i> Rua Walter Vetterli, 102 - Centro <br>Lauro Müller -SC
+              </a>
+            </li>
           </ul>
           <a href="contato.html" class="inline-block mt-4 px-6 py-3 bg-blue-700 text-white rounded-full font-bold shadow hover:bg-blue-800 transition">Fale Conosco</a>
         </div>
