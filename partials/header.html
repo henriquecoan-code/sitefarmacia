@@ -43,14 +43,8 @@
       <div class="flex items-center space-x-6">
         <!-- Auth/User Info -->
         <div id="authContainerSecondary" class="text-center relative"></div>
-        <!-- Favoritos
-        <div class="text-center">
-          <a href="#" class="text-gray-700 hover:text-blue-700">
-            <i class="fas fa-heart text-xl"></i>
-            <p class="text-xs">Favoritos</p>
-          </a>
-        </div>
-         -->
+        <!-- Botão Cadastro Modal -->
+        <button id="openCadastroModalBtn" class="text-white bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium shadow transition hidden md:inline-flex items-center"><i class="fas fa-user-plus mr-2"></i>Cadastrar-se</button>
         <!-- Carrinho -->
         <div class="text-center relative group">
           <a href="./carrinho-novo.html" id="cart-icon" class="text-gray-700 hover:text-blue-700">
@@ -133,18 +127,34 @@
     document.addEventListener('DOMContentLoaded', function() {
       const loginBtn = document.getElementById('loginBtn');
       const registerBtn = document.getElementById('registerBtn');
-      
+      const cadastroBtn = document.getElementById('openCadastroModalBtn');
       if (loginBtn) {
         loginBtn.addEventListener('click', function(e) {
           e.preventDefault();
           openAuthModal('login');
         });
       }
-      
       if (registerBtn) {
         registerBtn.addEventListener('click', function(e) {
           e.preventDefault();
           openAuthModal('register');
+        });
+      }
+      if (cadastroBtn) {
+        cadastroBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Força o carregamento do script do modal se não estiver disponível
+          if (typeof window.openCadastroModal === 'function') {
+            window.openCadastroModal();
+          } else {
+            // fallback: tenta carregar o script manualmente e abrir depois
+            var script = document.createElement('script');
+            script.src = '/js/auth-modal.js'; // Caminho absoluto para garantir que sempre encontra
+            script.onload = function() {
+              if (typeof window.openCadastroModal === 'function') window.openCadastroModal();
+            };
+            document.body.appendChild(script);
+          }
         });
       }
     });

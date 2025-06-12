@@ -4,6 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - Farmácia São Benedito</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/estilo.css">
+    <style>
+      body.gradient-bg {
+        background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
+      }
+      .form-card {
+        box-shadow: 0 8px 32px 0 rgba(30,58,138,0.10), 0 1.5px 4px 0 rgba(30,58,138,0.08);
+      }
+      .toast {
+        position: fixed; top: 2rem; right: 2rem; z-index: 9999;
+        min-width: 220px; max-width: 350px;
+        background: #fff; border-left: 6px solid #9333ea;
+        color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 1rem 1.5rem; border-radius: 0.75rem; font-weight: 500;
+        display: flex; align-items: center; gap: 0.5rem;
+        transition: opacity 0.3s;
+      }
+      .toast.success { border-left-color: #22c55e; }
+      .toast.error { border-left-color: #ef4444; }
+      .toast.show { opacity: 1; }
+      .toast.hidden { opacity: 0; pointer-events: none; }
+      .loading-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.7); z-index: 9998;
+        align-items: center; justify-content: center;
+      }
+      .loading-spinner {
+        border: 4px solid #e0e7ff; border-top: 4px solid #9333ea; border-radius: 50%; width: 40px; height: 40px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+      .error-message { color: #ef4444; font-size: 0.95em; margin-top: 0.25rem; }
+      .error-message.hidden { display: none; }
+      .loader {
+        border: 3px solid #e0e7ff; border-top: 3px solid #9333ea; border-radius: 50%; width: 18px; height: 18px; display: inline-block; animation: spin 1s linear infinite; vertical-align: middle;
+      }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col gradient-bg">
     <div id="header-container"></div>
@@ -179,6 +217,11 @@
     </div>
     <div id="footer-container" class="mt-auto w-full"></div>
     <script type="module">
+      import { loadHeader } from './js/header-loader.js';
+      import { loadFooter } from './js/footer-loader.js';
+      loadHeader('header-container', 'authContainerSecondary');
+      loadFooter('footer-container');
+
       import { auth, firestore } from './js/firebase-config.js';
       import { createUserWithEmailAndPassword, updateProfile, signOut } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
       import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
@@ -386,6 +429,7 @@
           });
         });
     </script>
+    <script src="js/auth-modal.js"></script>
     <script src="js/auth-mobile.js"></script>
 </body>
 </html>

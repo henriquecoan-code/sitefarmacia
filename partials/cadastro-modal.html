@@ -1,0 +1,111 @@
+<!-- Modal de Cadastro de Usuário reutilizável -->
+<div id="cadastro-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200">
+  <div id="cadastro-modal" class="bg-white rounded-xl form-card overflow-hidden p-8 w-full max-w-md relative animate-fadeIn">
+    <button id="close-cadastro-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button>
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-user-plus text-purple-600 text-2xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800">Cadastro de Usuário</h1>
+      <p class="text-gray-600 mt-2">Preencha os campos abaixo para criar seu cadastro</p>
+    </div>
+    <form id="registrationFormModal" class="space-y-4">
+      <!-- Nome Completo -->
+      <div>
+        <label for="fullNameModal" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-user text-gray-400"></i>
+          </div>
+          <input type="text" id="fullNameModal" name="fullName" class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500" placeholder="Digite seu nome completo" required>
+        </div>
+        <p id="fullNameErrorModal" class="error-message hidden">Por favor, insira seu nome completo</p>
+      </div>
+      <!-- E-mail -->
+      <div>
+        <label for="emailModal" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-envelope text-gray-400"></i>
+          </div>
+          <input type="email" id="emailModal" name="email" class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500" placeholder="seu@email.com" required>
+        </div>
+        <p id="emailErrorModal" class="error-message hidden">Por favor, insira um e-mail válido</p>
+      </div>
+      <!-- Senha -->
+      <div>
+        <label for="passwordModal" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-lock text-gray-400"></i>
+          </div>
+          <input type="password" id="passwordModal" name="password" class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500" placeholder="Mínimo 6 caracteres" required minlength="6">
+        </div>
+        <p id="passwordErrorModal" class="error-message hidden">A senha deve ter pelo menos 6 caracteres</p>
+      </div>
+      <!-- CPF/CNPJ -->
+      <div>
+        <label for="cpfModal" class="block text-sm font-medium text-gray-700 mb-1">CPF ou CNPJ</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-id-card text-gray-400"></i>
+          </div>
+          <input type="text" id="cpfModal" name="cpf" class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500" placeholder="000.000.000-00 ou 00.000.000/0000-00" required maxlength="18">
+        </div>
+        <p id="cpfErrorModal" class="error-message hidden">Por favor, insira um CPF ou CNPJ válido</p>
+      </div>
+      <!-- Telefone -->
+      <div>
+        <label for="phoneModal" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-phone text-gray-400"></i>
+          </div>
+          <input type="text" id="phoneModal" name="phone" class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500" placeholder="(00) 00000-0000" required maxlength="15">
+        </div>
+        <p id="phoneErrorModal" class="error-message hidden">Por favor, insira um telefone válido</p>
+      </div>
+      <!-- Endereço Estruturado -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+        <div class="relative flex flex-col gap-2">
+          <div class="flex flex-wrap gap-2">
+            <input type="text" id="ruaModal" name="rua" class="w-full md:w-2/3 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Rua" required>
+            <input type="text" id="numeroModal" name="numero" class="w-24 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Nº" required>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <input type="text" id="bairroModal" name="bairro" class="w-full md:w-1/2 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Bairro" required>
+            <input type="text" id="cidadeModal" name="cidade" class="w-full md:w-1/2 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Cidade" required>
+          </div>
+          <input type="text" id="complementoModal" name="complemento" class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Complemento (Ed, Ap, prox. à)">
+        </div>
+        <p id="enderecoErrorModal" class="error-message hidden">Por favor, preencha todos os campos de endereço</p>
+      </div>
+      <!-- Termos e Condições -->
+      <div class="flex items-start mt-6">
+        <div class="flex items-center h-5">
+          <input id="termsModal" name="terms" type="checkbox" class="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded" required>
+        </div>
+        <div class="ml-3 text-sm">
+          <label for="termsModal" class="font-medium text-gray-700">Eu concordo com os <a href="#" class="text-purple-600 hover:text-purple-500">Termos e Condições</a></label>
+        </div>
+      </div>
+      <p id="termsErrorModal" class="error-message hidden">Você deve aceitar os termos e condições</p>
+      <!-- Botão de Envio -->
+      <div class="pt-4">
+        <button type="submit" id="submitButtonModal" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition">
+          <i class="fas fa-paper-plane mr-2"></i> Cadastrar
+        </button>
+      </div>
+    </form>
+    <div class="mt-6 text-center text-sm">
+      <p class="text-gray-500">Já possui uma conta? <a href="#" id="open-login-modal" class="font-medium text-purple-600 hover:text-purple-500">Faça login</a></p>
+    </div>
+  </div>
+</div>
+<style>
+@keyframes fadeIn { from { opacity: 0; transform: translateY(40px);} to { opacity: 1; transform: none; } }
+.animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(.4,0,.2,1); }
+</style>
+<!-- O JS para abrir/fechar e validar será carregado dinamicamente -->
+<!-- Removido o script src="js/auth-modal.js" daqui. Inclua globalmente antes do </body> em cada página. -->

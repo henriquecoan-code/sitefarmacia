@@ -1,6 +1,7 @@
 import { handleAuthState } from './auth-handler.js';
 import { firestore, auth } from './firebase-config.js';
 import { doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+import './auth-modal.js';
 
 export function loadHeader(headerContainerId, authContainerId) {
   return fetch('partials/header.html')

@@ -266,6 +266,224 @@ document.addEventListener('DOMContentLoaded', () => {
     alert(message);
   }
 
+  // Lógica para abrir/fechar e validar o modal de cadastro em qualquer página
+  function loadCadastroModal() {
+    if (!document.getElementById('cadastro-modal-overlay')) {
+      fetch('partials/cadastro-modal.html')
+        .then(r => r.text())
+        .then(html => {
+          document.body.insertAdjacentHTML('beforeend', html);
+          setupCadastroModalEvents();
+          setupCadastroModalForm();
+        });
+    } else {
+      setupCadastroModalEvents();
+      setupCadastroModalForm();
+    }
+  }
+
+  function setupCadastroModalEvents() {
+    const overlay = document.getElementById('cadastro-modal-overlay');
+    const closeBtn = document.getElementById('close-cadastro-modal');
+    if (!overlay || !closeBtn) return;
+    closeBtn.onclick = closeCadastroModal;
+    overlay.onclick = function(e) {
+      if (e.target === overlay) closeCadastroModal();
+    };
+    document.addEventListener('keydown', function escListener(e) {
+      if (e.key === 'Escape' && !overlay.classList.contains('hidden')) closeCadastroModal();
+    });
+  }
+
+  function openCadastroModal() {
+    loadCadastroModal();
+    setTimeout(() => {
+      const overlay = document.getElementById('cadastro-modal-overlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+    }, 100);
+  }
+
+  function closeCadastroModal() {
+    const overlay = document.getElementById('cadastro-modal-overlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  }
+
+  // Permite abrir o modal via window.openCadastroModal()
+  window.openCadastroModal = openCadastroModal;
+
+  // Lógica de validação e envio do formulário de cadastro do modal
+  function setupCadastroModalForm() {
+    const form = document.getElementById('registrationFormModal');
+    if (!form) return;
+    const submitButton = document.getElementById('submitButtonModal');
+    const fullName = document.getElementById('fullNameModal');
+    const email = document.getElementById('emailModal');
+    const password = document.getElementById('passwordModal');
+    const cpf = document.getElementById('cpfModal');
+    const phone = document.getElementById('phoneModal');
+    const rua = document.getElementById('ruaModal');
+    const numero = document.getElementById('numeroModal');
+    const bairro = document.getElementById('bairroModal');
+    const cidade = document.getElementById('cidadeModal');
+    const complemento = document.getElementById('complementoModal');
+    const terms = document.getElementById('termsModal');
+
+    // Funções de formatação (copiadas de cadastro3.html)
+    function formatCpfCnpj(value) {
+      value = value.replace(/\D/g, '');
+      if (value.length <= 11) {
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      } else {
+        value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+        value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+        value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+        value = value.replace(/(\d{4})(\d)/, '$1-$2');
+      }
+      return value;
+    }
+    function formatPhone(phone) {
+      return phone.replace(/\D/g, '')
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{5})(\d)/, '$1-$2');
+    }
+
+    cpf.addEventListener('input', function() {
+      this.value = formatCpfCnpj(this.value);
+    });
+    phone.addEventListener('input', function() {
+      this.value = formatPhone(this.value);
+    });
+
+    // Esconde erro ao digitar
+    [fullName, email, password, cpf, phone, rua, numero, bairro, cidade, terms].forEach(el => {
+      if (el) {
+        el.addEventListener('input', () => {
+          const errorEl = document.getElementById(el.id.replace('Modal', 'ErrorModal'));
+          if (errorEl) errorEl.classList.add('hidden');
+        });
+      }
+    });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const fullNameVal = fullName.value.trim();
+      const emailVal = email.value.trim();
+      const passwordVal = password.value;
+      const cpfRaw = cpf.value.replace(/\D/g, '');
+      const phoneVal = phone.value.replace(/\D/g, '');
+      const ruaVal = rua.value.trim();
+      const numeroVal = numero.value.trim();
+      const bairroVal = bairro.value.trim();
+      const cidadeVal = cidade.value.trim();
+      const complementoVal = complemento.value.trim();
+      const termsChecked = terms.checked;
+
+      function setFieldErrorModal(id, show) {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !show);
+      }
+
+      setFieldErrorModal('fullNameErrorModal', !fullNameVal);
+      setFieldErrorModal('emailErrorModal', !emailVal);
+      setFieldErrorModal('passwordErrorModal', passwordVal.length < 6);
+      setFieldErrorModal('cpfErrorModal', !(cpfRaw.length === 11 || cpfRaw.length === 14));
+      setFieldErrorModal('phoneErrorModal', phoneVal.length < 10);
+      setFieldErrorModal('enderecoErrorModal', !(ruaVal && numeroVal && bairroVal && cidadeVal));
+      setFieldErrorModal('termsErrorModal', !termsChecked);
+      if (!fullNameVal || !emailVal || passwordVal.length < 6 || !(cpfRaw.length === 11 || cpfRaw.length === 14) || phoneVal.length < 10 || !termsChecked || !(ruaVal && numeroVal && bairroVal && cidadeVal)) {
+        return;
+      }
+
+      // Validação de e-mail
+      const emailRegex = /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(emailVal)) {
+        setFieldErrorModal('emailErrorModal', true);
+        email.focus();
+        return;
+      }
+      // Domínios permitidos
+      const allowedDomains = [
+        'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'bol.com.br', 'uol.com.br', 'live.com'
+      ];
+      const emailDomain = emailVal.split('@')[1]?.toLowerCase();
+      if (!allowedDomains.includes(emailDomain)) {
+        setFieldErrorModal('emailErrorModal', true);
+        email.focus();
+        return;
+      }
+
+      // Feedback visual de loading
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<span class="loader mr-2"></span>Processando...';
+
+      try {
+        // Firebase Auth
+        const { createUserWithEmailAndPassword, updateProfile, signOut } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js');
+        const { doc, setDoc, collection, addDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+        const userCredential = await createUserWithEmailAndPassword(auth, emailVal, passwordVal);
+        await updateProfile(userCredential.user, { displayName: fullNameVal });
+        await setDoc(doc(firestore, 'usuarios', userCredential.user.uid), {
+          nome: fullNameVal,
+          email: emailVal,
+          cpf: cpfRaw,
+          telefone: phoneVal,
+          role: "user",
+          dataCadastro: new Date().toISOString(),
+          emailVerificado: false
+        });
+        // Endereço
+        const enderecosCol = collection(firestore, 'usuarios', userCredential.user.uid, 'enderecos');
+        await addDoc(enderecosCol, {
+          cep: '',
+          rua: ruaVal,
+          numero: numeroVal,
+          bairro: bairroVal,
+          cidade: cidadeVal,
+          complemento: complementoVal,
+          telefone: phoneVal,
+          criadoEm: new Date().toISOString()
+        });
+        // Sucesso visual
+        submitButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Cadastro realizado!';
+        setTimeout(() => {
+          closeCadastroModal();
+          window.location.href = 'login.html';
+        }, 1800);
+        await signOut(auth);
+      } catch (error) {
+        let errorMessage = 'Erro no cadastro: ';
+        switch(error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = 'Este e-mail já está cadastrado';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'A senha deve ter pelo menos 6 caracteres';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'E-mail inválido';
+            break;
+          default:
+            errorMessage += error.message;
+        }
+        setFieldErrorModal('emailErrorModal', true);
+        submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Cadastrar';
+        submitButton.disabled = false;
+        alert(errorMessage);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Cadastrar';
+      }
+    });
+  }
+
   // Inicialização
   function init() {
     try {
@@ -279,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       auth.onAuthStateChanged((user) => {
-//        console.log('Estado de autenticação mudou:', user);
+  //        console.log('Estado de autenticação mudou:', user);
         if (user) {
           console.log('Usuário logado:', user.email);
         } else {
