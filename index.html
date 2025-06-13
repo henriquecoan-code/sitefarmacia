@@ -153,6 +153,11 @@
     // Carrega header e footer
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
+    // ...cadastro modal...
+    import { setupCadastroModalBtn } from './js/utils.js';
+
+    await loadHeader('header-container', 'authContainerSecondary');
+    setupCadastroModalBtn();
 
     // Variáveis globais para filtros
     let allProducts = [];
@@ -400,6 +405,5 @@
     }
     </script>
     <script src="js/auth-modal.js"></script>
-    <script src="js/auth-mobile.js"></script>
 </body>
 </html>

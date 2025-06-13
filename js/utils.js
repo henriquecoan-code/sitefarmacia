@@ -14,3 +14,15 @@ export function escapeHTML(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+//modal cadastro
+export function setupCadastroModalBtn() {
+  const cadastroBtn = document.getElementById('openCadastroModalBtn');
+  if (cadastroBtn) {
+    cadastroBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (typeof window.openCadastroModal === 'function') {
+        window.openCadastroModal();
+      }
+    });
+  }
+}
