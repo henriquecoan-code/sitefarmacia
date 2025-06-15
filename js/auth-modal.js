@@ -241,17 +241,7 @@
     }
 
     // Toast do modal
-    function showModalToast(message, type = 'success') {
-      const toast = document.getElementById('modal-toast');
-      if (!toast) return;
-      toast.textContent = message;
-      toast.className = 'fixed left-1/2 top-8 z-50 px-4 py-2 rounded shadow-lg text-white text-sm font-medium transform -translate-x-1/2 transition-all ' +
-        (type === 'success' ? 'bg-green-600' : 'bg-red-600');
-      toast.classList.remove('hidden');
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 4000);
-    }
+    // Removed duplicate definition of showModalToast.
 
     // Máscara dinâmica para CPF/CNPJ
     function maskCpfCnpj(value) {
