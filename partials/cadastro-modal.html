@@ -1,16 +1,20 @@
 <!-- Modal de Cadastro de Usuário reutilizável -->
 <div id="cadastro-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200" role="dialog" aria-modal="true" aria-labelledby="cadastro-modal-title" aria-describedby="cadastro-modal-desc">
-  <div id="cadastro-modal" class="bg-white rounded-xl form-card overflow-hidden p-8 w-full max-w-md relative animate-fadeIn shadow-2xl">
-    <button id="close-cadastro-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl" aria-label="Fechar modal"><i class="fas fa-times"></i></button>
-    <div class="text-center mb-8">
-      <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
+  <!-- Overlay de loading -->
+  <div id="modal-loading-overlay" class="hidden absolute inset-0 bg-white bg-opacity-80 z-50 flex items-center justify-center">
+    <div class="loader border-4 border-purple-200 border-t-purple-600 rounded-full w-12 h-12 animate-spin" aria-label="Carregando"></div>
+  </div>
+  <div id="cadastro-modal" class="bg-white rounded-2xl form-card overflow-hidden p-4 w-full max-w-md sm:max-w-xs max-h-[95vh] relative animate-fadeIn shadow-2xl flex flex-col justify-center border border-purple-200">
+    <button id="close-cadastro-modal" class="absolute top-3 right-3 text-gray-400 hover:text-purple-600 text-2xl transition" aria-label="Fechar modal"><i class="fas fa-times"></i></button>
+    <div class="text-center mb-6">
+      <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-2 shadow">
         <i class="fas fa-user-plus text-purple-600 text-2xl"></i>
       </div>
-      <h1 id="cadastro-modal-title" class="text-2xl font-bold text-gray-800">Cadastro de Usuário</h1>
-      <p id="cadastro-modal-desc" class="text-gray-600 mt-2">Preencha os campos abaixo para criar seu cadastro</p>
+      <h1 id="cadastro-modal-title" class="text-2xl font-bold text-purple-700">Cadastro de Usuário</h1>
+      <p id="cadastro-modal-desc" class="text-gray-500 mt-1">Preencha os campos abaixo para criar seu cadastro</p>
     </div>
-    <div id="modal-toast" class="fixed left-1/2 top-8 z-50 hidden px-4 py-2 rounded shadow-lg text-white text-sm font-medium bg-green-600 transform -translate-x-1/2 transition-all"></div>
-    <form id="registrationFormModal" class="space-y-4">
+    <div id="modal-toast" aria-live="polite" class="fixed left-1/2 top-8 z-50 hidden px-4 py-2 rounded shadow-lg text-white text-sm font-medium bg-green-600 transform -translate-x-1/2 transition-all"></div>
+    <form id="registrationFormModal" class="space-y-3">
       <!-- Nome Completo -->
       <div>
         <label for="fullNameModal" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
@@ -44,6 +48,17 @@
         </div>
         <p id="passwordErrorModal" class="error-message hidden">A senha deve ter pelo menos 6 caracteres</p>
       </div>
+      <!-- Confirmação de Senha -->
+      <div>
+        <label for="confirmPasswordModal" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-lock text-gray-400"></i>
+          </div>
+          <input type="password" id="confirmPasswordModal" name="confirmPassword" class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500" placeholder="Repita a senha" required minlength="6">
+        </div>
+        <p id="confirmPasswordErrorModal" class="error-message hidden">As senhas não coincidem</p>
+      </div>
       <!-- CPF/CNPJ -->
       <div>
         <label for="cpfModal" class="block text-sm font-medium text-gray-700 mb-1">CPF ou CNPJ</label>
@@ -66,21 +81,16 @@
         </div>
         <p id="phoneErrorModal" class="error-message hidden">Por favor, insira um telefone válido</p>
       </div>
-      <!-- Endereço Estruturado -->
+      <!-- CEP -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-        <div class="relative flex flex-col gap-2">
-          <div class="flex flex-wrap gap-2">
-            <input type="text" id="ruaModal" name="rua" class="w-full md:w-2/3 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Rua" required>
-            <input type="text" id="numeroModal" name="numero" class="w-24 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Nº" required>
+        <label for="cepModal" class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-map-marker-alt text-gray-400"></i>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <input type="text" id="bairroModal" name="bairro" class="w-full md:w-1/2 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Bairro" required>
-            <input type="text" id="cidadeModal" name="cidade" class="w-full md:w-1/2 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Cidade" required>
-          </div>
-          <input type="text" id="complementoModal" name="complemento" class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 px-3 py-2" placeholder="Complemento (Ed, Ap, prox. à)">
+          <input type="text" id="cepModal" name="cep" class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500" placeholder="00000-000" required maxlength="9">
         </div>
-        <p id="enderecoErrorModal" class="error-message hidden">Por favor, preencha todos os campos de endereço</p>
+        <p id="cepErrorModal" class="error-message hidden">Por favor, insira um CEP válido</p>
       </div>
       <!-- Termos e Condições -->
       <div class="flex items-start mt-6">
@@ -88,18 +98,18 @@
           <input id="termsModal" name="terms" type="checkbox" class="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded" required>
         </div>
         <div class="ml-3 text-sm">
-          <label for="termsModal" class="font-medium text-gray-700">Eu concordo com os <a href="#" class="text-purple-600 hover:text-purple-500">Termos e Condições</a></label>
+          <label for="termsModal" class="font-medium text-gray-700">Eu concordo com os <a href="#" class="text-purple-600 hover:text-purple-500">Termos e Condições</a> e <a href="/politica-privacidade.html" target="_blank" class="text-purple-600 hover:text-purple-500">Política de Privacidade</a></label>
         </div>
       </div>
       <p id="termsErrorModal" class="error-message hidden">Você deve aceitar os termos e condições</p>
       <!-- Botão de Envio -->
-      <div class="pt-4">
-        <button type="submit" id="submitButtonModal" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition">
+      <div class="pt-2">
+        <button type="submit" id="submitButtonModal" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-semibold text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition">
           <i class="fas fa-paper-plane mr-2"></i> Cadastrar
         </button>
       </div>
     </form>
-    <div class="mt-6 text-center text-sm">
+    <div class="mt-4 text-center text-sm">
       <p class="text-gray-500">Já possui uma conta? <a href="#" id="open-login-modal" class="font-medium text-purple-600 hover:text-purple-500">Faça login</a></p>
     </div>
   </div>
@@ -107,6 +117,34 @@
 <style>
 @keyframes fadeIn { from { opacity: 0; transform: translateY(40px);} to { opacity: 1; transform: none; } }
 .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(.4,0,.2,1); }
+.loader { border-top-color: #7c3aed; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 640px) {
+  #cadastro-modal { max-width: 98vw !important; padding: 0.5rem !important; }
+}
+@media (max-width: 400px) {
+  #cadastro-modal { max-width: 100vw !important; border-radius: 0 !important; }
+}
+#cadastro-modal input {
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  font-size: 1rem;
+  transition: border 0.2s;
+}
+#cadastro-modal input:focus {
+  border-color: #a78bfa;
+  background: #fff;
+}
+#cadastro-modal label {
+  color: #6b7280;
+  font-weight: 500;
+}
+#cadastro-modal .error-message {
+  color: #dc2626;
+  font-size: 0.9em;
+  margin-top: 0.15rem;
+}
 </style>
 <!-- O JS para abrir/fechar e validar será carregado dinamicamente -->
 <!-- Removido o script src="js/auth-modal.js" daqui. Inclua globalmente antes do </body> em cada página. -->

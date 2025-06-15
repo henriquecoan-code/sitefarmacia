@@ -118,6 +118,17 @@
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
 
+    // Carrega o modal de cadastro dinamicamente
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      document.getElementById('cadastro-modal-placeholder').innerHTML = html;
+    }
+    await loadCadastroModal();
+
+    import { setupCadastroModalBtn } from './js/utils.js';
+    setupCadastroModalBtn();
+
     let produtos = [];
     let categorias = new Set();
 

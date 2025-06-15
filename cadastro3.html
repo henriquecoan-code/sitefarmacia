@@ -216,11 +216,23 @@
         </div>
     </div>
     <div id="footer-container" class="mt-auto w-full"></div>
+    <div id="cadastro-modal-placeholder"></div>
     <script type="module">
       import { loadHeader } from './js/header-loader.js';
       import { loadFooter } from './js/footer-loader.js';
       loadHeader('header-container', 'authContainerSecondary');
       loadFooter('footer-container');
+
+      // Carrega o modal de cadastro dinamicamente
+      async function loadCadastroModal() {
+        const resp = await fetch('partials/cadastro-modal.html');
+        const html = await resp.text();
+        document.getElementById('cadastro-modal-placeholder').innerHTML = html;
+      }
+      await loadCadastroModal();
+
+      import { setupCadastroModalBtn } from './js/utils.js';
+      setupCadastroModalBtn();
 
       import { auth, firestore } from './js/firebase-config.js';
       import { createUserWithEmailAndPassword, updateProfile, signOut } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';

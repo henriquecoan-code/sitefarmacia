@@ -47,6 +47,18 @@
     window.auth = auth;
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
+    
+    // Carrega o modal de cadastro dinamicamente
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      document.getElementById('cadastro-modal-placeholder').innerHTML = html;
+    }
+    await loadCadastroModal();
+
+    import { setupCadastroModalBtn } from './js/utils.js';
+    setupCadastroModalBtn();
+
     fetch('http://localhost:3000/produtos')
       .then(res => res.json())
       .then(produtos => {
