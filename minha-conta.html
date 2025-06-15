@@ -10,6 +10,7 @@
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
+  <div id="cadastro-modal-placeholder"></div>
   <div class="flex flex-col md:flex-row">
     <!--menu esquerdo-->
     <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
@@ -66,6 +67,17 @@
     } catch (e) {
       console.error('Erro ao carregar o footer:', e);
     }
+
+    // Carrega o modal de cadastro dinamicamente
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      document.getElementById('cadastro-modal-placeholder').innerHTML = html;
+    }
+    await loadCadastroModal();
+
+    import { setupCadastroModalBtn } from './js/utils.js';
+    setupCadastroModalBtn();    
 
         const loading = document.getElementById('loading');
     const errorMessage = document.getElementById('error-message');

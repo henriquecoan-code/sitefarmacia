@@ -68,6 +68,18 @@
     import { loadFooter } from './js/footer-loader.js';
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
+
+    // Carrega o modal de cadastro dinamicamente
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      document.getElementById('cadastro-modal-placeholder').innerHTML = html;
+    }
+    await loadCadastroModal();
+
+    import { setupCadastroModalBtn } from './js/utils.js';
+    setupCadastroModalBtn();
+    
     // Feedback do formulário (simulação)
     const form = document.getElementById('contato-form');
     if (form) {
