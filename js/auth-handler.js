@@ -59,14 +59,43 @@ export function handleAuthState(authContainerId) {
       });
     } else {
       authContainer.innerHTML = `
-        <a href="login.html" id="loginBtn" class="text-gray-700 hover:text-blue-700">
+        <a href="#" id="loginBtn" class="text-gray-700 hover:text-blue-700">
           <i class="fas fa-user text-xl"></i>
           <p class="text-xs">Entrar</p>
         </a>
-        <a href="cadastro3.html" id="registerBtn" class="text-gray-700 hover:text-blue-700">
+        <a href="#" id="registerBtn" class="text-gray-700 hover:text-blue-700">
           <p class="text-xs">Cadastrar</p>
         </a>
       `;
+      // Adiciona eventos para abrir os modais corretos
+      setTimeout(() => {
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        if (loginBtn) {
+          loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (typeof window.openAuthModal === 'function') {
+              window.openAuthModal('login');
+            }
+          });
+        }
+        if (registerBtn) {
+          registerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (typeof window.openCadastroModal === 'function') {
+              window.openCadastroModal();
+            } else {
+              // fallback: tenta carregar o script manualmente e abrir depois
+              var script = document.createElement('script');
+              script.src = '/js/auth-modal.js';
+              script.onload = function() {
+                if (typeof window.openCadastroModal === 'function') window.openCadastroModal();
+              };
+              document.body.appendChild(script);
+            }
+          });
+        }
+      }, 0);
     }
   });
 }

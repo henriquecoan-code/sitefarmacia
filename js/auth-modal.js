@@ -202,7 +202,20 @@
         await signOut(auth);
         setTimeout(() => {
           closeCadastroModal();
-          window.location.href = 'login.html';
+          if (typeof window.openAuthModal === 'function') {
+            window.openAuthModal('login');
+          } else {
+            // fallback: tenta abrir o modal de login pelo header
+            const overlay = document.getElementById('auth-modal-overlay');
+            if (overlay) {
+              overlay.classList.remove('hidden');
+              document.body.classList.add('overflow-hidden');
+              const content = document.getElementById('auth-modal-content');
+              if (content) {
+                window.openAuthModal && window.openAuthModal('login');
+              }
+            }
+          }
         }, 2000);
       } catch (error) {
         let errorMessage = 'Erro no cadastro: ';

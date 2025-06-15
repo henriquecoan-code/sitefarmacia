@@ -97,9 +97,20 @@
             <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Entrar</button>
           </form>
           <p class='mt-4 text-sm text-center'>
-            Não tem uma conta? <a href='#' onclick='openAuthModal("register")' class='text-blue-600 hover:underline'>Cadastre-se</a>
+            Não tem uma conta? <a href='#' id='openCadastroLink' class='text-blue-600 hover:underline' tabindex='0'>Cadastre-se</a>
           </p>
         `;
+        // Garante que o evento é adicionado imediatamente após o HTML ser inserido
+        const cadastroLink = content.querySelector('#openCadastroLink');
+        if (cadastroLink) {
+          cadastroLink.removeAttribute('href');
+          cadastroLink.style.cursor = 'pointer';
+          cadastroLink.onclick = function(e) {
+            e.preventDefault();
+            openAuthModal('register');
+            return false;
+          };
+        }
       } else {
         content.innerHTML = `
           <h2 class='text-xl font-bold mb-4 text-blue-900'>Cadastrar</h2>
@@ -159,6 +170,26 @@
       }
     });
     window.openAuthModal = openAuthModal;
+    // Garante que os botões de login/cadastro sempre abrem o modal correto, mesmo após recarregamento dinâmico
+    function attachAuthModalListeners() {
+      const loginBtn = document.getElementById('loginBtn');
+      const registerBtn = document.getElementById('registerBtn');
+      if (loginBtn) {
+        loginBtn.onclick = function(e) {
+          e.preventDefault();
+          window.openAuthModal && window.openAuthModal('login');
+        };
+      }
+      if (registerBtn) {
+        registerBtn.onclick = function(e) {
+          e.preventDefault();
+          window.openAuthModal && window.openAuthModal('register');
+        };
+      }
+    }
+    // Roda ao carregar e expõe globalmente para ser chamado após updates dinâmicos
+    attachAuthModalListeners();
+    window.attachAuthModalListeners = attachAuthModalListeners;
     </script>
   </header>
   <!-- Menu Topbar (MOBILE: sempre visível; DESKTOP: aparece só após rolar) -->
