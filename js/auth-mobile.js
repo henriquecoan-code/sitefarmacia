@@ -58,19 +58,16 @@ function renderAuthMobileMenu(user) {
       // Só renderiza se o conteúdo for diferente do atual para evitar loop infinito
       const html =
         '<div class="flex flex-col space-y-1">' +
-        '<a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
-        '<a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
+        '<a href="login.html" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
+        '<a href="cadastro3.html" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
         '</div>';
       // Corrige: remove espaços e quebras para comparação robusta
       const clean = s => s.replace(/\s+/g, ' ').trim();
       if (clean(container.innerHTML) !== clean(html)) {
         container.innerHTML = html;
         document.getElementById('loginBtnMobileMenu').onclick = function (e) {
-          e.preventDefault();
-          if (typeof window.openAuthModal === 'function') {
-            window.openAuthModal('login');
-          }
-          // Fecha o menu mobile
+          // Não previne o default, deixa navegar normalmente
+          // Fecha o menu mobile ao navegar
           if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
             try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
           }
@@ -82,19 +79,7 @@ function renderAuthMobileMenu(user) {
           }
         };
         document.getElementById('registerBtnMobileMenu').onclick = function (e) {
-          e.preventDefault();
-          if (typeof window.openCadastroModal === 'function') {
-            window.openCadastroModal();
-          } else {
-            // fallback: tenta carregar o script manualmente e abrir depois
-            var script = document.createElement('script');
-            script.src = '/js/auth-modal.js';
-            script.onload = function() {
-              if (typeof window.openCadastroModal === 'function') window.openCadastroModal();
-            };
-            document.body.appendChild(script);
-          }
-          // Fecha o menu mobile
+          // Não previne o default, deixa navegar normalmente
           if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
             try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
           }

@@ -202,6 +202,7 @@
         await signOut(auth);
         setTimeout(() => {
           closeCadastroModal();
+<<<<<<< HEAD
       cadastro-modal
           if (typeof window.openAuthModal === 'function') {
             window.openAuthModal('login');
@@ -220,6 +221,9 @@
 
           window.location.href = 'login.html';
       main
+=======
+          window.location.href = 'login.html';
+>>>>>>> parent of c2f67df (cadastrar funcionando)
         }, 2000);
       } catch (error) {
         let errorMessage = 'Erro no cadastro: ';
