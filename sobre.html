@@ -25,7 +25,6 @@
     await loadFooter('footer-container');
   </script>
   <script src="js/auth-modal.js"></script>
-  <script src="js/auth-mobile.js"></script>
 </head>
 <body class="bg-gray-50">
   <div id="header-container"></div>
@@ -120,5 +119,16 @@
   </main>
   <div id="footer-container"></div>
   <script src="js/auth-mobile.js"></script>
+  <!-- Carrega o modal de cadastro dinamicamente e insere no <body> -->
+  <script>
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+      document.body.appendChild(temp.firstElementChild);
+    }
+    loadCadastroModal();
+  </script>
 </body>
 </html>

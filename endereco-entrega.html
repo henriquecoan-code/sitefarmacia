@@ -265,6 +265,16 @@
       }
     }
 
+    // Carrega o modal de cadastro dinamicamente e insere no <body>
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+      document.body.appendChild(temp.firstElementChild);
+    }
+    await loadCadastroModal();
+
     // Função para exibir toast visual
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
