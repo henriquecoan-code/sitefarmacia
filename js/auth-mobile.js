@@ -83,17 +83,7 @@ function renderAuthMobileMenu(user) {
         };
         document.getElementById('registerBtnMobileMenu').onclick = function (e) {
           e.preventDefault();
-          if (typeof window.openCadastroModal === 'function') {
-            window.openCadastroModal();
-          } else {
-            // fallback: tenta carregar o script manualmente e abrir depois
-            var script = document.createElement('script');
-            script.src = './js/auth-modal.js';
-            script.onload = function() {
-              if (typeof window.openCadastroModal === 'function') window.openCadastroModal();
-            };
-            document.body.appendChild(script);
-          }
+          loadAuthModalAndOpen();
           // Fecha o menu mobile
           if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
             try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
