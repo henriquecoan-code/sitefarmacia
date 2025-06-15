@@ -69,13 +69,21 @@
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
 
-    // Carrega o modal de cadastro dinamicamente e insere no <body>
+    //cadastro-modal
+    //Carrega o modal de cadastro dinamicamente e insere no <body>
     async function loadCadastroModal() {
       const resp = await fetch('partials/cadastro-modal.html');
       const html = await resp.text();
       const temp = document.createElement('div');
       temp.innerHTML = html;
       document.body.appendChild(temp.firstElementChild);
+
+    // Carrega o modal de cadastro dinamicamente
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      document.getElementById('cadastro-modal-placeholder').innerHTML = html;
+    //main
     }
     await loadCadastroModal();
 

@@ -202,6 +202,7 @@
         await signOut(auth);
         setTimeout(() => {
           closeCadastroModal();
+      cadastro-modal
           if (typeof window.openAuthModal === 'function') {
             window.openAuthModal('login');
           } else {
@@ -216,6 +217,9 @@
               }
             }
           }
+
+          window.location.href = 'login.html';
+      main
         }, 2000);
       } catch (error) {
         let errorMessage = 'Erro no cadastro: ';
@@ -238,11 +242,29 @@
         submitBtn.innerHTML = originalBtn;
         showLoading(false);
       }
+      cadastro-modal
     }
 
     // Toast do modal
     // Removed duplicate definition of showModalToast.
 
+=======
+    }
+
+    // Toast do modal
+    function showModalToast(message, type = 'success') {
+      const toast = document.getElementById('modal-toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.className = 'fixed left-1/2 top-8 z-50 px-4 py-2 rounded shadow-lg text-white text-sm font-medium transform -translate-x-1/2 transition-all ' +
+        (type === 'success' ? 'bg-green-600' : 'bg-red-600');
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4000);
+    }
+
+    main
     // Máscara dinâmica para CPF/CNPJ
     function maskCpfCnpj(value) {
       value = value.replace(/\D/g, '');
