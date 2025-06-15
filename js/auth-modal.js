@@ -247,9 +247,7 @@
 
     // Toast do modal
     // Removed duplicate definition of showModalToast.
-
-=======
-    }
+   
 
     // Toast do modal
     function showModalToast(message, type = 'success') {
