@@ -22,6 +22,9 @@
     <span><i class="fas fa-exclamation-triangle mr-2"></i>Seu e-mail ainda não foi confirmado. Confirme seu e-mail para finalizar suas compras.</span>
   </div>
 
+  <!-- Placeholder global para o login-modal -->
+  <div id="login-modal-placeholder"></div>
+
   <!-- Header Principal -->
   <header class="bg-white shadow-md sticky top-0 z-50 hidden md:block">
     <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between">
@@ -60,6 +63,11 @@
             <button class="mt-2 w-full bg-blue-700 text-white py-1 rounded hover:bg-blue-800 text-sm">Finalizar Compra</button>
           </div>
         </div>
+        <!-- Botão Entrar 
+        <button id="openLoginModalBtn" class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium shadow transition md:inline-flex items-center">
+          <i class="fas fa-sign-in-alt mr-2"></i>Entrar
+        </button>
+        -->
       </div>
     </div>
 
@@ -77,122 +85,8 @@
       </div>
     </nav>
     <!-- Modal de Login/Cadastro -->
-    <div id="auth-modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center transition-opacity duration-200">
-      <div id="auth-modal" class="bg-white rounded-lg shadow-xl w-full max-w-md relative p-8">
-        <button id="close-auth-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button>
-        <div id="auth-modal-content"></div>
-      </div>
-    </div>
-    <script>
-    // Modal login/cadastro dinâmico
-    function openAuthModal(type) {
-      const overlay = document.getElementById('auth-modal-overlay');
-      const content = document.getElementById('auth-modal-content');
-      overlay.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (type === 'login') {
-        content.innerHTML = `
-          <h2 class='text-xl font-bold mb-4 text-blue-900'>Entrar</h2>
-          <form id='login-form' class='space-y-4'>
-            <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
-            <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
-            <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Entrar</button>
-          </form>
-          <p class='mt-4 text-sm text-center'>
-            Não tem uma conta? <a href='#' id='openCadastroLink' class='text-blue-600 hover:underline' tabindex='0'>Cadastre-se</a>
-          </p>
-        `;
-        // Garante que o evento é adicionado imediatamente após o HTML ser inserido
-        const cadastroLink = content.querySelector('#openCadastroLink');
-        if (cadastroLink) {
-          cadastroLink.removeAttribute('href');
-          cadastroLink.style.cursor = 'pointer';
-          cadastroLink.onclick = function(e) {
-            e.preventDefault();
-            openAuthModal('register');
-            return false;
-          };
-        }
-      } else {
-        content.innerHTML = `
-          <h2 class='text-xl font-bold mb-4 text-blue-900'>Cadastrar</h2>
-          <form id='register-form' class='space-y-4'>
-            <input type='text' placeholder='Nome completo' class='w-full border rounded px-3 py-2' required />
-            <input type='email' placeholder='E-mail' class='w-full border rounded px-3 py-2' required />
-            <input type='password' placeholder='Senha' class='w-full border rounded px-3 py-2' required />
-            <input type='password' placeholder='Confirmar senha' class='w-full border rounded px-3 py-2' required />
-            <button type='submit' class='w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800'>Cadastrar</button>
-          </form>
-          <p class='mt-4 text-sm text-center'>
-            Já tem uma conta? <a href='#' onclick='openAuthModal("login")' class='text-blue-600 hover:underline'>Entrar</a>
-          </p>
-        `;
-      }
-      document.getElementById('close-auth-modal').addEventListener('click', closeAuthModal);
-    }
-
-    function closeAuthModal() {
-      const overlay = document.getElementById('auth-modal-overlay');
-      overlay.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const loginBtn = document.getElementById('loginBtn');
-      const registerBtn = document.getElementById('registerBtn');
-      const cadastroBtn = document.getElementById('openCadastroModalBtn');
-      if (loginBtn) {
-        loginBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          openAuthModal('login');
-        });
-      }
-      if (registerBtn) {
-        registerBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          openAuthModal('register');
-        });
-      }
-      if (cadastroBtn) {
-        cadastroBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          // Força o carregamento do script do modal se não estiver disponível
-          if (typeof window.openCadastroModal === 'function') {
-            window.openCadastroModal();
-          } else {
-            // fallback: tenta carregar o script manualmente e abrir depois
-            var script = document.createElement('script');
-            script.src = '/js/auth-modal.js'; // Caminho absoluto para garantir que sempre encontra
-            script.onload = function() {
-              if (typeof window.openCadastroModal === 'function') window.openCadastroModal();
-            };
-            document.body.appendChild(script);
-          }
-        });
-      }
-    });
-    window.openAuthModal = openAuthModal;
-    // Garante que os botões de login/cadastro sempre abrem o modal correto, mesmo após recarregamento dinâmico
-    function attachAuthModalListeners() {
-      const loginBtn = document.getElementById('loginBtn');
-      const registerBtn = document.getElementById('registerBtn');
-      if (loginBtn) {
-        loginBtn.onclick = function(e) {
-          e.preventDefault();
-          window.openAuthModal && window.openAuthModal('login');
-        };
-      }
-      if (registerBtn) {
-        registerBtn.onclick = function(e) {
-          e.preventDefault();
-          window.openAuthModal && window.openAuthModal('register');
-        };
-      }
-    }
-    // Roda ao carregar e expõe globalmente para ser chamado após updates dinâmicos
-    attachAuthModalListeners();
-    window.attachAuthModalListeners = attachAuthModalListeners;
-    </script>
+    <!-- REMOVIDO: auth-modal-overlay dinâmico -->
+    <!--#include file="partials/login-modal.html" -->
   </header>
   <!-- Menu Topbar (MOBILE: sempre visível; DESKTOP: aparece só após rolar) -->
   <div id="topbar-fixed" x-data="{ mobileMenuOpen: false }"
@@ -332,5 +226,6 @@ if (headerSearchForm) {
 }
 </script>
 <script src="js/utils.js"></script>
+<script src="/js/login-modal-loader.js"></script>
 </body>
 </html>
