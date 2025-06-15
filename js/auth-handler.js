@@ -74,8 +74,8 @@ export function handleAuthState(authContainerId) {
         if (loginBtn) {
           loginBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (typeof window.openAuthModal === 'function') {
-              window.openAuthModal('login');
+            if (typeof window.openLoginModal === 'function') {
+              window.openLoginModal();
             }
           });
         }
