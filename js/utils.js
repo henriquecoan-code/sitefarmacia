@@ -27,6 +27,19 @@ export function setupCadastroModalBtn() {
   }
 }
 
+//modal login
+export function setupLoginModalBtn() {
+  const loginBtn = document.getElementById('openLoginModalBtn');
+  if (loginBtn) {
+    loginBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (typeof window.openLoginModal === 'function') {
+        window.openLoginModal();
+      }
+    });
+  }
+}
+
 /**
  * Valida CPF
  */
