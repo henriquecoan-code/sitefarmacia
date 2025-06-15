@@ -200,3 +200,17 @@ observeMobileMenuAuth();
   // Fallback: tenta rodar após 2s caso eventos não disparem
   setTimeout(reinitAuthMobile, 2000);
 })();
+
+function loadAuthModalAndOpen() {
+  if (typeof window.openCadastroModal === 'function') {
+    window.openCadastroModal();
+  } else {
+    // fallback: tenta carregar o script manualmente e abrir depois
+    var script = document.createElement('script');
+    script.src = '/js/auth-modal.js';
+    script.onload = function() {
+      if (typeof window.openCadastroModal === 'function') window.openCadastroModal();
+    };
+    document.body.appendChild(script);
+  }
+}
