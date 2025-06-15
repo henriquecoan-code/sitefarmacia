@@ -202,6 +202,7 @@
         await signOut(auth);
         setTimeout(() => {
           closeCadastroModal();
+          
           if (typeof window.openAuthModal === 'function') {
             window.openAuthModal('login');
           } else {

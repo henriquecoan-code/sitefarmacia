@@ -68,6 +68,7 @@
       console.error('Erro ao carregar o footer:', e);
     }
 
+
     // Carrega o modal de cadastro dinamicamente e insere no <body>
     async function loadCadastroModal() {
       const resp = await fetch('partials/cadastro-modal.html');
@@ -75,7 +76,7 @@
       const temp = document.createElement('div');
       temp.innerHTML = html;
       document.body.appendChild(temp.firstElementChild);
-    }
+
     await loadCadastroModal();
 
     import { setupCadastroModalBtn } from './js/utils.js';
