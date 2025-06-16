@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 <body class="bg-gray-50">
+  <div id="login-modal-placeholder"></div>
   <div id="header-container"></div>
   <div class="flex flex-col md:flex-row">
     <!-- Menu lateral apenas no desktop -->
@@ -49,8 +50,6 @@
     </main>
   </div>
   <div id="footer-container"></div>
-  <script src="js/auth-modal.js"></script>
-  <script src="js/auth-mobile.js"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
@@ -58,20 +57,14 @@
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
+    // Garante que o header e autenticação funcionam igual ao index.html
     const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
     const auth = getAuth(app);
     const db = getFirestore(app);
     window.auth = auth;
-    try {
-      await loadHeader('header-container', 'authContainerSecondary');
-    } catch (e) {
-      console.error('Erro ao carregar o header:', e);
-    }
-    try {
-      await loadFooter('footer-container');
-    } catch (e) {
-      console.error('Erro ao carregar o footer:', e);
-    }
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
         // OUVINTE DE AUTENTICAÇÃO FORA DO DOMContentLoaded
     onAuthStateChanged(auth, async user => {
       if (!user) {
@@ -289,9 +282,31 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.classList.add('hidden'), 300);
   }, 2500);
 }
+
+// Protege links sensíveis no menu lateral desktop para abrir o login-modal se não autenticado
+function protectDesktopLinks() {
+  const links = [
+    'a[href="./minha-conta.html"]',
+    'a[href="./endereco-entrega.html"]',
+    'a[href="./pedidos.html"]'
+  ];
+  links.forEach(selector => {
+    document.querySelectorAll(selector).forEach(link => {
+      link.addEventListener('click', function(e) {
+        if (!window.auth || !window.auth.currentUser) {
+          e.preventDefault();
+          if (typeof window.openLoginModal === 'function') window.openLoginModal();
+        }
+      });
+    });
+  });
+}
+// Aguarda DOM pronto e header carregado
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(protectDesktopLinks, 500);
+});
   </script>
-    </div>
-  <div id="footer-container"></div>
   <script src="js/auth-mobile.js"></script>
+  <script src="/js/login-modal-loader.js"></script>
 </body>
 </html>
