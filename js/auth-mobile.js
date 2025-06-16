@@ -3,6 +3,13 @@
 // Não use import aqui!
 // O objeto auth deve ser exposto em window.auth pelo carregador principal
 
+// Garante que window.auth está disponível globalmente
+try {
+  if (typeof window !== 'undefined' && typeof auth !== 'undefined') {
+    window.auth = auth;
+  }
+} catch(e) {}
+
 function renderMobileAuth(user) {
   var container = document.getElementById('authContainerSecondaryMobile');
   if (!container) return;
@@ -22,20 +29,19 @@ function renderMobileAuth(user) {
       '<span class="text-xs">Entrar</span>' +
       '</button>';
     document.getElementById('mobileLoginBtn').onclick = function (e) {
-      window.location.href = 'login.html';
       e.preventDefault();
-      if (typeof openAuthModal === 'function') openAuthModal('login');
+      if (typeof window.openLoginModal === 'function') window.openLoginModal();
     };
   }
 }
 
 function renderAuthMobileMenu(user) {
   // Aguarda até o elemento existir e estar visível
-  function tryRender(attempts = 10) {
+  function tryRender(attempts = 5) {
     const container = document.getElementById('authContainerSecondaryMobileMenu');
     console.log('Tentando renderizar menu mobile:', container, 'Tentativas restantes:', attempts, 'User:', user);
     if (!container || container.offsetParent === null) {
-      if (attempts > 0) setTimeout(() => tryRender(attempts - 1), 100);
+      if (attempts > 0) setTimeout(() => tryRender(attempts - 1), 500);
       return;
     }
     container.classList.remove('hidden');
@@ -43,17 +49,36 @@ function renderAuthMobileMenu(user) {
     if (user) {
       container.innerHTML =
         '<div class="flex flex-col space-y-1">' +
-        '<a href="minha-conta.html" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
+        '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
         '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
         '</div>';
-      document.getElementById('logoutBtnMobileMenu').onclick = function (e) {
-        e.preventDefault();
-        if (window.auth) {
-          window.auth.signOut().then(function () {
-            window.location.reload();
-          });
-        }
-      };
+      // Adiciona listener para fechar o menu ao clicar em Minha Conta
+      var minhaConta = document.getElementById('mobileMenuMinhaConta');
+      if (minhaConta) {
+        minhaConta.addEventListener('click', function() {
+          // Fecha o menu mobile igual aos outros links
+          if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
+            try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
+          }
+          var aside = document.querySelector('aside');
+          if (aside && aside.__x && aside.__x.$data) {
+            aside.__x.$data.mobileMenuOpen = false;
+          } else if (aside && aside.parentElement && aside.parentElement.__x && aside.parentElement.__x.$data) {
+            aside.parentElement.__x.$data.mobileMenuOpen = false;
+          }
+        });
+      }
+      var sair = document.getElementById('logoutBtnMobileMenu');
+      if (sair) {
+        sair.onclick = function(e) {
+          e.preventDefault();
+          if (window.auth) {
+            window.auth.signOut().then(function () {
+              window.location.reload();
+            });
+          }
+        };
+      }
     } else {
       // Só renderiza se o conteúdo for diferente do atual para evitar loop infinito
       const html =
@@ -67,8 +92,8 @@ function renderAuthMobileMenu(user) {
         container.innerHTML = html;
         document.getElementById('loginBtnMobileMenu').onclick = function (e) {
           e.preventDefault();
-          if (typeof window.openAuthModal === 'function') {
-            window.openAuthModal('login');
+          if (typeof window.openLoginModal === 'function') {
+            window.openLoginModal();
           }
           // Fecha o menu mobile
           if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
@@ -122,32 +147,13 @@ window.observeMobileMenuAuth = observeMobileMenuAuth;
 
 setupAuthMobile();
 
-(function ensureMobileMenuAuthSync() {
-  function trySync() {
-    var aside = document.querySelector('aside');
-    if (!aside) return;
-    var lastOpen = false;
-    setInterval(function() {
-      var isOpen = aside.style.display !== 'none' && aside.offsetParent !== null;
-      if (isOpen && !lastOpen) {
-        var container = document.getElementById('authContainerSecondaryMobileMenu');
-        if (container) {
-          container.classList.remove('hidden');
-          container.style.removeProperty('display');
-        }
-        if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
-          window.renderAuthMobileMenu(window.currentAuthUser);
-        }
-      }
-      lastOpen = isOpen;
-    }, 200);
+// Remove o setInterval de sincronização automática do menu mobile
+// Adiciona listener para evento customizado ao abrir o menu
+window.addEventListener('mobileMenuOpened', function() {
+  if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
+    window.renderAuthMobileMenu(window.currentAuthUser);
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', trySync);
-  } else {
-    trySync();
-  }
-})();
+});
 
 // --- MutationObserver para garantir renderização após Alpine.js, sempre por último ---
 function observeMobileMenuAuth() {

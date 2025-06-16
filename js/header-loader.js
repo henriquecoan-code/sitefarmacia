@@ -31,7 +31,7 @@ export function loadHeader(headerContainerId, authContainerId) {
           if (window.auth && window.renderMobileAuth && window.renderAuthMobileMenu) {
             window.auth.onAuthStateChanged(function(user) {
               window.renderMobileAuth(user);
-              window.renderAuthMobileMenu(user);
+              // window.renderAuthMobileMenu(user); // Removido para evitar loop
             });
             // Chama manualmente para garantir renderização inicial
             window.renderAuthMobileMenu(window.auth.currentUser);
