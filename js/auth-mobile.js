@@ -46,47 +46,13 @@ function renderAuthMobileMenu(user) {
     }
     container.classList.remove('hidden');
     container.style.removeProperty('display');
-    if (user) {
-      container.innerHTML =
-        '<div class="flex flex-col space-y-1">' +
-        '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
-        '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
-        '</div>';
-      // Adiciona listener para fechar o menu ao clicar em Minha Conta
-      var minhaConta = document.getElementById('mobileMenuMinhaConta');
-      if (minhaConta) {
-        minhaConta.addEventListener('click', function() {
-          // Fecha o menu mobile igual aos outros links
-          if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
-            try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
-          }
-          var aside = document.querySelector('aside');
-          if (aside && aside.__x && aside.__x.$data) {
-            aside.__x.$data.mobileMenuOpen = false;
-          } else if (aside && aside.parentElement && aside.parentElement.__x && aside.parentElement.__x.$data) {
-            aside.parentElement.__x.$data.mobileMenuOpen = false;
-          }
-        });
-      }
-      var sair = document.getElementById('logoutBtnMobileMenu');
-      if (sair) {
-        sair.onclick = function(e) {
-          e.preventDefault();
-          if (window.auth) {
-            window.auth.signOut().then(function () {
-              window.location.reload();
-            });
-          }
-        };
-      }
-    } else {
-      // Só renderiza se o conteúdo for diferente do atual para evitar loop infinito
+    // Se user for null, renderiza menu de não autenticado e não faz mais tentativas
+    if (!user) {
       const html =
         '<div class="flex flex-col space-y-1">' +
         '<a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
         '<a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
         '</div>';
-      // Corrige: remove espaços e quebras para comparação robusta
       const clean = s => s.replace(/\s+/g, ' ').trim();
       if (clean(container.innerHTML) !== clean(html)) {
         container.innerHTML = html;
@@ -121,8 +87,42 @@ function renderAuthMobileMenu(user) {
           }
         };
       }
+      console.log('Conteúdo após render (não autenticado):', container.innerHTML);
+      return; // Não faz mais tentativas
     }
-    console.log('Conteúdo após render:', container.innerHTML);
+    // ...código original para usuário autenticado...
+    container.innerHTML =
+      '<div class="flex flex-col space-y-1">' +
+      '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
+      '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
+      '</div>';
+    // Adiciona listener para fechar o menu ao clicar em Minha Conta
+    var minhaConta = document.getElementById('mobileMenuMinhaConta');
+    if (minhaConta) {
+      minhaConta.addEventListener('click', function() {
+        if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
+          try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
+        }
+        var aside = document.querySelector('aside');
+        if (aside && aside.__x && aside.__x.$data) {
+          aside.__x.$data.mobileMenuOpen = false;
+        } else if (aside && aside.parentElement && aside.parentElement.__x && aside.parentElement.__x.$data) {
+          aside.parentElement.__x.$data.mobileMenuOpen = false;
+        }
+      });
+    }
+    var sair = document.getElementById('logoutBtnMobileMenu');
+    if (sair) {
+      sair.onclick = function(e) {
+        e.preventDefault();
+        if (window.auth) {
+          window.auth.signOut().then(function () {
+            window.location.reload();
+          });
+        }
+      };
+    }
+    console.log('Conteúdo após render (autenticado):', container.innerHTML);
   }
   tryRender();
 }
@@ -176,8 +176,24 @@ function observeMobileMenuAuth() {
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function() {
         if (container.offsetParent !== null && !container.classList.contains('hidden')) {
-          if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
-            window.renderAuthMobileMenu(window.currentAuthUser);
+          // Só renderiza se o conteúdo não estiver correto para o usuário atual
+          let expectedHtml;
+          if (window.currentAuthUser) {
+            expectedHtml = '<div class="flex flex-col space-y-1">' +
+              '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
+              '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
+              '</div>';
+          } else {
+            expectedHtml = '<div class="flex flex-col space-y-1">' +
+              '<a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
+              '<a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
+              '</div>';
+          }
+          const clean = s => s.replace(/\s+/g, ' ').trim();
+          if (clean(container.innerHTML) !== clean(expectedHtml)) {
+            if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
+              window.renderAuthMobileMenu(window.currentAuthUser);
+            }
           }
         }
       }, 50);
