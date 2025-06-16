@@ -10,7 +10,6 @@
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body class="bg-gray-50">
-  <div id="login-modal-placeholder"></div>
   <div id="header-container"></div>
   <main class="container mx-auto px-4 py-8 min-h-[60vh]">
     <h1 class="text-3xl font-bold text-blue-900 mb-6 flex items-center"><i class="fas fa-envelope mr-2"></i>Fale Conosco</h1>
@@ -64,6 +63,8 @@
     </div>
   </main>
   <div id="footer-container"></div>
+    <div id="login-modal-placeholder"></div>
+
   <script type="module">
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
@@ -137,6 +138,7 @@
       });
     }
   </script>
-  <script src="/js/login-modal-loader.js"></script>
+  <script src="js/auth-modal.js"></script>
+  <script src="js/login-modal-loader.js"></script></body>
 </body>
 </html>
