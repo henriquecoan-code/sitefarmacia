@@ -54,7 +54,7 @@
     
     // Carrega o modal de cadastro dinamicamente e insere no <body>
     async function loadCadastroModal() {
-      const resp = await fetch('partials/cadastro-modal.html');
+      const resp = await fetch('./partials/cadastro-modal.html');
       const html = await resp.text();
       const temp = document.createElement('div');
       temp.innerHTML = html;
