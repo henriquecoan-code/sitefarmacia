@@ -1,5 +1,6 @@
-id;codigo;nome;descricao;precoMaximo;valorComDesconto;categoria;subcategoria;estoque;fotos;desconto
-1;7,89123E+12;Paracetamol 750mg;AnalgÈsico para dores e febre;2250;1990;Medicamentos;AnalgÈsicos;100;paracetamol750mg.png;12
-2;7,89123E+12;Shampoo Anticaspa;Shampoo para controle de caspa;1800;1500;Higiene Pessoal;Shampoo;50;produto2.jpg;17
-3;7,89123E+12;Vitamina C 1g;Suplemento de vitamina C;3000;2500;Vitaminas;Suplementos;80;produto3.jpg;17
-4;;Sonridor caf c/4;Sonridor Caf 4cp;7000;6000;Medicamentos;AnalgÈsicos;10;;12
+nome;categoria;ean;cod-red;precoMaximo;desconto;quantidade;tags;descricao;fotos
+Paracetamol 750mg;Medicamentos;7,89123E+12;12345;22.50;12;100;analg√©sico, febre;Analg√©sico para dores e febre;paracetamol750mg.png
+Shampoo Anticaspa;Higiene Pessoal;7,89123E+12;54321;18.00;17;50;shampoo, anticaspa;Shampoo para controle de caspa;produto2.jpg
+Vitamina C 1g;Vitaminas;7,89123E+12;67890;30.00;17;80;vitamina, suplemento;Suplemento de vitamina C;produto3.jpg
+Sonridor caf c/4;Medicamentos;7,89123E+12;11223;70.00;12;10;analg√©sico;Sonridor Caf 4cp;
+Dipirona 500mg 10cp;Medicamentos;;1052;6.00;12;100;analgesico, febre;Analg√©sico para dores e febre;

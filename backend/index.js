@@ -189,35 +189,29 @@ app.post('/produtos/upload-csv', uploadCsv.single('csv'), async (req, res) => {
         return res.status(400).json({ error: 'Arquivo CSV não enviado.' });
     }
     const filePath = req.file.path;
-    const produtos = [];
+    const produtosCSV = [];
+    const nomesCSV = new Set();
     fs.createReadStream(filePath)
-        .pipe(csv({ separator: ';' })) // Corrige para CSV com ponto e vírgula
+        .pipe(csv({ separator: ';' }))
         .on('data', (row) => {
-            // Conversão e validação robusta
             const nome = row.nome && row.nome.trim();
-            // Aceita centavos ou reais
             let precoMaximo = row.precoMaximo ? parseFloat(row.precoMaximo.toString().replace(',', '.')) : 0;
             if (precoMaximo > 1000) precoMaximo = precoMaximo / 100;
             let valorComDesconto = row.valorComDesconto ? parseFloat(row.valorComDesconto.toString().replace(',', '.')) : 0;
             if (valorComDesconto > 1000) valorComDesconto = valorComDesconto / 100;
-            // Desconto pode vir como inteiro (12) ou decimal (0.12)
             let desconto = row.desconto ? parseFloat(row.desconto.toString().replace(',', '.')) : 0;
             if (desconto > 1) desconto = desconto / 100;
-            // Se valorComDesconto não vier, calcula
             if (!valorComDesconto && precoMaximo > 0) {
                 valorComDesconto = precoMaximo * (1 - desconto);
             }
             const estoque = parseInt(row.estoque || row.quantidade || '0', 10);
-            // Fotos: aceita múltiplos separados por vírgula ou ponto e vírgula
             let fotos = [];
             if (row.fotos) {
                 fotos = row.fotos.split(/[,;]/).map(f => f.trim()).filter(Boolean);
-                // Corrige caminho para /uploads se não for URL
                 fotos = fotos.map(f => (f && !f.startsWith('/') && !f.startsWith('http')) ? `/uploads/${f}` : f);
             }
-            // Só importa se nome e preço forem válidos
             if (nome && precoMaximo > 0) {
-                produtos.push({
+                produtosCSV.push({
                     nome,
                     descricao: row.descricao || '',
                     precoMaximo,
@@ -229,21 +223,39 @@ app.post('/produtos/upload-csv', uploadCsv.single('csv'), async (req, res) => {
                     fotos,
                     criadoEm: admin.firestore.FieldValue.serverTimestamp()
                 });
+                nomesCSV.add(nome);
             }
         })
         .on('end', async () => {
             try {
-                // Limpa coleção antes de importar (opcional: pode ser só adicionar/atualizar)
+                // Busca todos os produtos atuais
                 const snapshot = await db.collection('produtos').get();
-                const batch = db.batch();
-                snapshot.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-                // Adiciona novos produtos
-                for (const prod of produtos) {
-                    await db.collection('produtos').add(prod);
+                const produtosBanco = [];
+                const produtosBancoPorNome = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    produtosBanco.push({ id: doc.id, ...data });
+                    if (data.nome) {
+                        produtosBancoPorNome[data.nome] = { id: doc.id, ...data };
+                    }
+                });
+                // Upsert: atualiza ou insere
+                for (const prod of produtosCSV) {
+                    if (prod.nome in produtosBancoPorNome) {
+                        // Atualiza
+                        await db.collection('produtos').doc(produtosBancoPorNome[prod.nome].id).update({
+                            ...prod,
+                            criadoEm: produtosBancoPorNome[prod.nome].criadoEm || admin.firestore.FieldValue.serverTimestamp()
+                        });
+                    } else {
+                        // Insere
+                        await db.collection('produtos').add(prod);
+                    }
                 }
-                fs.unlinkSync(filePath); // Remove arquivo após uso
-                res.json({ success: true, count: produtos.length });
+                // Identifica produtos não presentes no CSV
+                const produtosOrfaos = produtosBanco.filter(p => !nomesCSV.has(p.nome));
+                fs.unlinkSync(filePath);
+                res.json({ success: true, count: produtosCSV.length, produtosOrfaos });
             } catch (e) {
                 res.status(500).json({ error: 'Erro ao importar produtos.' });
             }
@@ -296,6 +308,36 @@ app.post("/contato", async (req, res) => {
         console.error("Erro ao enviar e-mail de contato:", error);
         res.status(500).json({ error: "Erro ao enviar mensagem. Tente novamente mais tarde." });
     }
+});
+
+app.post('/produtos/confirmar-acoes', async (req, res) => {
+    const { acoes } = req.body;
+    if (!Array.isArray(acoes)) {
+        return res.status(400).json({ error: 'Ações inválidas.' });
+    }
+    try {
+        const batch = db.batch();
+        for (const item of acoes) {
+            const { id, acao } = item;
+            const ref = db.collection('produtos').doc(id);
+            if (acao === 'remover') {
+                batch.delete(ref);
+            } else if (acao === 'inativar') {
+                batch.update(ref, { ativo: false });
+            }
+            // Se for "manter", não faz nada
+        }
+        await batch.commit();
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Erro ao aplicar ações.' });
+    }
+});
+
+// Middleware global para erros não tratados
+app.use((err, req, res, next) => {
+  console.error('Erro não tratado:', err);
+  res.status(500).json({ error: 'Erro interno do servidor.' });
 });
 
 app.listen(port, "0.0.0.0", () => {

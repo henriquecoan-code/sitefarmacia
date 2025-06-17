@@ -82,11 +82,12 @@
             </form>
           </div>
         </div>
-        <section class="upload-area">
+        <section class="upload-area flex items-center gap-2">
           <label class="upload-label" for="csv-upload">📤 Fazer upload de produtos (.csv)</label>
           <input type="file" id="csv-upload" accept=".csv">
+          <button id="enviar-csv" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" type="button">Enviar</button>
+          <a href="produtos-modelo.csv" download class="ml-2 text-blue-700 underline text-xs hover:text-blue-900">Baixar modelo CSV</a>
           <div class="status-msg" id="upload-status"></div>
-          <a href="produtos-modelo.csv" download style="font-size:0.95rem;display:block;margin-top:0.5rem;">Baixar modelo de planilha</a>
         </section>
         <section class="filtros">
           <input type="text" id="filtro-nome" placeholder="Pesquisar por nome...">
@@ -274,57 +275,50 @@
     document.getElementById('filtro-nome').addEventListener('input', renderizarProdutos);
     document.getElementById('filtro-categoria').addEventListener('change', renderizarProdutos);
 
-    // Função para parsear CSV simples (assume separador ; ou ,)
-    function parseCSV(text) {
-      const lines = text.split(/\r?\n/).filter(l => l.trim());
-      if (lines.length < 2) return [];
-      const sep = lines[0].includes(';') ? ';' : ',';
-      const headers = lines[0].split(sep).map(h => h.trim());
-      return lines.slice(1).map(line => {
-        const cols = line.split(sep);
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = (cols[i]||'').trim());
-        return obj;
-      });
-    }
+    const uploadInput = document.getElementById('csv-upload');
+    const enviarBtn = document.getElementById('enviar-csv');
+    const status = document.getElementById('upload-status');
+    let arquivoCSV = null;
 
-    document.getElementById('csv-upload').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const status = document.getElementById('upload-status');
-      status.textContent = 'Lendo arquivo...';
+    uploadInput.addEventListener('change', (e) => {
+      arquivoCSV = e.target.files[0] || null;
+      status.textContent = arquivoCSV ? `Arquivo selecionado: ${arquivoCSV.name}` : '';
+    });
+
+    enviarBtn.addEventListener('click', async () => {
+      if (!arquivoCSV) {
+        status.textContent = 'Selecione um arquivo CSV antes de enviar.';
+        return;
+      }
+      status.textContent = 'Enviando arquivo para o servidor...';
+      const formData = new FormData();
+      formData.append('csv', arquivoCSV);
       try {
-        const text = await file.text();
-        const produtosCSV = parseCSV(text);
-        if (!produtosCSV.length) throw new Error('CSV vazio ou inválido');
-        status.textContent = 'Salvando produtos no Firestore...';
-        let count = 0;
-        for (const prod of produtosCSV) {
-          // Conversão e validação básica
-          if (!prod.nome || !prod.precoMaximo) continue;
-          const precoMaximo = parseFloat(prod.precoMaximo.replace(',', '.'));
-          const desconto = prod.desconto ? parseFloat(prod.desconto.replace(',', '.')) : 0;
-          const valorComDesconto = precoMaximo * (1 - desconto);
-          const quantidade = prod.quantidade ? parseInt(prod.quantidade, 10) : 0;
-          const tags = prod.tags ? prod.tags.split(',').map(t => t.trim()) : [];
-          const fotos = prod.fotos ? prod.fotos.split(',').map(f => f.trim()) : [];
-          await addDoc(collection(db, 'produtos'), {
-            nome: prod.nome,
-            descricao: prod.descricao || '',
-            precoMaximo,
-            desconto,
-            valorComDesconto,
-            quantidade,
-            categoria: prod.categoria || '',
-            subcategoria: prod.subcategoria || '',
-            tags,
-            fotos,
-            criadoEm: new Date()
-          });
-          count++;
+        const resp = await fetch('/produtos/upload-csv', {
+          method: 'POST',
+          body: formData
+        });
+        let data = {};
+        const text = await resp.text();
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            status.textContent = 'Erro ao importar: resposta inválida do servidor.';
+            return;
+          }
         }
-        status.textContent = `Importação concluída: ${count} produto(s) salvo(s)!`;
-        await carregarProdutos();
+        if (resp.ok) {
+          if (data.produtosOrfaos && data.produtosOrfaos.length > 0) {
+            localStorage.setItem('produtosOrfaos', JSON.stringify(data.produtosOrfaos));
+            window.location.href = 'produtos_confirmar_remocao.html';
+          } else {
+            status.textContent = `Importação concluída: ${data.count || 0} produto(s) atualizado(s)!`;
+            await carregarProdutos();
+          }
+        } else {
+          status.textContent = 'Erro ao importar: ' + (data.error || 'Erro desconhecido');
+        }
       } catch (err) {
         status.textContent = 'Erro ao importar: ' + err.message;
       }
@@ -333,5 +327,6 @@
 
     carregarProdutos();
   </script>
+  <div id="cadastro-modal-placeholder"></div>
 </body>
 </html>
