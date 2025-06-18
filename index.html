@@ -351,15 +351,17 @@
         if (Array.isArray(product.fotos) && product.fotos.length > 0) {
           fotoSrc = product.fotos[0] || 'img/medicamento.png';
         }
-        const temDesconto = product.desconto && product.desconto > 0;
+        const temDesconto = (product.precoMaximo / product.precoComDesconto)-1;
         const precoOriginal = Number(product.precoMaximo).toFixed(2);
-        const precoDesconto = Number(product.valorComDesconto).toFixed(2);
+        const precoDesconto = product.precoComDesconto !== undefined && !isNaN(product.precoComDesconto)
+          ? Number(product.precoComDesconto).toFixed(2)
+          : (product.valorComDesconto !== undefined ? Number(product.valorComDesconto).toFixed(2) : precoOriginal);
         const productElement = document.createElement('div');
         productElement.className = 'bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-200 flex flex-col h-full border border-gray-100 group';
         productElement.innerHTML = `
           <div class="flex justify-center items-center bg-gradient-to-t from-gray-50 to-white h-40 relative overflow-hidden">
             <img src="${fotoSrc}" alt="Imagem do Produto" class="w-28 h-28 object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm" onerror="this.onerror=null;this.src='img/medicamento.png';" />
-            ${temDesconto ? `<span class=\"absolute top-2 left-2 bg-gradient-to-r from-red-600 to-red-400 text-white text-xs font-bold px-2 py-1 rounded shadow\">${Math.round(product.desconto * 100)}% OFF</span>` : ''}
+            ${temDesconto ? `<span class=\"absolute top-2 left-2 bg-gradient-to-r from-red-600 to-red-400 text-white text-xs font-bold px-2 py-1 rounded shadow\">${Math.round(temDesconto * 100)}% OFF</span>` : ''}
           </div>
           <div class="p-4 flex flex-col flex-1 justify-between">
             <div>

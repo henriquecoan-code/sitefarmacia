@@ -39,7 +39,14 @@
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-gray-700 mb-0.5">Categoria</label>
-                  <input type="text" id="categoria" class="w-full rounded border px-2 py-1 h-7 text-xs">
+                  <select id="categoria" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
+                    <option value="Suplementos">Suplementos</option>
+                    <option value="Hospitalar">Hospitalar</option>
+                    <option value="Genéricos">Genéricos</option>
+                    <option value="Perfumaria">Perfumaria</option>
+                    <option value="Referência">Referência</option>
+                    <option value="Similares">Similares</option>
+                  </select>
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN</label>
@@ -56,6 +63,10 @@
                 <div>
                   <label class="block text-xs font-medium text-gray-700 mb-0.5">Desconto (%)</label>
                   <input type="number" id="desconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" max="100">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço com desconto (R$)</label>
+                  <input type="number" id="precoComDesconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0">
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-gray-700 mb-0.5">Quantidade</label>
@@ -161,6 +172,31 @@
       select.value = valorAtual;
     }
 
+    // Atualiza o campo Preço com desconto ao alterar preço máximo ou desconto
+    document.getElementById('precoMaximo').addEventListener('input', atualizarPrecoComDescontoOuDesconto);
+    document.getElementById('desconto').addEventListener('input', atualizarPrecoComDescontoOuDesconto);
+    // Atualiza o campo desconto ao alterar preço máximo ou preço com desconto
+    document.getElementById('precoComDesconto').addEventListener('input', atualizarDescontoPorPrecoComDesconto);
+
+    function atualizarPrecoComDescontoOuDesconto() {
+      const preco = parseFloat(document.getElementById('precoMaximo').value.replace(',', '.')) || 0;
+      let desconto = parseFloat(document.getElementById('desconto').value.replace(',', '.')) || 0;
+      if (desconto > 1) desconto = desconto / 100;
+      const valor = preco * (1 - desconto);
+      document.getElementById('precoComDesconto').value = valor > 0 ? valor.toFixed(2) : '';
+    }
+
+    function atualizarDescontoPorPrecoComDesconto() {
+      const preco = parseFloat(document.getElementById('precoMaximo').value.replace(',', '.')) || 0;
+      const precoComDesconto = parseFloat(document.getElementById('precoComDesconto').value.replace(',', '.')) || 0;
+      if (preco > 0 && precoComDesconto >= 0 && precoComDesconto <= preco) {
+        const desconto = 1 - (precoComDesconto / preco);
+        document.getElementById('desconto').value = (desconto * 100).toFixed(2);
+      }
+    }
+    // Inicializa valor ao carregar
+    atualizarPrecoComDescontoOuDesconto();
+
     // Formulário manual
     const form = document.getElementById('form-produto');
     const formStatus = document.getElementById('form-status');
@@ -174,13 +210,18 @@
       let desconto = parseFloat(document.getElementById('desconto').value.replace(',', '.')) || 0;
       if (desconto > 1) desconto = desconto / 100;
       const valorComDesconto = precoMaximo * (1 - desconto);
+      const precoComDesconto = parseFloat(document.getElementById('precoComDesconto').value);
+      // Atualiza campo visual
+      document.getElementById('precoComDesconto').value = valorComDesconto.toFixed(2);
       const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
       const categoria = document.getElementById('categoria').value.trim();
       const ean = document.getElementById('ean').value.trim();
       const codRed = document.getElementById('cod-red').value.trim();
       const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean);
       const fotos = document.getElementById('fotos').value.split(',').map(f => f.trim()).filter(Boolean);
-      const produto = { nome, descricao, precoMaximo, desconto, valorComDesconto, quantidade, categoria, ean, codRed, tags, fotos, criadoEm: new Date() };
+      // Atualiza campo visual
+      document.getElementById('precoComDesconto').value = valorComDesconto.toFixed(2);
+      const produto = { nome, descricao, precoMaximo, desconto, valorComDesconto, precoComDesconto, quantidade, categoria, ean, codRed, tags, fotos, criadoEm: new Date() };
       try {
         if (id) {
           // Edição
@@ -227,8 +268,14 @@
           <img src="${prod.fotos && prod.fotos[0] ? prod.fotos[0] : 'img/medicamento.png'}" alt="${prod.nome}">
           <h3>${prod.nome || ''}</h3>
           <p><b>Categoria:</b> ${prod.categoria || '-'}</p>
-          <p><b>Preço:</b> R$ ${prod.precoMaximo ? prod.precoMaximo.toFixed(2) : '-'}</p>
-          <p><b>Desconto:</b> ${prod.desconto ? (prod.desconto * 100).toFixed(0) + '%' : '-'}</p>
+          <p><b>Preço Máximo:</b> R$ ${prod.precoMaximo ? prod.precoMaximo.toFixed(2) : '-'}</p>
+          <p><b>Desconto:</b> ${prod.desconto ? (prod.desconto * 100).toFixed(2) + '%' : '-'}</p>
+          <p><b>Preço com desconto:</b> R$ ${prod.precoComDesconto !== undefined && !isNaN(prod.precoComDesconto) ? Number(prod.precoComDesconto).toFixed(2) : (prod.valorComDesconto !== undefined ? Number(prod.valorComDesconto).toFixed(2) : '-')}</p>
+          <p><b>Quantidade:</b> ${prod.quantidade || '-'}</p>
+          <p><b>EAN:</b> ${prod.ean || '-'}</p>
+          <p><b>Cod-Red:</b> ${prod.codRed || '-'}</p>
+          <p><b>Tags:</b> ${prod.tags && prod.tags.length ? prod.tags.join(', ') : '-'}</p>
+          <p><b>Descrição:</b> ${prod.descricao || '-'}</p>
           <div class="flex gap-2 mt-2">
             <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded edit-btn" data-id="${prod.id}"><i class="fas fa-edit"></i> Editar</button>
             <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded delete-btn" data-id="${prod.id}"><i class="fas fa-trash"></i> Excluir</button>
@@ -286,6 +333,18 @@
         return obj;
       });
     }
+    // Função para converter código de categoria em nome
+    function categoriaPorCodigo(codigo) {
+      switch (String(codigo).trim()) {
+        case '10000': return 'Suplementos';
+        case '9000': return 'Hospitalar';
+        case '4000': return 'Genéricos';
+        case '8000': return 'Perfumaria';
+        case '3000': return 'Referência';
+        case '2000': return 'Similares';
+        default: return codigo;
+      }
+    }
 
     // Novo fluxo de upload CSV direto para Firestore
     const uploadInput = document.getElementById('csv-upload');
@@ -323,18 +382,21 @@
           // Monta objeto produto conforme modelo
           const produto = {
             nome: prod.nome || '',
-            categoria: prod.categoria || '',
+            categoria: categoriaPorCodigo(prod.categoria || ''),
             ean: prod.ean || '',
             codRed: prod['cod-red'] || '',
             precoMaximo: prod.precoMaximo ? parseFloat(prod.precoMaximo.replace(',', '.')) : 0,
             desconto: prod.desconto ? (parseFloat(prod.desconto.replace(',', '.')) > 1 ? parseFloat(prod.desconto.replace(',', '.')) / 100 : parseFloat(prod.desconto.replace(',', '.'))) : 0,
+            precoComDesconto: prod.precoComDesconto ? parseFloat(prod.precoComDesconto.replace(',', '.')) : undefined,
             quantidade: prod.quantidade ? parseInt(prod.quantidade, 10) : 0,
             tags: prod.tags ? prod.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
             descricao: prod.descricao || '',
             fotos: prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [],
             criadoEm: new Date()
           };
-          produto.valorComDesconto = produto.precoMaximo * (1 - produto.desconto);
+          produto.valorComDesconto = produto.precoComDesconto !== undefined && !isNaN(produto.precoComDesconto)
+            ? produto.precoComDesconto
+            : produto.precoMaximo * (1 - produto.desconto);
           if (produtosExistentes[nomeKey]) {
             await updateDoc(doc(db, 'produtos', produtosExistentes[nomeKey]), produto);
             atualizados++;
