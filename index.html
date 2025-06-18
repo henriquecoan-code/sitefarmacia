@@ -158,6 +158,10 @@
 
     // Carrega header e footer
     await loadHeader('header-container', 'authContainerSecondary');
+    // Garante que a busca do header funcione após o carregamento dinâmico
+    import('./js/header-search.js').then(mod => {
+      if (window.setupHeaderSearch) window.setupHeaderSearch();
+    });
     await loadFooter('footer-container');
 
     // Carrega o modal de login dinamicamente
@@ -403,9 +407,11 @@
     // Se houver busca na query string, aplica na busca
     const urlParams = new URLSearchParams(window.location.search);
     const buscaParam = urlParams.get('busca');
+    // Corrige referência ao campo de busca do header (mobile e desktop)
+    const searchInput = document.getElementById('header-search-input');
     if (buscaParam) {
       currentSearch = buscaParam;
-      searchInput.value = buscaParam;
+      if (searchInput) searchInput.value = buscaParam;
       applyFilters();
     } else {
       fetchProducts();
