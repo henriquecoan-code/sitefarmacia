@@ -380,23 +380,30 @@
           const nomeKey = (prod.nome || '').trim().toLowerCase();
           if (!nomeKey) continue;
           // Monta objeto produto conforme modelo
+          let precoMaximo = prod.precoMaximo ? parseFloat(prod.precoMaximo.replace(',', '.')) : 0;
+          let precoComDesconto = prod.precoComDesconto ? parseFloat(prod.precoComDesconto.replace(',', '.')) : undefined;
+          let desconto = prod.desconto ? (parseFloat(prod.desconto.replace(',', '.')) > 1 ? parseFloat(prod.desconto.replace(',', '.')) / 100 : parseFloat(prod.desconto.replace(',', '.'))) : 0;
+          // Se precoComDesconto e precoMaximo existem, calcula o desconto
+          if (precoMaximo > 0 && precoComDesconto !== undefined && !isNaN(precoComDesconto)) {
+            desconto = 1 - (precoComDesconto / precoMaximo);
+          }
           const produto = {
             nome: prod.nome || '',
             categoria: categoriaPorCodigo(prod.categoria || ''),
             ean: prod.ean || '',
             codRed: prod['cod-red'] || '',
-            precoMaximo: prod.precoMaximo ? parseFloat(prod.precoMaximo.replace(',', '.')) : 0,
-            desconto: prod.desconto ? (parseFloat(prod.desconto.replace(',', '.')) > 1 ? parseFloat(prod.desconto.replace(',', '.')) / 100 : parseFloat(prod.desconto.replace(',', '.'))) : 0,
-            precoComDesconto: prod.precoComDesconto ? parseFloat(prod.precoComDesconto.replace(',', '.')) : undefined,
+            precoMaximo,
+            desconto,
+            precoComDesconto,
             quantidade: prod.quantidade ? parseInt(prod.quantidade, 10) : 0,
             tags: prod.tags ? prod.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
             descricao: prod.descricao || '',
             fotos: prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [],
             criadoEm: new Date()
           };
-          produto.valorComDesconto = produto.precoComDesconto !== undefined && !isNaN(produto.precoComDesconto)
-            ? produto.precoComDesconto
-            : produto.precoMaximo * (1 - produto.desconto);
+          produto.valorComDesconto = precoComDesconto !== undefined && !isNaN(precoComDesconto)
+            ? precoComDesconto
+            : precoMaximo * (1 - desconto);
           if (produtosExistentes[nomeKey]) {
             await updateDoc(doc(db, 'produtos', produtosExistentes[nomeKey]), produto);
             atualizados++;

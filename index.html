@@ -45,10 +45,13 @@
          <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
             <nav class="flex flex-col space-y-4 px-6 mt-8">
                 <a href="#" class="text-blue-900 font-bold hover:text-blue-700 transition" id="aside-todos">Todos os Produtos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="medicamentos">Medicamentos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="dermocosmeticos">Dermocosméticos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="higiene">Higiene Pessoal</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="vitaminas">Vitaminas</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="referência">Referência</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Similares">Similares</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Genéricos">Genéricos</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="perfumaria">Perfumaria</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="suplementos">Vitaminas</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Hospitalar">Hospitalar</a>
+
             </nav>
         </aside>
         
@@ -65,10 +68,12 @@
                         <div class="relative w-full sm:w-auto">
                             <select id="filtro-categoria" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
                                 <option value="">Todas as categorias</option>
-                                <option value="medicamentos">Medicamentos</option>
-                                <option value="dermocosmeticos">Dermocosméticos</option>
-                                <option value="higiene">Higiene Pessoal</option>
-                                <option value="vitaminas">Vitaminas</option>
+                                <option value="referência">Referência</option>
+                                <option value="Similares">Similares</option>
+                                <option value="Genéricos">Genéricos</option>
+                                <option value="perfumaria">Perfumaria</option>
+                                <option value="Hospitalar">Hospitalar</option>
+                                <option value="suplementos">Vitaminas</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <i class="fas fa-chevron-down"></i>
@@ -223,7 +228,7 @@
     function applyFilters() {
       let filtered = allProducts;
       if (currentCategory) {
-        filtered = filtered.filter(p => (p.categoria || '').toLowerCase() === currentCategory);
+        filtered = filtered.filter(p => (p.categoria || '').toLowerCase() === currentCategory.toLowerCase());
       }
       if (currentSubcategory) {
         filtered = filtered.filter(p => (p.subcategoria || '').toLowerCase() === currentSubcategory);
@@ -346,22 +351,20 @@
     function renderProducts(produtos) {
       const productsContainer = document.getElementById('lista-produtos');
       productsContainer.innerHTML = '';
-      produtos.forEach(product => {
+      produtos.filter(product => product.quantidade === undefined || product.quantidade > 0).forEach(product => {
         let fotoSrc = 'img/medicamento.png';
         if (Array.isArray(product.fotos) && product.fotos.length > 0) {
           fotoSrc = product.fotos[0] || 'img/medicamento.png';
         }
-        const temDesconto = (product.precoMaximo / product.precoComDesconto)-1;
+        const temDesconto = product.desconto && product.desconto > 0;
         const precoOriginal = Number(product.precoMaximo).toFixed(2);
-        const precoDesconto = product.precoComDesconto !== undefined && !isNaN(product.precoComDesconto)
-          ? Number(product.precoComDesconto).toFixed(2)
-          : (product.valorComDesconto !== undefined ? Number(product.valorComDesconto).toFixed(2) : precoOriginal);
+        const precoDesconto = Number(product.valorComDesconto).toFixed(2);
         const productElement = document.createElement('div');
         productElement.className = 'bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-200 flex flex-col h-full border border-gray-100 group';
         productElement.innerHTML = `
           <div class="flex justify-center items-center bg-gradient-to-t from-gray-50 to-white h-40 relative overflow-hidden">
             <img src="${fotoSrc}" alt="Imagem do Produto" class="w-28 h-28 object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm" onerror="this.onerror=null;this.src='img/medicamento.png';" />
-            ${temDesconto ? `<span class=\"absolute top-2 left-2 bg-gradient-to-r from-red-600 to-red-400 text-white text-xs font-bold px-2 py-1 rounded shadow\">${Math.round(temDesconto * 100)}% OFF</span>` : ''}
+            ${temDesconto ? `<span class=\"absolute top-2 left-2 bg-gradient-to-r from-red-600 to-red-400 text-white text-xs font-bold px-2 py-1 rounded shadow\">${Math.round(product.desconto * 100)}% OFF</span>` : ''}
           </div>
           <div class="p-4 flex flex-col flex-1 justify-between">
             <div>
