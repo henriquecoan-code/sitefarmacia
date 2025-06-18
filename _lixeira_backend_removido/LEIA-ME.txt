@@ -1,0 +1,1 @@
+Arquivos do backend movidos para esta pasta para garantir segurança e limpeza do projeto estático. Se tudo funcionar normalmente, pode excluir esta pasta definitivamente.

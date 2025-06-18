@@ -50,19 +50,17 @@
     </main>
   </div>
   <div id="footer-container"></div>
+  <script type="module" src="js/load-components.js"></script>
+  <script src="js/auth-modal.js"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
-    import { loadHeader } from './js/header-loader.js';
-    import { loadFooter } from './js/footer-loader.js';
+    import { getFirestore, collection, query, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
     import { firebaseConfig } from './js/firebase-config.js';
     const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
     const auth = getAuth(app);
     const db = getFirestore(app);
     window.auth = auth;
-    await loadHeader('header-container', 'authContainerSecondary');
-    await loadFooter('footer-container');
 
     const loading = document.getElementById('loading');
     const errorMessage = document.getElementById('error-message');
@@ -98,121 +96,73 @@
       // Renderiza pedidos
       pagedOrders.forEach((order, idx) => {
         const isNovo = order.status === 'Pendente' && !pedidosVisualizados[order.__docId];
-        const produtosHtml = order.produtos.map(p =>
-          `<tr><td class="px-2 py-1 text-center">${p.quantidade}</td><td class="px-2 py-1">${p.nome}</td><td class="px-2 py-1 text-right">R$ ${p.valor}</td><td class="px-2 py-1 text-right">R$ ${p.subtotal}</td></tr>`
+        const produtosHtml = (order.produtos || []).map(p =>
+          `<tr>
+            <td class="px-2 py-1 text-center">${p.quantidade || ''}</td>
+            <td class="px-2 py-1">${p.nome || ''}</td>
+            <td class="px-2 py-1 text-right">R$ ${p.valor || ''}</td>
+            <td class="px-2 py-1 text-right">R$ ${p.subtotal || ''}</td>
+          </tr>`
         ).join('');
         const endereco = order.endereco || {};
-        const detailsId = `order-details-${start + idx}`;
+        const detailsId = `order-details-${idx}`;
         const pedidoDocId = order.__docId;
         const hasValidId = pedidoDocId && typeof pedidoDocId === 'string' && pedidoDocId.length > 0;
-        const statusOptions = [ 'Pendente', 'Em Separação', 'Enviado', 'Entregue', 'Cancelado' ];
+        const statusOptions = ['Pendente', 'Em andamento', 'Entregue', 'Cancelado'];
         const statusSelect = `<select class="status-select border rounded px-2 py-1 text-sm" data-pedido-id="${pedidoDocId || ''}" style="min-width:120px;" ${!hasValidId ? 'disabled' : ''}>${statusOptions.map(opt => `<option value="${opt}"${order.status === opt ? ' selected' : ''}>${opt}</option>`).join('')}</select>`;
         const confirmBtn = hasValidId ? `<button class="ml-2 px-2 py-1 bg-blue-600 text-white rounded confirm-status-btn" data-pedido-id="${pedidoDocId}" data-current-status="${order.status}" style="font-size:0.9em;">Confirmar</button>` : `<button class="ml-2 px-2 py-1 bg-gray-400 text-white rounded cursor-not-allowed" disabled style="font-size:0.9em;">Confirmar</button><span class='ml-2 text-xs text-red-600'>ID do pedido inválido, não é possível atualizar o status.</span>`;
         const printBtn = `<button class="ml-2 px-2 py-1 bg-gray-200 text-blue-900 rounded print-pedido-btn" data-details-id="${detailsId}" data-pedido-id="${pedidoDocId}" title="Imprimir Pedido"><i class="fas fa-print"></i></button>`;
-
-        // Badge NOVO
-        const novoBadge = isNovo ? "<span class='ml-2 px-2 py-1 bg-green-500 text-white rounded text-xs font-bold'>NOVO</span>" : "";
-
-        // WhatsApp buttons (empresa e cliente)
-        // Telefones (ajuste para o número real da farmácia)
-        const telEmpresa = '554834643201'; // Exemplo: DDD+Número, só dígitos
-        const telCliente = (order.telefone || '').replace(/\D/g, '');
-
-        // Mensagens personalizadas por status
-        let msgEmpresa = '';
-        let msgCliente = '';
-        if (order.status === 'Pendente') {
-          msgEmpresa =
-            'Pedido: ' + (order.numeroPedido || '') + ' || Pedido recebido\n' +
-            'Cliente: ' + (order.nomeUsuario || '') + '\n' +
-            'Telefone: ' + (order.telefone || '') + '\n' +
-            'Endereço: Rua ' + (endereco.rua || '') + ', Nº ' + (endereco.numero || '') + ', ' + (endereco.bairro || '') + ', ' + (endereco.cidade || '') + (endereco.complemento ? ', ' + endereco.complemento : '') + '\n' +
-            'Forma de pagamento: ' + (order.pagamento || '') + '\n' +
-            'Observações: ' + (order.observacoes || 'Nenhuma') + '\n\n' +
-            'Produtos:\n' + order.produtos.map(p => '- ' + p.quantidade + 'x ' + p.nome + ' (R$ ' + p.valor + ')').join('\n') + '\n\n' +
-            'Total: R$ ' + order.total;
-          msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido foi recebido e está entrando em separação. Em breve entraremos em contato para entrega. Obrigado!`;
-        } else if (order.status === 'Em Separação') {
-          msgEmpresa = '';
-          msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido está aguardando entrega. Em breve entraremos em contato.`;
-        } else if (order.status === 'Enviado') {
-          msgEmpresa = '';
-          msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido está a caminho!`;
-        } else if (order.status === 'Entregue') {
-          msgEmpresa = '';
-          msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido foi entregue. Obrigado pela preferência!`;
-        } else if (order.status === 'Cancelado') {
-          msgEmpresa = '';
-          msgCliente = `Olá, ${order.nomeUsuario || 'cliente'}! Seu pedido foi cancelado. Se tiver dúvidas, entre em contato conosco.`;
-        }
-
-        // Links WhatsApp
-        const waEmpresaBtn = msgEmpresa ? `<a href="https://wa.me/${telEmpresa}?text=${encodeURIComponent(msgEmpresa)}" target="_blank" class="whatsapp-btn flex items-center justify-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" style="min-width:40px; min-height:32px;"><i class='fab fa-whatsapp'></i></a>` : '';
-        const waClienteBtn = msgCliente && telCliente.length >= 10 ? `<a href="https://wa.me/55${telCliente}?text=${encodeURIComponent(msgCliente)}" target="_blank" class="whatsapp-btn flex items-center justify-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" style="min-width:40px; min-height:32px;"><i class='fab fa-whatsapp'></i></a>` : '';
-
-        // Botões lado a lado, separados por barra vertical
-        const whatsappBtns = `<div class='flex items-center gap-2 mt-2'>${printBtn ? '<span class="mx-1 border-l h-6 border-gray-300"></span>' : ''}${waEmpresaBtn}${waEmpresaBtn && waClienteBtn ? '<span class="mx-1 border-l h-6 border-gray-300"></span>' : ''}${waClienteBtn}</div>`;
-
-        const html = [
-          '<div class="bg-white rounded-lg shadow p-4 border-2 ',
-          (isNovo ? 'border-green-500' : 'border-transparent'), '">',
-          '<div class="flex items-center justify-between cursor-pointer" onclick="toggleOrderDetails(\'', detailsId, '\', \'', pedidoDocId, '\')">',
-          '<div>',
-          '<span class="font-bold text-blue-800">Pedido #', order.numeroPedido, '</span>',
-          '<span class="ml-4 text-gray-700 font-semibold">', order.nomeUsuario || 'Cliente', '</span>',
-          '<span class="ml-4 text-gray-500 text-sm">', order.dataPedido || '', '</span>',
-          '<span class="ml-4 px-3 py-1 rounded-full text-sm font-semibold ',
-          (order.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Cancelado' ? 'bg-red-100 text-red-700' : order.status === 'Entregue' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'), '">',
-          statusSelect,
-          confirmBtn,
-          '</span>',
-          novoBadge,
-          '</div>',
-          '<div class="flex items-center gap-2">',
-          printBtn,
-          whatsappBtns,
-          '<button type="button" aria-label="Ver detalhes" class="ml-2 focus:outline-none">',
-          '<i id="arrow-', detailsId, '" class="fas fa-chevron-down transition-transform duration-200"></i>',
-          '</button>',
-          '</div>',
-          '</div>',
-          '<div id="', detailsId, '" class="hidden mt-4 print-area">',
-          '<div class="mb-2">',
-            '<span class="font-semibold">Pedido:</span> ', order.numeroPedido || '',
-          '<span class="font-semibold"> | Nome:</span> ', order.nomeUsuario || '',
-          //(order.emailUsuario ? '<span class="ml-4 font-semibold">Email:</span> ' + order.emailUsuario : ''),
-          '<span class="ml-4 font-semibold"> | Telefone:</span> ', order.telefone || '',
-          '</div>',
-          '<div class="mb-2">',
-          '<span class="font-semibold">\nEndereço:</span> Rua ', endereco.rua || '', ', Nº ', endereco.numero || '', ', ', endereco.bairro || '', ', ', endereco.cidade || '', (endereco.complemento ? ', ' + endereco.complemento : ''),
-          '</div>',
-          '<div class="mb-2">',
-          '<span class="font-semibold">Forma de pagamento:</span> ', order.pagamento || '',
-          '</div>',
-          '<div class="mb-2">',
-          '<span class="font-semibold">Observações:</span> ', order.observacoes || 'Nenhuma',
-          '</div>',
-          '<div class="overflow-x-auto mt-4">',
-          '<table class="min-w-full text-sm border">',
-          '<thead>',
-          '<tr class="bg-gray-100">',
-          '<th class="px-2 py-1">Qnt</th>',
-          '<th class="px-2 py-1">Produto</th>',
-          '<th class="px-2 py-1 text-right">Vlr un</th>',
-          '<th class="px-2 py-1 text-right">Vlr total</th>',
-          '</tr>',
-          '</thead>',
-          '<tbody>',
-          produtosHtml,
-          '</tbody>',
-          '</table>',
-          '</div>',
-          '<div class="text-right mt-4 text-xl font-bold text-blue-900">',
-          'Total: R$ ', order.total,
-          '</div>',
-          '</div>',
-          '</div>'
-        ].join('');
+        const whatsappBtn = `<button class="ml-2 px-2 py-1 bg-green-500 text-white rounded whatsapp-pedido-btn" data-details-id="${detailsId}" data-pedido-id="${pedidoDocId}" title="Enviar para WhatsApp"><i class="fab fa-whatsapp"></i></button>`;
+        const html = `
+          <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <div class="flex items-center justify-between cursor-pointer" onclick="toggleOrderDetails('${detailsId}', '${pedidoDocId}')">
+              <div>
+                <span class="font-bold text-blue-800">Pedido #${order.numeroPedido || ''}</span>
+                <span class="ml-4 text-gray-500 text-sm">${order.dataPedido || ''}</span>
+                <span class="ml-4 px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                  ${order.status || 'Pendente'}
+                </span>
+                ${isNovo ? `<span class='ml-2 bg-green-500 text-white px-2 py-1 rounded text-xs'>Novo</span>` : ''}
+              </div>
+              <div class="flex items-center">${statusSelect}${confirmBtn}${printBtn}${whatsappBtn}</div>
+            </div>
+            <div id="${detailsId}" class="hidden mt-4" role="region" aria-labelledby="arrow-${detailsId}">
+              <div class="mb-2">
+                <span class="font-semibold">Nome:</span> ${order.nomeUsuario || ''}
+                ${order.emailUsuario ? `<span class="ml-4 font-semibold">Email:</span> ${order.emailUsuario}` : ''}
+                <span class="ml-4 font-semibold">Telefone:</span> ${order.telefone || ''}
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Endereço:</span>
+                Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''} ${endereco.complemento ? ', ' + endereco.complemento : ''}
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Forma de pagamento:</span> ${order.pagamento || ''}
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Observações:</span> ${order.observacoes || 'Nenhuma'}
+              </div>
+              <div class="overflow-x-auto mt-4">
+                <table class="min-w-full text-sm border">
+                  <thead>
+                    <tr class="bg-gray-100">
+                      <th class="px-2 py-1">Qnt</th>
+                      <th class="px-2 py-1">Produto</th>
+                      <th class="px-2 py-1 text-right">Vlr un</th>
+                      <th class="px-2 py-1 text-right">Vlr total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${produtosHtml}
+                  </tbody>
+                </table>
+              </div>
+              <div class="text-right mt-4 text-xl font-bold text-blue-900">
+                Total: R$ ${order.total || ''}
+              </div>
+            </div>
+          </div>
+        `;
         ordersList.insertAdjacentHTML('beforeend', html);
       });
       // Paginação
@@ -276,13 +226,73 @@
           const details = document.getElementById(detailsId);
           if (details) {
             const printWindow = window.open('', '', 'width=800,height=600');
+            // ATENÇÃO: Para produção, remova o CDN do Tailwind e use build local
             printWindow.document.write('<html><head><title>Imprimir Pedido</title>');
             printWindow.document.write('<link rel="stylesheet" href="https://cdn.tailwindcss.com">');
             printWindow.document.write('</head><body>');
             printWindow.document.write(details.innerHTML);
-            printWindow.document.write('</body></html>');
+            printWindow.document.write(html);
             printWindow.document.close();
             setTimeout(() => printWindow.print(), 300);
+          }
+        });
+      });
+      // Handler de envio para WhatsApp
+      document.querySelectorAll('.whatsapp-pedido-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const detailsId = this.getAttribute('data-details-id');
+          const details = document.getElementById(detailsId);
+          if (details) {
+            // Monta mensagem profissional para WhatsApp
+            const lines = [];
+            lines.push('🩺 * Seu pedido foi recebido*');
+            lines.push('');
+            lines.push('🩺 *Pedido - Farmácia São Benedito*');
+            lines.push('--------------------------------');
+            // Busca dados do pedido
+            const parent = details.closest('.bg-white');
+            if (parent) {
+              const numero = parent.querySelector('.font-bold.text-blue-800')?.innerText || '';
+              const data = parent.querySelector('.text-gray-500.text-sm')?.innerText || '';
+              const status = parent.querySelector('.rounded-full.text-sm.font-semibold')?.innerText || '';
+              lines.push(`*${numero}* | ${data}`);
+              lines.push(`Status: ${status}`);
+            }
+            // Dados do cliente
+            const nome = details.querySelector('.font-semibold')?.nextSibling?.textContent.trim() || '';
+            const email = (details.innerText.match(/Email:\s*([\w\.-]+@[\w\.-]+)/) || [])[1] || '';
+            const telefone = (details.innerText.match(/Telefone:\s*([\d\-\(\)\s]+)/) || [])[1] || '';
+            lines.push('');
+            lines.push(`👤 *Cliente:* ${nome}`);
+            if (email) lines.push(`✉️ *Email:* ${email}`);
+            if (telefone) lines.push(`📞 *Telefone:* ${telefone}`);
+            // Endereço
+            const endereco = (details.innerText.match(/Endereço:\s*([\s\S]*?)Forma de pagamento:/) || [])[1]?.trim();
+            if (endereco) lines.push(`🏠 *Endereço:* ${endereco}`);
+            // Pagamento
+            const pagamento = (details.innerText.match(/Forma de pagamento:\s*([\w\s]+)/) || [])[1] || '';
+            if (pagamento) lines.push(`💳 *Pagamento:* ${pagamento}`);
+            // Observações
+            const obs = (details.innerText.match(/Observações:\s*([\s\S]*?)Qnt/) || [])[1]?.trim();
+            if (obs) lines.push(`📝 *Observações:* ${obs}`);
+            // Produtos
+            lines.push('');
+            lines.push('🛒 *Produtos:*');
+            const trs = details.querySelectorAll('tbody tr');
+            trs.forEach(tr => {
+              const tds = tr.querySelectorAll('td');
+              if (tds.length >= 4) {
+                lines.push(`- ${tds[0].innerText}x ${tds[1].innerText} (R$ ${tds[2].innerText}) = R$ ${tds[3].innerText}`);
+              }
+            });
+            // Total
+            const total = (details.innerText.match(/Total: R\$\s*([\d\.,]+)/) || [])[1] || '';
+            if (total) lines.push(`\n*Total: R$ ${total}*`);
+            lines.push('--------------------------------');
+            lines.push('Atenciosamente, Farmácia São Benedito.');
+            const text = encodeURIComponent(lines.join('\n'));
+            window.open('https://wa.me/?text=' + text, '_blank');
           }
         });
       });
@@ -386,6 +396,29 @@
       });
     }
 
+    // Carregar todos os pedidos ao autenticar admin
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        showError('Você precisa estar logado como admin para ver os pedidos.');
+        return;
+      }
+      try {
+        let pedidos = [];
+        const q = query(collection(db, 'pedidos'), orderBy('numeroPedido', 'desc'));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          data.__docId = doc.id;
+          pedidos.push(data);
+        });
+        allOrders = pedidos;
+        if (loading) loading.classList.add('hidden');
+        filtrarPedidos();
+      } catch (e) {
+        showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
+      }
+    });
+
     // Eventos de filtro
     ['filtro-busca','filtro-status','filtro-data'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => {
@@ -394,7 +427,5 @@
       });
     });
   </script>
-  <script src="js/auth-modal.js"></script>
-  <script src="js/auth-mobile.js"></script>
 </body>
 </html>

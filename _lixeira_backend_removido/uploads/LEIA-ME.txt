@@ -1,0 +1,1 @@
+Uploads do backend movidos para esta pasta temporariamente. Se tudo funcionar, pode excluir com segurança.
