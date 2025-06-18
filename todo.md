@@ -21,3 +21,10 @@
 - [x] 016: Validar funcionamento do frontend (servido localmente com http-server e backend rodando).
 - [ ] 017: Implantar site permanentemente (Frontend exposto temporariamente. Backend não exposto publicamente. Necessita discussão para solução permanente).
 - [ ] 018: Reportar e enviar acesso ao usuário (fornecer URL temporária do frontend e explicar próximos passos para backend).
+
+## Limpeza de segurança e otimização
+
+- [ ] Excluir a pasta `backend/` e todo seu conteúdo, pois não é mais necessário para o funcionamento do site.
+- [ ] Remover eventuais referências ao backend em `README.md` ou outros arquivos de documentação.
+- [ ] Garantir que o fluxo de produtos está 100% via frontend + Firebase.
+- [ ] Testar o site após a exclusão para garantir que tudo funciona normalmente.

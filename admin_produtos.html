@@ -245,15 +245,14 @@
           document.getElementById('nome').value = prod.nome || '';
           document.getElementById('descricao').value = prod.descricao || '';
           document.getElementById('precoMaximo').value = prod.precoMaximo || '';
-          document.getElementById('desconto').value = prod.desconto > 1 ? (prod.desconto * 100) : (prod.desconto || '');
+          document.getElementById('desconto').value = prod.desconto || '';
           document.getElementById('quantidade').value = prod.quantidade || '';
           document.getElementById('categoria').value = prod.categoria || '';
           document.getElementById('ean').value = prod.ean || '';
           document.getElementById('cod-red').value = prod.codRed || '';
-          document.getElementById('tags').value = Array.isArray(prod.tags) ? prod.tags.join(', ') : (prod.tags || '');
-          document.getElementById('fotos').value = Array.isArray(prod.fotos) ? prod.fotos.join(', ') : (prod.fotos || '');
+          document.getElementById('tags').value = (prod.tags || []).join(', ');
+          document.getElementById('fotos').value = (prod.fotos || []).join(', ');
           btnCancelar.classList.remove('hidden');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
         });
       });
       // Botões de exclusão
@@ -275,6 +274,20 @@
     document.getElementById('filtro-nome').addEventListener('input', renderizarProdutos);
     document.getElementById('filtro-categoria').addEventListener('change', renderizarProdutos);
 
+    // Função para parsear CSV simples (assume ; como separador)
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(';').map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const cols = line.split(';');
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (cols[i] || '').trim());
+        return obj;
+      });
+    }
+
+    // Novo fluxo de upload CSV direto para Firestore
     const uploadInput = document.getElementById('csv-upload');
     const enviarBtn = document.getElementById('enviar-csv');
     const status = document.getElementById('upload-status');
@@ -290,35 +303,48 @@
         status.textContent = 'Selecione um arquivo CSV antes de enviar.';
         return;
       }
-      status.textContent = 'Enviando arquivo para o servidor...';
-      const formData = new FormData();
-      formData.append('csv', arquivoCSV);
+      status.textContent = 'Lendo arquivo CSV...';
       try {
-        const resp = await fetch('/produtos/upload-csv', {
-          method: 'POST',
-          body: formData
+        const text = await arquivoCSV.text();
+        const produtosCSV = parseCSV(text);
+        if (!produtosCSV.length) throw new Error('CSV vazio ou inválido');
+        status.textContent = 'Salvando produtos no Firestore...';
+        // Busca todos os produtos existentes para upsert por nome
+        const snap = await getDocs(collection(db, 'produtos'));
+        const produtosExistentes = {};
+        snap.forEach(docu => {
+          const data = docu.data();
+          if (data.nome) produtosExistentes[data.nome.trim().toLowerCase()] = docu.id;
         });
-        let data = {};
-        const text = await resp.text();
-        if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (e) {
-            status.textContent = 'Erro ao importar: resposta inválida do servidor.';
-            return;
-          }
-        }
-        if (resp.ok) {
-          if (data.produtosOrfaos && data.produtosOrfaos.length > 0) {
-            localStorage.setItem('produtosOrfaos', JSON.stringify(data.produtosOrfaos));
-            window.location.href = 'produtos_confirmar_remocao.html';
+        let inseridos = 0, atualizados = 0;
+        for (const prod of produtosCSV) {
+          const nomeKey = (prod.nome || '').trim().toLowerCase();
+          if (!nomeKey) continue;
+          // Monta objeto produto conforme modelo
+          const produto = {
+            nome: prod.nome || '',
+            categoria: prod.categoria || '',
+            ean: prod.ean || '',
+            codRed: prod['cod-red'] || '',
+            precoMaximo: prod.precoMaximo ? parseFloat(prod.precoMaximo.replace(',', '.')) : 0,
+            desconto: prod.desconto ? (parseFloat(prod.desconto.replace(',', '.')) > 1 ? parseFloat(prod.desconto.replace(',', '.')) / 100 : parseFloat(prod.desconto.replace(',', '.'))) : 0,
+            quantidade: prod.quantidade ? parseInt(prod.quantidade, 10) : 0,
+            tags: prod.tags ? prod.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+            descricao: prod.descricao || '',
+            fotos: prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [],
+            criadoEm: new Date()
+          };
+          produto.valorComDesconto = produto.precoMaximo * (1 - produto.desconto);
+          if (produtosExistentes[nomeKey]) {
+            await updateDoc(doc(db, 'produtos', produtosExistentes[nomeKey]), produto);
+            atualizados++;
           } else {
-            status.textContent = `Importação concluída: ${data.count || 0} produto(s) atualizado(s)!`;
-            await carregarProdutos();
+            await addDoc(collection(db, 'produtos'), produto);
+            inseridos++;
           }
-        } else {
-          status.textContent = 'Erro ao importar: ' + (data.error || 'Erro desconhecido');
         }
+        status.textContent = `Importação concluída: ${inseridos} inseridos, ${atualizados} atualizados!`;
+        await carregarProdutos();
       } catch (err) {
         status.textContent = 'Erro ao importar: ' + err.message;
       }
@@ -327,6 +353,6 @@
 
     carregarProdutos();
   </script>
-  <div id="cadastro-modal-placeholder"></div>
+  <div id="cadastro-modal-placeholder" class="hidden"></div>
 </body>
 </html>

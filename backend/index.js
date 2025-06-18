@@ -186,40 +186,48 @@ const uploadCsv = multer({
 
 app.post('/produtos/upload-csv', uploadCsv.single('csv'), async (req, res) => {
     if (!req.file) {
+        console.error('Nenhum arquivo CSV enviado.');
         return res.status(400).json({ error: 'Arquivo CSV não enviado.' });
     }
     const filePath = req.file.path;
     const produtosCSV = [];
     const nomesCSV = new Set();
+    console.log('Iniciando leitura do CSV:', filePath);
     fs.createReadStream(filePath)
         .pipe(csv({ separator: ';' }))
         .on('data', (row) => {
             const nome = row.nome && row.nome.trim();
             let precoMaximo = row.precoMaximo ? parseFloat(row.precoMaximo.toString().replace(',', '.')) : 0;
             if (precoMaximo > 1000) precoMaximo = precoMaximo / 100;
-            let valorComDesconto = row.valorComDesconto ? parseFloat(row.valorComDesconto.toString().replace(',', '.')) : 0;
-            if (valorComDesconto > 1000) valorComDesconto = valorComDesconto / 100;
             let desconto = row.desconto ? parseFloat(row.desconto.toString().replace(',', '.')) : 0;
             if (desconto > 1) desconto = desconto / 100;
-            if (!valorComDesconto && precoMaximo > 0) {
-                valorComDesconto = precoMaximo * (1 - desconto);
+            let valorComDesconto = precoMaximo > 0 ? precoMaximo * (1 - desconto) : 0;
+            if (row.valorComDesconto) {
+                valorComDesconto = parseFloat(row.valorComDesconto.toString().replace(',', '.'));
+                if (valorComDesconto > 1000) valorComDesconto = valorComDesconto / 100;
             }
-            const estoque = parseInt(row.estoque || row.quantidade || '0', 10);
+            const quantidade = row.quantidade ? parseInt(row.quantidade, 10) : 0;
             let fotos = [];
             if (row.fotos) {
                 fotos = row.fotos.split(/[,;]/).map(f => f.trim()).filter(Boolean);
                 fotos = fotos.map(f => (f && !f.startsWith('/') && !f.startsWith('http')) ? `/uploads/${f}` : f);
             }
+            // Novos campos do modelo
+            const ean = row.ean ? row.ean.trim() : '';
+            const codRed = row['cod-red'] ? row['cod-red'].trim() : '';
+            const tags = row.tags ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
             if (nome && precoMaximo > 0) {
                 produtosCSV.push({
                     nome,
-                    descricao: row.descricao || '',
-                    precoMaximo,
-                    valorComDesconto: parseFloat(valorComDesconto.toFixed(2)),
-                    desconto,
-                    quantidade: estoque,
                     categoria: row.categoria || '',
-                    subcategoria: row.subcategoria || '',
+                    ean,
+                    codRed,
+                    precoMaximo,
+                    desconto,
+                    valorComDesconto: parseFloat(valorComDesconto.toFixed(2)),
+                    quantidade,
+                    tags,
+                    descricao: row.descricao || '',
                     fotos,
                     criadoEm: admin.firestore.FieldValue.serverTimestamp()
                 });
@@ -228,6 +236,7 @@ app.post('/produtos/upload-csv', uploadCsv.single('csv'), async (req, res) => {
         })
         .on('end', async () => {
             try {
+                console.log('Produtos lidos do CSV:', produtosCSV.length);
                 // Busca todos os produtos atuais
                 const snapshot = await db.collection('produtos').get();
                 const produtosBanco = [];
@@ -239,28 +248,31 @@ app.post('/produtos/upload-csv', uploadCsv.single('csv'), async (req, res) => {
                         produtosBancoPorNome[data.nome] = { id: doc.id, ...data };
                     }
                 });
-                // Upsert: atualiza ou insere
+                let inseridos = 0;
+                let atualizados = 0;
                 for (const prod of produtosCSV) {
                     if (prod.nome in produtosBancoPorNome) {
-                        // Atualiza
                         await db.collection('produtos').doc(produtosBancoPorNome[prod.nome].id).update({
                             ...prod,
                             criadoEm: produtosBancoPorNome[prod.nome].criadoEm || admin.firestore.FieldValue.serverTimestamp()
                         });
+                        atualizados++;
                     } else {
-                        // Insere
                         await db.collection('produtos').add(prod);
+                        inseridos++;
                     }
                 }
-                // Identifica produtos não presentes no CSV
+                console.log('Produtos inseridos:', inseridos, 'Produtos atualizados:', atualizados);
                 const produtosOrfaos = produtosBanco.filter(p => !nomesCSV.has(p.nome));
                 fs.unlinkSync(filePath);
-                res.json({ success: true, count: produtosCSV.length, produtosOrfaos });
+                res.json({ success: true, count: produtosCSV.length, inseridos, atualizados, produtosOrfaos });
             } catch (e) {
+                console.error('Erro ao importar produtos:', e);
                 res.status(500).json({ error: 'Erro ao importar produtos.' });
             }
         })
         .on('error', (err) => {
+            console.error('Erro ao processar CSV:', err);
             res.status(500).json({ error: 'Erro ao processar CSV.' });
         });
 });
