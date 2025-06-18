@@ -407,15 +407,19 @@
     // Se houver busca na query string, aplica na busca
     const urlParams = new URLSearchParams(window.location.search);
     const buscaParam = urlParams.get('busca');
-    // Corrige referência ao campo de busca do header (mobile e desktop)
-    const searchInput = document.getElementById('header-search-input');
-    if (buscaParam) {
-      currentSearch = buscaParam;
-      if (searchInput) searchInput.value = buscaParam;
-      applyFilters();
-    } else {
-      fetchProducts();
+    function aplicarBuscaInicial() {
+      if (buscaParam) {
+        currentSearch = buscaParam;
+        const searchInput = document.getElementById('header-search-input');
+        if (searchInput) searchInput.value = buscaParam;
+        applyFilters();
+      } else {
+        fetchProducts();
+      }
     }
+    // Tenta aplicar imediatamente e também após o header carregar
+    aplicarBuscaInicial();
+    document.addEventListener('headerLoaded', aplicarBuscaInicial);
 
     // Botão para abrir o login-modal
     document.body.addEventListener('click', (e) => {
