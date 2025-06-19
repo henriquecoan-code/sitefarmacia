@@ -11,7 +11,7 @@
 <body class="bg-gray-50">
   <div id="login-modal-placeholder"></div>
   <div id="header-container"></div>
-  <div class="flex flex-col md:flex-row">
+  <div class="container mx-auto flex flex-col md:flex-row">
     <!-- Menu lateral apenas no desktop -->
     <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
       <nav class="flex flex-col space-y-4 px-6 mt-8">
@@ -23,30 +23,32 @@
     </aside>
     <!-- Conteúdo principal -->
     <main class="flex-1 p-6 bg-gray-50 max-w-4xl mx-auto">
-      <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
-          <a href="#" id="edit-main-address-btn" class="text-blue-600 hover:text-blue-800 text-sm">
-            <i class="fas fa-edit mr-1"></i> Editar
-          </a>
-        </div>
-        <div id="address-loading" class="text-center text-gray-600">Carregando endereço...</div>
-        <div id="main-address" class="hidden"></div>
-        <div id="no-address" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
-      </section>
-      <section id="all-addresses-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-list mr-2"></i>Todos os Endereços</h2>
-          <a href="#" id="add-address-btn" class="text-blue-600 hover:text-blue-800 text-sm">
-            <i class="fas fa-plus mr-1"></i> Novo Endereço
-          </a>
-        </div>
-        <div id="addresses-loading" class="text-center text-gray-600">Carregando endereços...</div>
-        <div id="addresses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        <div id="no-addresses" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
-      </section>
-      <!-- Toast visual para feedback -->
-      <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-green-600 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 transition-opacity duration-300"></div>
+      <div class="max-w-4xl mx-auto">
+        <section id="main-address-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>Endereço Principal</h2>
+            <a href="#" id="edit-main-address-btn" class="text-blue-600 hover:text-blue-800 text-sm">
+              <i class="fas fa-edit mr-1"></i> Editar
+            </a>
+          </div>
+          <div id="address-loading" class="text-center text-gray-600">Carregando endereço...</div>
+          <div id="main-address" class="hidden"></div>
+          <div id="no-address" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
+        </section>
+        <section id="all-addresses-section" class="bg-white p-6 rounded-lg shadow-md mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-blue-800"><i class="fas fa-list mr-2"></i>Todos os Endereços</h2>
+            <a href="#" id="add-address-btn" class="text-blue-600 hover:text-blue-800 text-sm">
+              <i class="fas fa-plus mr-1"></i> Novo Endereço
+            </a>
+          </div>
+          <div id="addresses-loading" class="text-center text-gray-600">Carregando endereços...</div>
+          <div id="addresses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+          <div id="no-addresses" class="text-center text-gray-500 hidden">Nenhum endereço cadastrado.</div>
+        </section>
+        <!-- Toast visual para feedback -->
+        <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-green-600 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 transition-opacity duration-300"></div>
+      </div>
     </main>
   </div>
   <div id="footer-container"></div>
