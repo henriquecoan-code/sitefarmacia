@@ -1,0 +1,37 @@
+Título da página dinâmico: Use o nome do produto no <title>.
+Meta description: Adicione uma meta descrição única e relevante para cada produto.
+Dados estruturados (Schema.org): Use JSON-LD para marcar o produto como um Product, incluindo nome, imagem, preço, disponibilidade, descrição, marca, categoria, etc.
+Breadcrumbs: Adicione navegação breadcrumb para contexto.
+Imagens otimizadas: Use alt descritivo e, se possível, mais de uma imagem.
+Detalhes ricos: Mostre marca, fabricante, código EAN, categoria, tags, avaliações (mesmo que fictícias), disponibilidade (em estoque/fora de estoque), e benefícios do produto.
+Perguntas frequentes (FAQ): Adicione uma seção de perguntas frequentes sobre o produto, também marcada com dados estruturados.
+Links internos: Sugira produtos relacionados ou categorias.
+<head>
+  <!-- ...existing code... -->
+  <title>Paracetamol 750mg - Farmácia São Benedito</title>
+  <meta name="description" content="Compre Paracetamol 750mg com o melhor preço. Analgésico e antitérmico. Entrega rápida em todo o Brasil. Confira detalhes, indicações e disponibilidade.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "Paracetamol 750mg",
+    "image": [
+      "https://seudominio.com/img/produtos/paracetamol750mg.png"
+    ],
+    "description": "Paracetamol 750mg é indicado para alívio de dores e febre. Confira preço, disponibilidade e informações técnicas.",
+    "sku": "123456789",
+    "brand": {
+      "@type": "Brand",
+      "name": "Farmácia São Benedito"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": "https://seudominio.com/admin_produto_detalhes.html?id=123456789",
+      "priceCurrency": "BRL",
+      "price": "12.90",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+  </script>
+  <!-- ...existing code... -->
+</head>
