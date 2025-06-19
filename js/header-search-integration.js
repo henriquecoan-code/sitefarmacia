@@ -43,3 +43,26 @@
   document.addEventListener('headerLoaded', attachAsideMenuListeners);
   setTimeout(attachAsideMenuListeners, 1000);
 })();
+
+// No menu mobile, ao clicar em links de categoria, redireciona para index.html se não estiver nela
+(function() {
+  function handleMobileMenuLink(e) {
+    // Só executa em telas mobile
+    if (window.innerWidth >= 768) return;
+    var categoria = this.getAttribute('data-categoria');
+    if (categoria && !window.location.pathname.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    }
+  }
+  function attachMobileMenuListeners() {
+    var mobileAsideLinks = document.querySelectorAll('#topbar-fixed aside nav a[data-categoria]');
+    mobileAsideLinks.forEach(function(link) {
+      link.removeEventListener('click', handleMobileMenuLink);
+      link.addEventListener('click', handleMobileMenuLink);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', attachMobileMenuListeners);
+  document.addEventListener('headerLoaded', attachMobileMenuListeners);
+  setTimeout(attachMobileMenuListeners, 1000);
+})();
