@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farmácia Online - Produtos</title>
+    <meta id="meta-description" name="description" content="Produtos de farmácia, medicamentos, perfumaria, genéricos, suplementos e mais. Entrega rápida e preço baixo.">
+    <script id="ldjson-schema" type="application/ld+json"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -354,6 +356,29 @@
     function renderProducts(produtos) {
       const productsContainer = document.getElementById('lista-produtos');
       productsContainer.innerHTML = '';
+      // SEO: Gera dados estruturados para os produtos listados
+      if (produtos && produtos.length) {
+        const schema = {
+          "@context": "https://schema.org/",
+          "@type": "ItemList",
+          "itemListElement": produtos.slice(0, 20).map((product, idx) => ({
+            "@type": "ListItem",
+            "position": idx + 1,
+            "url": window.location.origin + '/index.html#produto-' + (product.id || idx),
+            "name": product.nome || '',
+            "image": (Array.isArray(product.fotos) && product.fotos.length ? product.fotos[0] : ''),
+            "description": product.descricao || '',
+            "sku": product.ean || '',
+            "offers": {
+              "@type": "Offer",
+              "price": product.valorComDesconto !== undefined ? Number(product.valorComDesconto).toFixed(2) : (product.precoMaximo ? Number(product.precoMaximo).toFixed(2) : ''),
+              "priceCurrency": "BRL",
+              "availability": (product.quantidade === undefined || product.quantidade > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+            }
+          }))
+        };
+        document.getElementById('ldjson-schema').textContent = JSON.stringify(schema, null, 2);
+      }
       produtos.filter(product => product.quantidade === undefined || product.quantidade > 0).forEach(product => {
         let fotoSrc = 'img/medicamento.png';
         if (Array.isArray(product.fotos) && product.fotos.length > 0) {
