@@ -105,10 +105,12 @@ function renderAuthMobileMenu(user) {
       '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">' + primeiroNome + '</a>' +
       '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
       '</div>';
-    // Adiciona listener para fechar o menu ao clicar em Minha Conta
+    // Adiciona listener para garantir que sempre leve para minha-conta.html
     var minhaConta = document.getElementById('mobileMenuMinhaConta');
     if (minhaConta) {
-      minhaConta.addEventListener('click', function() {
+      minhaConta.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = 'minha-conta.html';
         if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
           try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
         }
