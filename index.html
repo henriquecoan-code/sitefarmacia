@@ -234,7 +234,10 @@
         const search = currentSearch.toLowerCase();
         filtered = filtered.filter(p =>
           (p.nome && p.nome.toLowerCase().includes(search)) ||
-          (p.descricao && p.descricao.toLowerCase().includes(search))
+          (p.descricao && p.descricao.toLowerCase().includes(search)) ||
+          (Array.isArray(p.tags) && p.tags.some(tag => tag.toLowerCase().includes(search))) ||
+          (p.ean && String(p.ean).toLowerCase().includes(search)) ||
+          (p.codRed && String(p.codRed).toLowerCase().includes(search))
         );
       }
       const emptyState = document.getElementById('empty-state');
