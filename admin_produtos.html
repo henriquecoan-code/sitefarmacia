@@ -12,106 +12,101 @@
 </head>
 <body class="min-h-screen flex flex-col bg-gray-50">
   <div id="header-container"></div>
-  <div class="flex flex-1">
-    <!-- Aside Menu Padronizado -->
-    <aside class="w-64 bg-white shadow-lg min-h-screen hidden md:block">
-      <div class="p-6 border-b">
-        <h2 class="text-xl font-bold text-blue-900">Administração</h2>
-      </div>
-      <nav class="flex flex-col space-y-2 p-6">
-        <a href="admin.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-user-shield mr-2"></i>Administradores</a>
-        <a href="admin_produtos_novo.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-blue-900 font-bold"><i class="fas fa-pills mr-2"></i>Produtos</a>
-        <a href="admin-pedidos.html" class="text-left px-4 py-2 rounded hover:bg-blue-100 transition flex items-center text-gray-700 font-medium"><i class="fas fa-clipboard-list mr-2"></i>Pedidos</a>
-      </nav>
-    </aside>
-    <main class="flex-1 flex justify-center items-start p-8">
-      <div class="w-full">
-        <div class="w-full flex justify-center">
-          <div class="w-full">
-            <h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Administração de Produtos</h1>
-            <!-- Formulário manual de produto -->
-            <form id="form-produto" class="bg-white rounded-lg shadow p-2 mb-4 space-y-2 w-full mx-auto text-xs" style="font-size:0.92rem;">
-              <input type="hidden" id="produto-id">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Nome</label>
-                  <input type="text" id="nome" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Categoria</label>
-                  <select id="categoria" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
-                    <option value="Suplementos">Suplementos</option>
-                    <option value="Hospitalar">Hospitalar</option>
-                    <option value="Genéricos">Genéricos</option>
-                    <option value="Perfumaria">Perfumaria</option>
-                    <option value="Referência">Referência</option>
-                    <option value="Similares">Similares</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN</label>
-                  <input type="text" id="ean" class="w-full rounded border px-2 py-1 h-7 text-xs">
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red</label>
-                  <input type="text" id="cod-red" class="w-full rounded border px-2 py-1 h-7 text-xs">
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço Máximo (R$)</label>
-                  <input type="number" id="precoMaximo" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" required>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Desconto (%)</label>
-                  <input type="number" id="desconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" max="100">
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço com desconto (R$)</label>
-                  <input type="number" id="precoComDesconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0">
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Quantidade</label>
-                  <input type="number" id="quantidade" class="w-full rounded border px-2 py-1 h-7 text-xs" min="0">
-                </div>
-                <div class="md:col-span-2">
-                  <label class="block text-xs font-medium text-gray-700 mb-0.5">Tags (separadas por vírgula)</label>
-                  <input type="text" id="tags" class="w-full rounded border px-2 py-1 h-7 text-xs">
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-0.5">Descrição</label>
-                <textarea id="descricao" class="w-full rounded border px-2 py-1 text-xs" rows="1" style="min-height:1.5em;"></textarea>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-0.5">Fotos (URLs separadas por vírgula)</label>
-                <input type="text" id="fotos" class="w-full rounded border px-2 py-1 h-7 text-xs">
-              </div>
-              <div class="flex gap-1">
-                <button type="submit" id="btn-salvar" class="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 transition text-xs h-7">Salvar</button>
-                <button type="button" id="btn-cancelar" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 transition hidden text-xs h-7">Cancelar</button>
-              </div>
-              <div id="form-status" class="text-xs mt-1"></div>
-            </form>
-          </div>
-        </div>
-        <section class="upload-area flex items-center gap-2">
-          <label class="upload-label" for="csv-upload">📤 Fazer upload de produtos (.csv)</label>
-          <input type="file" id="csv-upload" accept=".csv">
-          <button id="enviar-csv" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" type="button">Enviar</button>
-          <a href="produtos-modelo.csv" download class="ml-2 text-blue-700 underline text-xs hover:text-blue-900">Baixar modelo CSV</a>
-          <div class="status-msg" id="upload-status"></div>
-        </section>
-        <section class="filtros">
-          <input type="text" id="filtro-nome" placeholder="Pesquisar por nome...">
-          <select id="filtro-categoria">
-            <option value="">Todas as categorias</option>
-          </select>
-        </section>
-        <section>
-          <div class="produtos-container" id="produtos-lista"></div>
-        </section>
-      </div>
-    </main>
+  <!-- Menu admin horizontal -->
+  <div class="w-full flex flex-row flex-wrap gap-2 px-2 py-4 justify-center items-center mt-[56px] md:mt-0">
+    <a href="admin.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-gray-700"><i class="fas fa-user-shield"></i>Administradores</a>
+    <a href="admin_produtos.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-blue-900 bg-blue-50"><i class="fas fa-pills"></i>Produtos</a>
+    <a href="admin-pedidos.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-gray-700"><i class="fas fa-clipboard-list"></i>Pedidos</a>
+  </nav>
   </div>
+  <main class="flex-1 p-4 md:mt-0">
+    <div class="max-w-4xl mx-auto">
+      <div class="w-full flex justify-center">
+        <div class="w-full">
+          <h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Administração de Produtos</h1>
+          <!-- Formulário manual de produto -->
+          <form id="form-produto" class="bg-white rounded-lg shadow p-2 mb-4 space-y-2 w-full mx-auto text-xs" style="font-size:0.92rem;">
+            <input type="hidden" id="produto-id">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Nome</label>
+                <input type="text" id="nome" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Categoria</label>
+                <select id="categoria" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
+                  <option value="Suplementos">Suplementos</option>
+                  <option value="Hospitalar">Hospitalar</option>
+                  <option value="Genéricos">Genéricos</option>
+                  <option value="Perfumaria">Perfumaria</option>
+                  <option value="Referência">Referência</option>
+                  <option value="Similares">Similares</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN</label>
+                <input type="text" id="ean" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red</label>
+                <input type="text" id="cod-red" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço Máximo (R$)</label>
+                <input type="number" id="precoMaximo" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" required>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Desconto (%)</label>
+                <input type="number" id="desconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" max="100">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço com desconto (R$)</label>
+                <input type="number" id="precoComDesconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Quantidade</label>
+                <input type="number" id="quantidade" class="w-full rounded border px-2 py-1 h-7 text-xs" min="0">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Tags (separadas por vírgula)</label>
+                <input type="text" id="tags" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-0.5">Descrição</label>
+              <textarea id="descricao" class="w-full rounded border px-2 py-1 text-xs" rows="1" style="min-height:1.5em;"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-0.5">Fotos (URLs separadas por vírgula)</label>
+              <input type="text" id="fotos" class="w-full rounded border px-2 py-1 h-7 text-xs">
+            </div>
+            <div class="flex gap-1">
+              <button type="submit" id="btn-salvar" class="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 transition text-xs h-7">Salvar</button>
+              <button type="button" id="btn-cancelar" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 transition hidden text-xs h-7">Cancelar</button>
+            </div>
+            <div id="form-status" class="text-xs mt-1"></div>
+          </form>
+        </div>
+      </div>
+      <section class="upload-area flex items-center gap-2">
+        <label class="upload-label" for="csv-upload">📤 Fazer upload de produtos (.csv)</label>
+        <input type="file" id="csv-upload" accept=".csv">
+        <button id="enviar-csv" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" type="button">Enviar</button>
+        <a href="produtos-modelo.csv" download class="ml-2 text-blue-700 underline text-xs hover:text-blue-900">Baixar modelo CSV</a>
+        <div class="status-msg" id="upload-status"></div>
+      </section>
+      <section class="filtros">
+        <input type="text" id="filtro-nome" placeholder="Pesquisar por nome...">
+        <select id="filtro-categoria">
+          <option value="">Todas as categorias</option>
+        </select>
+      </section>
+      <section>
+        <div class="produtos-container" id="produtos-lista"></div>
+        <div id="paginacao-produtos" class="flex justify-center items-center gap-2 mt-6"></div>
+      </section>
+    </div>
+  </main>
   <div id="footer-container"></div>
   <script type="module" src="js/load-components.js"></script>
   <script src="js/auth-modal.js"></script>
@@ -248,6 +243,9 @@
       formStatus.textContent = '';
     });
 
+    let paginaAtual = 1;
+    const produtosPorPagina = 8;
+
     function renderizarProdutos() {
       const lista = document.getElementById('produtos-lista');
       const nomeFiltro = document.getElementById('filtro-nome').value.toLowerCase();
@@ -258,10 +256,17 @@
       );
       if (filtrados.length === 0) {
         lista.innerHTML = '<div style="color:#888">Nenhum produto encontrado.</div>';
+        document.getElementById('paginacao-produtos').innerHTML = '';
         return;
       }
+      // Paginação
+      const totalPaginas = Math.ceil(filtrados.length / produtosPorPagina);
+      if (paginaAtual > totalPaginas) paginaAtual = 1;
+      const inicio = (paginaAtual - 1) * produtosPorPagina;
+      const fim = inicio + produtosPorPagina;
+      const pagina = filtrados.slice(inicio, fim);
       lista.innerHTML = '';
-      filtrados.forEach(prod => {
+      pagina.forEach(prod => {
         const card = document.createElement('div');
         card.className = 'produto-card';
         card.innerHTML = `
@@ -283,6 +288,21 @@
         `;
         lista.appendChild(card);
       });
+      // Paginação UI
+      const paginacao = document.getElementById('paginacao-produtos');
+      paginacao.innerHTML = '';
+      if (totalPaginas > 1) {
+        for (let i = 1; i <= totalPaginas; i++) {
+          const btn = document.createElement('button');
+          btn.textContent = i;
+          btn.className = 'px-3 py-1 rounded border ' + (i === paginaAtual ? 'bg-blue-700 text-white' : 'bg-white text-blue-700 hover:bg-blue-100');
+          btn.addEventListener('click', () => {
+            paginaAtual = i;
+            renderizarProdutos();
+          });
+          paginacao.appendChild(btn);
+        }
+      }
       // Botões de edição
       lista.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
