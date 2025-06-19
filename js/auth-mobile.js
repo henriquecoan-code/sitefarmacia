@@ -91,9 +91,18 @@ function renderAuthMobileMenu(user) {
       return; // Não faz mais tentativas
     }
     // ...código original para usuário autenticado...
+    // Pega o primeiro nome do usuário
+    var primeiroNome = '';
+    if (user.displayName) {
+      primeiroNome = user.displayName.split(' ')[0];
+    } else if (user.email) {
+      primeiroNome = user.email.split('@')[0];
+    } else {
+      primeiroNome = 'Minha Conta';
+    }
     container.innerHTML =
       '<div class="flex flex-col space-y-1">' +
-      '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
+      '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">' + primeiroNome + '</a>' +
       '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
       '</div>';
     // Adiciona listener para fechar o menu ao clicar em Minha Conta
