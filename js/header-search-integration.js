@@ -23,3 +23,23 @@
   document.addEventListener('headerLoaded', attachHeaderSearchListener);
   setTimeout(attachHeaderSearchListener, 1000);
 })();
+
+// Limpa a busca ao clicar no menu lateral esquerdo (funciona mesmo se aside já estiver no DOM)
+(function() {
+  function clearSearchAndTrigger() {
+    var inputs = document.querySelectorAll('#header-search-input');
+    inputs.forEach(function(input) { input.value = ''; });
+    // Dispara busca em branco
+    window.dispatchEvent(new CustomEvent('headerSearch', { detail: '' }));
+  }
+  function attachAsideMenuListeners() {
+    var asideLinks = document.querySelectorAll('aside nav a[data-categoria], #aside-todos');
+    asideLinks.forEach(function(link) {
+      link.removeEventListener('click', clearSearchAndTrigger);
+      link.addEventListener('click', clearSearchAndTrigger);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', attachAsideMenuListeners);
+  document.addEventListener('headerLoaded', attachAsideMenuListeners);
+  setTimeout(attachAsideMenuListeners, 1000);
+})();
