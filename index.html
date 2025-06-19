@@ -272,11 +272,9 @@
         const buscaParam = urlParams.get('busca');
         if (buscaParam) {
           currentSearch = buscaParam;
-          searchInput.value = buscaParam;
           applyFilters();
         } else {
           currentSearch = '';
-          searchInput.value = '';
           applyFilters();
         }
       }
@@ -294,6 +292,16 @@
       };
     }
     listenHeaderSearch();
+
+    // Escuta o evento customizado de busca do header
+    window.addEventListener('headerSearch', function(e) {
+      currentSearch = e.detail || '';
+      if (!allProducts || allProducts.length === 0) {
+        fetchProducts(); // fetchProducts já chama applyFilters ao final
+      } else {
+        applyFilters();
+      }
+    });
 
     // Menu lateral esquerdo
     const asideLinks = document.querySelectorAll('aside nav a[data-categoria], #aside-todos');
@@ -418,7 +426,6 @@
     const buscaParam = urlParams.get('busca');
     if (buscaParam) {
       currentSearch = buscaParam;
-      searchInput.value = buscaParam;
       applyFilters();
     } else {
       fetchProducts();
@@ -433,6 +440,8 @@
     });
     </script>
     
+    
     <script src="js/auth-modal.js"></script>
+    <script type="module" src="./js/header-search-integration.js"></script>
 </body>
 </html>
