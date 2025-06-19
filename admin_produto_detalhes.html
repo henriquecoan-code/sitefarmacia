@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Produto - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="stylesheet" href="css/account-styles.css">
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+  <div id="header-container"></div>
+  <div class="w-full flex flex-row flex-wrap gap-2 px-2 py-4 justify-center items-center mt-[56px] md:mt-0">
+    <a href="admin.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-gray-700"><i class="fas fa-user-shield"></i>Administradores</a>
+    <a href="admin_produtos.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-blue-900 bg-blue-50"><i class="fas fa-pills"></i>Produtos</a>
+    <a href="admin-pedidos.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-gray-700"><i class="fas fa-clipboard-list"></i>Pedidos</a>
+  </div>
+  <main class="flex-1 p-4 md:mt-0">
+    <div class="max-w-2xl mx-auto bg-white rounded shadow p-6 mt-4">
+      <button onclick="window.history.back()" class="mb-4 text-blue-700 hover:underline flex items-center"><i class="fas fa-arrow-left mr-2"></i>Voltar</button>
+      <div id="detalhes-produto" class="space-y-4">
+        <div class="text-center text-gray-500">Carregando...</div>
+      </div>
+    </div>
+  </main>
+  <div id="footer-container"></div>
+  <script type="module" src="js/load-components.js"></script>
+  <script src="js/auth-modal.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const db = getFirestore(app);
+    // Pega o id do produto da query string
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const detalhes = document.getElementById('detalhes-produto');
+    if (!id) {
+      detalhes.innerHTML = '<div class="text-red-600">ID do produto não informado.</div>';
+    } else {
+      const docRef = doc(db, 'produtos', id);
+      getDoc(docRef).then(docSnap => {
+        if (!docSnap.exists()) {
+          detalhes.innerHTML = '<div class="text-red-600">Produto não encontrado.</div>';
+          return;
+        }
+        const p = docSnap.data();
+        detalhes.innerHTML = `
+          <div class="flex flex-col md:flex-row gap-6 items-center">
+            <img src="${p.fotos && p.fotos[0] ? p.fotos[0] : 'img/medicamento.png'}" alt="${p.nome}" class="w-40 h-40 object-contain rounded shadow">
+            <div class="flex-1">
+              <h1 class="text-2xl font-bold text-blue-900 mb-2">${p.nome || ''}</h1>
+              <p class="mb-1"><b>Categoria:</b> ${p.categoria || '-'}</p>
+              <p class="mb-1"><b>Preço Máximo:</b> R$ ${p.precoMaximo ? Number(p.precoMaximo).toFixed(2) : '-'}</p>
+              <p class="mb-1"><b>Desconto:</b> ${p.desconto ? (p.desconto * 100).toFixed(2) + '%' : '-'}</p>
+              <p class="mb-1"><b>Preço com desconto:</b> R$ ${p.precoComDesconto !== undefined && !isNaN(p.precoComDesconto) ? Number(p.precoComDesconto).toFixed(2) : (p.valorComDesconto !== undefined ? Number(p.valorComDesconto).toFixed(2) : '-')}</p>
+              <p class="mb-1"><b>Quantidade:</b> ${p.quantidade || '-'}</p>
+              <p class="mb-1"><b>EAN:</b> ${p.ean || '-'}</p>
+              <p class="mb-1"><b>Cod-Red:</b> ${p.codRed || '-'}</p>
+              <p class="mb-1"><b>Tags:</b> ${p.tags && p.tags.length ? p.tags.join(', ') : '-'}</p>
+              <p class="mb-1"><b>Descrição:</b> ${p.descricao || '-'}</p>
+            </div>
+          </div>
+        `;
+      }).catch(() => {
+        detalhes.innerHTML = '<div class="text-red-600">Erro ao buscar produto.</div>';
+      });
+    }
+  </script>
+</body>
+</html>
