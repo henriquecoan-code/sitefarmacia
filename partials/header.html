@@ -178,37 +178,96 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(updateTopbarVisibility, 300);
 });
 </script>
-  <script>
-// Atualiza contador do carrinho no header (desktop e mobile)
-document.addEventListener('DOMContentLoaded', function() {
-  function updateCartCount(count) {
-    const el = document.getElementById('cart-count');
-    const elMobile = document.getElementById('cart-count-mobile');
-    if (el) el.textContent = count;
-    if (elMobile) elMobile.textContent = count;
-  }
-  if (window.listenCartCount) {
-    window.listenCartCount(null, function(cartArr) {
-      // cartArr pode ser array ou objeto, depende da implementação
-      let count = 0;
-      if (Array.isArray(cartArr)) {
-        count = cartArr.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-      } else if (cartArr && typeof cartArr === 'object') {
-        count = Object.values(cartArr).reduce((sum, item) => sum + (item.quantidade || 1), 0);
-      }
+<script type="module">
+import { auth, firestore } from './js/firebase-config.js';
+import { doc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+
+window.firestore = firestore;
+window.auth = auth;
+
+let cartUnsubscribe = null;
+
+function updateCartCount(count) {
+  const el = document.getElementById('cart-count');
+  const elMobile = document.getElementById('cart-count-mobile');
+  // Garante que o contador nunca mostra negativo
+  const safeCount = Math.max(0, count);
+  if (el) el.textContent = safeCount;
+  if (elMobile) elMobile.textContent = safeCount;
+}
+
+function setCartCountOnce(user) {
+  if (user) {
+    // Usuário logado: NUNCA usa localStorage
+    const cartRef = doc(firestore, 'carrinhos', user.uid);
+    getDoc(cartRef).then(snap => {
+      const itens = snap.exists() ? (Array.isArray(snap.data().itens) ? snap.data().itens : []) : [];
+      const count = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
       updateCartCount(count);
     });
   } else {
-    // fallback: tenta pegar do localStorage
-    try {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const count = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+    // Visitante: usa apenas localStorage
+    const cart = Array.isArray(JSON.parse(localStorage.getItem('cart'))) ? JSON.parse(localStorage.getItem('cart')) : [];
+    const count = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+    updateCartCount(count);
+  }
+}
+
+function listenCartRealtime(user) {
+  if (cartUnsubscribe) {
+    cartUnsubscribe();
+    cartUnsubscribe = null;
+  }
+  if (user) {
+    // Usuário logado: snapshot do Firestore
+    const cartRef = doc(firestore, 'carrinhos', user.uid);
+    cartUnsubscribe = onSnapshot(cartRef, (snap) => {
+      const itens = snap.exists() ? (Array.isArray(snap.data().itens) ? snap.data().itens : []) : [];
+      const count = itens.reduce((sum, item) => sum + (item.quantidade || 1), 0);
       updateCartCount(count);
-    } catch(e) {}
+    });
+  } else {
+    // Visitante: usa apenas localStorage
+    const cart = Array.isArray(JSON.parse(localStorage.getItem('cart'))) ? JSON.parse(localStorage.getItem('cart')) : [];
+    const count = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+    updateCartCount(count);
+  }
+}
+
+// Aguarda autenticação antes de atualizar o contador do carrinho
+let initialAuthResolved = false;
+auth.onAuthStateChanged(function(user) {
+  setCartCountOnce(user);
+  listenCartRealtime(user);
+  initialAuthResolved = true;
+});
+
+// Atualiza ao voltar para a aba ou ao carregar o footer, mas só depois da autenticação
+function updateIfAuthResolved() {
+  if (initialAuthResolved) {
+    setCartCountOnce(auth.currentUser);
+  } else {
+    // Aguarda autenticação e atualiza depois
+    auth.onAuthStateChanged(function(user) {
+      setCartCountOnce(user);
+    });
+  }
+}
+
+window.addEventListener('storage', function(e) {
+  // Só visitantes (não logados) devem responder a eventos de storage
+  if (!auth.currentUser && e.key === 'cart') {
+    updateIfAuthResolved();
   }
 });
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) updateIfAuthResolved();
+});
+document.addEventListener('footerLoaded', function() {
+  updateIfAuthResolved();
+});
 </script>
-  <script>
+<script>
 // Busca global: direciona para index.html ao pesquisar
 function handleHeaderSearch(e) {
   e.preventDefault();

@@ -4,7 +4,7 @@ import { escapeHTML } from './utils.js';
 // Gerenciamento do Carrinho
 class Carrinho {
   constructor() {
-    this.itens = JSON.parse(localStorage.getItem('carrinho')) || [];
+    this.itens = JSON.parse(localStorage.getItem('cart')) || [];
   }
 
   adicionarItem(produto) {
@@ -18,7 +18,7 @@ class Carrinho {
   }
 
   salvar() {
-    localStorage.setItem('carrinho', JSON.stringify(this.itens));
+    localStorage.setItem('cart', JSON.stringify(this.itens));
     this.atualizarContador();
   }
 
