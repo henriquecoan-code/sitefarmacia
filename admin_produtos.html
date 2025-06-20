@@ -44,12 +44,24 @@
                 </select>
               </div>
               <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Sub Categoria</label>
+                <input type="text" id="subcategoria" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+              <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN</label>
                 <input type="text" id="ean" class="w-full rounded border px-2 py-1 h-7 text-xs">
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red</label>
                 <input type="text" id="cod-red" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Laboratório</label>
+                <input type="text" id="laboratorio" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">DCB (Princípio Ativo)</label>
+                <input type="text" id="dcb" class="w-full rounded border px-2 py-1 h-7 text-xs">
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço Máximo (R$)</label>
@@ -212,11 +224,14 @@
       const categoria = document.getElementById('categoria').value.trim();
       const ean = document.getElementById('ean').value.trim();
       const codRed = document.getElementById('cod-red').value.trim();
+      const laboratorio = document.getElementById('laboratorio').value.trim();
+      const subcategoria = document.getElementById('subcategoria').value.trim();
+      const dcb = document.getElementById('dcb').value.trim();
       const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean);
       const fotos = document.getElementById('fotos').value.split(',').map(f => f.trim()).filter(Boolean);
       // Atualiza campo visual
       document.getElementById('precoComDesconto').value = valorComDesconto.toFixed(2);
-      const produto = { nome, descricao, precoMaximo, desconto, valorComDesconto, precoComDesconto, quantidade, categoria, ean, codRed, tags, fotos, criadoEm: new Date() };
+      const produto = { nome, descricao, precoMaximo, desconto, valorComDesconto, precoComDesconto, quantidade, categoria, subcategoria, laboratorio, dcb, ean, codRed, tags, fotos, criadoEm: new Date() };
       try {
         if (id) {
           // Edição
@@ -309,8 +324,11 @@
           document.getElementById('desconto').value = prod.desconto || '';
           document.getElementById('quantidade').value = prod.quantidade || '';
           document.getElementById('categoria').value = prod.categoria || '';
+          document.getElementById('subcategoria').value = prod.subcategoria || '';
           document.getElementById('ean').value = prod.ean || '';
           document.getElementById('cod-red').value = prod.codRed || '';
+          document.getElementById('laboratorio').value = prod.laboratorio || '';
+          document.getElementById('dcb').value = prod.dcb || '';
           document.getElementById('tags').value = (prod.tags || []).join(', ');
           document.getElementById('fotos').value = (prod.fotos || []).join(', ');
           btnCancelar.classList.remove('hidden');
@@ -404,8 +422,11 @@
           const produto = {
             nome: prod.nome || '',
             categoria: categoriaPorCodigo(prod.categoria || ''),
+            subcategoria: prod.subcategoria || '',
             ean: prod.ean || '',
             codRed: prod['cod-red'] || '',
+            laboratorio: prod.laboratorio || '',
+            dcb: prod.dcb || '',
             precoMaximo,
             desconto,
             precoComDesconto,

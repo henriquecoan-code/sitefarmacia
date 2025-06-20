@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Produto</title>
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="stylesheet" href="css/account-styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+  <div id="header-container"></div>
+  <main class="flex-1 p-4 md:mt-0">
+    <div class="max-w-2xl mx-auto bg-white rounded shadow p-6 mt-4">
+      <button onclick="window.history.back()" class="mb-4 text-blue-700 hover:underline flex items-center"><i class="fas fa-arrow-left mr-2"></i>Voltar</button>
+      <div id="detalhes-produto" class="space-y-4">
+        <div class="text-center text-gray-500">Carregando...</div>
+      </div>
+    </div>
+  </main>
+  <div id="footer-container"></div>
+  <script type="module" src="js/load-components.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const db = getFirestore(app);
+    // Pega o id do produto da query string
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const detalhes = document.getElementById('detalhes-produto');
+    if (!id) {
+      detalhes.innerHTML = '<div class="text-red-600">ID do produto não informado.</div>';
+    } else {
+      const docRef = doc(db, 'produtos', id);
+      getDoc(docRef).then(docSnap => {
+        if (!docSnap.exists()) {
+          detalhes.innerHTML = '<div class="text-red-600">Produto não encontrado.</div>';
+          return;
+        }
+        const p = docSnap.data();
+        detalhes.innerHTML = `
+          <div class="flex flex-col md:flex-row gap-8 items-center md:items-start bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-lg p-6 border border-blue-100">
+            <div class="flex-shrink-0 flex flex-col items-center w-full md:w-auto">
+              <img src="${p.fotos && p.fotos[0] ? p.fotos[0] : 'img/medicamento.png'}" alt="${p.nome}" class="w-44 h-44 object-contain rounded-xl shadow-md border-2 border-blue-100 bg-white">
+              <span class="mt-3 inline-block px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">${p.laboratorio || 'Laboratório desconhecido'}</span>
+            </div>
+            <div class="flex-1 flex flex-col justify-center w-full">
+              <h1 class="text-4xl font-extrabold text-blue-900 mb-2 leading-tight">${p.nome || ''}</h1>
+              <div class="mt-6">
+                <h2 class="text-lg font-semibold text-blue-800 mb-1">Descrição</h2>
+                <p class="text-gray-800 bg-blue-50 rounded p-3">${p.descricao || '-'}</p>
+              </div>              
+              <div class="flex flex-wrap gap-2 mb-4">
+                ${p.tags && p.tags.length ? p.tags.map(tag => `<span class='px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs'>${tag}</span>`).join('') : ''}
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-base text-gray-700">
+                <div><b>Categoria:</b> ${p.categoria || '-'}</div>
+                <div><b>Subcategoria:</b> ${p.subcategoria || '-'}</div>
+                <div><b>DCB (Princípio Ativo):</b> ${p.dcb || '-'}</div>
+                <div><b>EAN:</b> ${p.ean || '-'}</div>
+                <div><b>Cod-Red:</b> ${p.codRed || '-'}</div>
+                <div><b>Quantidade:</b> ${p.quantidade || '-'}</div>
+                <div><b>Preço Máximo:</b> <span class="text-gray-900 font-semibold">R$ ${p.precoMaximo ? Number(p.precoMaximo).toFixed(2) : '-'}</span></div>
+                <div><b>Desconto:</b> <span class="text-green-500 font-semibold">${p.desconto ? (p.desconto * 100).toFixed(2) + '%' : '-'}</span></div>
+                <div class="md:col-span-2 flex flex-col md:flex-row md:items-center gap-4 mt-2">
+                  <span><b>Preço com desconto:</b> <span class="text-blue-700 text-lg font-bold">R$ ${p.precoComDesconto !== undefined && !isNaN(p.precoComDesconto) ? Number(p.precoComDesconto).toFixed(2) : (p.valorComDesconto !== undefined ? Number(p.valorComDesconto).toFixed(2) : '-')}</span></span>
+                  <div class="flex items-center gap-2 mt-2 md:mt-0">
+                    <label for="qtd" class="text-sm font-medium text-gray-700">Qtd:</label>
+                    <input id="qtd" type="number" min="1" max="${p.quantidade || 99}" value="1" class="w-16 px-2 py-1 border border-blue-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 text-center" />
+                    <button id="add-carrinho" class="ml-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow transition">Adicionar</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).catch(() => {
+        detalhes.innerHTML = '<div class="text-red-600">Erro ao buscar produto.</div>';
+      });
+    }
+    // Adiciona funcionalidade ao botão
+    setTimeout(() => {
+      const btn = document.getElementById('add-carrinho');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const qtd = parseInt(document.getElementById('qtd').value) || 1;
+          // Aqui você pode integrar com o carrinho real
+          alert(`Adicionado ao carrinho: ${qtd}x ${p.nome}`);
+        });
+      }
+    }, 100);
+  </script>
+</body>
+</html>

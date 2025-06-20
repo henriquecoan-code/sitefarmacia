@@ -81,6 +81,9 @@
                                 <option value="">Todas as subcategorias</option>
                             </select>
                         </div>
+                        <div class="relative w-full sm:w-auto hidden">
+                            <input type="text" id="busca-produto" placeholder="Buscar por nome, descrição, tags, EAN, Cod-Red, laboratório, subcategoria ou DCB..." class="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
                     </div>
                 </div>
 
@@ -222,6 +225,7 @@
     }
 
     // Aplica filtros e busca
+    // Busca aprimorada: múltiplos termos, fuzzy, busca por ID
     function applyFilters() {
       let filtered = allProducts;
       if (currentCategory) {
@@ -231,13 +235,18 @@
         filtered = filtered.filter(p => (p.subcategoria || '').toLowerCase() === currentSubcategory);
       }
       if (currentSearch) {
-        const search = currentSearch.toLowerCase();
+        const terms = currentSearch.toLowerCase().split(/\s+/).filter(Boolean);
         filtered = filtered.filter(p =>
-          (p.nome && p.nome.toLowerCase().includes(search)) ||
-          (p.descricao && p.descricao.toLowerCase().includes(search)) ||
-          (Array.isArray(p.tags) && p.tags.some(tag => tag.toLowerCase().includes(search))) ||
-          (p.ean && String(p.ean).toLowerCase().includes(search)) ||
-          (p.codRed && String(p.codRed).toLowerCase().includes(search))
+          terms.every(term =>
+            (p.nome && p.nome.toLowerCase().includes(term)) ||
+            (p.descricao && p.descricao.toLowerCase().includes(term)) ||
+            (Array.isArray(p.tags) && p.tags.some(tag => tag.toLowerCase().includes(term))) ||
+            (p.ean && String(p.ean).toLowerCase().includes(term)) ||
+            (p.codRed && String(p.codRed).toLowerCase().includes(term)) ||
+            (p.laboratorio && p.laboratorio.toLowerCase().includes(term)) ||
+            (p.subcategoria && p.subcategoria.toLowerCase().includes(term)) ||
+            (p.dcb && p.dcb.toLowerCase().includes(term))
+          )
         );
       }
       const emptyState = document.getElementById('empty-state');
@@ -268,6 +277,14 @@
     const catSelect = document.getElementById('filtro-categoria');
     const subcatSelect = document.getElementById('filtro-subcategoria');
     const searchInput = document.getElementById('busca-produto');
+
+    // Campo de busca local
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        currentSearch = this.value;
+        applyFilters();
+      });
+    }
 
     // Integra busca do header/topbar ao filtro local
     function listenHeaderSearch() {
@@ -394,12 +411,12 @@
         productElement.className = 'card-produto';
         productElement.innerHTML = `
           <div class="flex justify-center items-center bg-gradient-to-t from-gray-50 to-white h-40 relative overflow-hidden">
-            <img src="${fotoSrc}" alt="Imagem do Produto" class="w-28 h-28 object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm" onerror="this.onerror=null;this.src='img/medicamento.png';" />
+            <img src="${fotoSrc}" alt="Imagem do Produto" class="w-28 h-28 object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm cursor-pointer" onerror="this.onerror=null;this.src='img/medicamento.png';" data-produto-id="${product.id}" />
             ${temDesconto ? `<span class='desconto-badge'>${Math.round(product.desconto * 100)}% OFF</span>` : ''}
           </div>
           <div class="info flex flex-col flex-1 justify-between">
             <div>
-              <h3 class="nome truncate-2-lines" title="${product.nome}">${product.nome}</h3>
+              <h3 class="nome truncate-2-lines cursor-pointer" title="${product.nome}" data-produto-id="${product.id}">${product.nome}</h3>
               <p class="descricao truncate-2-lines" title="${product.descricao || ''}">${product.descricao || ''}</p>
               <div class="precos">
                 ${temDesconto ? `<span class='preco-original'>R$ ${precoOriginal}</span>` : ''}
@@ -414,6 +431,14 @@
           </div>
         `;
         productsContainer.appendChild(productElement);
+        // Clique na imagem ou nome leva para detalhes
+        const img = productElement.querySelector('img[data-produto-id]');
+        const nome = productElement.querySelector('h3[data-produto-id]');
+        [img, nome].forEach(el => {
+          if (el) el.addEventListener('click', () => {
+            window.location.href = `produto_detalhes.html?id=${product.id}`;
+          });
+        });
         // Botão com feedback visual
         const btn = productElement.querySelector('.add-cart-btn');
         const btnText = btn.querySelector('.cart-btn-text');
@@ -471,5 +496,6 @@
     
     <script src="js/auth-modal.js"></script>
     <script type="module" src="./js/header-search-integration.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
 </body>
 </html>

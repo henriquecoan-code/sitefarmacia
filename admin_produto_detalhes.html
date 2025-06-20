@@ -53,6 +53,9 @@
             <div class="flex-1">
               <h1 class="text-2xl font-bold text-blue-900 mb-2">${p.nome || ''}</h1>
               <p class="mb-1"><b>Categoria:</b> ${p.categoria || '-'}</p>
+              <p class="mb-1"><b>Subcategoria:</b> ${p.subcategoria || '-'}</p>
+              <p class="mb-1"><b>Laboratório:</b> ${p.laboratorio || '-'}</p>
+              <p class="mb-1"><b>DCB (Princípio Ativo):</b> ${p.dcb || '-'}</p>
               <p class="mb-1"><b>Preço Máximo:</b> R$ ${p.precoMaximo ? Number(p.precoMaximo).toFixed(2) : '-'}</p>
               <p class="mb-1"><b>Desconto:</b> ${p.desconto ? (p.desconto * 100).toFixed(2) + '%' : '-'}</p>
               <p class="mb-1"><b>Preço com desconto:</b> R$ ${p.precoComDesconto !== undefined && !isNaN(p.precoComDesconto) ? Number(p.precoComDesconto).toFixed(2) : (p.valorComDesconto !== undefined ? Number(p.valorComDesconto).toFixed(2) : '-')}</p>
