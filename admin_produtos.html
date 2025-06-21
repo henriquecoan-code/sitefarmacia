@@ -100,12 +100,15 @@
           </form>
         </div>
       </div>
-      <section class="upload-area flex items-center gap-2">
+      <section class="upload-area flex flex-wrap items-center gap-2">
         <label class="upload-label" for="csv-upload">📤 Fazer upload de produtos (.csv)</label>
         <input type="file" id="csv-upload" accept=".csv">
         <button id="enviar-csv" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" type="button">Enviar</button>
         <a href="produtos-modelo.csv" download class="ml-2 text-blue-700 underline text-xs hover:text-blue-900">Baixar modelo CSV</a>
-        <div class="status-msg" id="upload-status"></div>
+        <button id="exportar-csv" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 ml-2" type="button">Exportar para CSV</button>
+        <button id="importar-inativar-csv" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 ml-2" type="button">Importar e Inativar Ausentes</button>
+        <div class="w-full"></div>
+        <div class="status-msg w-full text-xs mt-1" id="upload-status"></div>
       </section>
       <section class="filtros">
         <input type="text" id="filtro-nome" placeholder="Pesquisar por nome...">
@@ -422,7 +425,8 @@
           const produto = {
             nome: prod.nome || '',
             categoria: categoriaPorCodigo(prod.categoria || ''),
-            subcategoria: prod.subcategoria || '',
+            // Suporte a múltiplas subcategorias separadas por vírgula
+            subcategoria: prod.subcategoria ? prod.subcategoria.split(',').map(s => s.trim()).filter(Boolean) : [],
             ean: prod.ean || '',
             codRed: prod['cod-red'] || '',
             laboratorio: prod.laboratorio || '',
@@ -454,6 +458,141 @@
       }
       setTimeout(() => { status.textContent = ''; }, 4000);
     });
+
+    // Importação com inativação de ausentes
+    async function importarEInativarAusentes() {
+      if (!arquivoCSV) {
+        status.textContent = 'Selecione um arquivo CSV antes de importar.';
+        return;
+      }
+      status.textContent = 'Lendo arquivo CSV...';
+      try {
+        const text = await arquivoCSV.text();
+        const produtosCSV = parseCSV(text);
+        if (!produtosCSV.length) throw new Error('CSV vazio ou inválido');
+        status.textContent = 'Salvando produtos e inativando ausentes...';
+        // Busca todos os produtos existentes
+        const snap = await getDocs(collection(db, 'produtos'));
+        const produtosExistentes = {};
+        snap.forEach(docu => {
+          const data = docu.data();
+          if (data.nome) produtosExistentes[data.nome.trim().toLowerCase()] = { id: docu.id, data };
+        });
+        // Monta set de nomes do CSV
+        const nomesCSV = new Set();
+        let inseridos = 0, atualizados = 0;
+        for (const prod of produtosCSV) {
+          const nomeKey = (prod.nome || '').trim().toLowerCase();
+          if (!nomeKey) continue;
+          nomesCSV.add(nomeKey);
+          let precoMaximo = prod.precoMaximo ? parseFloat(prod.precoMaximo.replace(',', '.')) : 0;
+          let precoComDesconto = prod.precoComDesconto ? parseFloat(prod.precoComDesconto.replace(',', '.')) : undefined;
+          let desconto = prod.desconto ? (parseFloat(prod.desconto.replace(',', '.')) > 1 ? parseFloat(prod.desconto.replace(',', '.')) / 100 : parseFloat(prod.desconto.replace(',', '.'))) : 0;
+          if (precoMaximo > 0 && precoComDesconto !== undefined && !isNaN(precoComDesconto)) {
+            desconto = 1 - (precoComDesconto / precoMaximo);
+          }
+          const produto = {
+            nome: prod.nome || '',
+            categoria: categoriaPorCodigo(prod.categoria || ''),
+            subcategoria: prod.subcategoria ? prod.subcategoria.split(',').map(s => s.trim()).filter(Boolean) : [],
+            ean: prod.ean || '',
+            codRed: prod['cod-red'] || '',
+            laboratorio: prod.laboratorio || '',
+            dcb: prod.dcb || '',
+            precoMaximo,
+            desconto,
+            precoComDesconto,
+            quantidade: prod.quantidade ? parseInt(prod.quantidade, 10) : 0,
+            tags: prod.tags ? prod.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+            descricao: prod.descricao || '',
+            fotos: prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [],
+            criadoEm: new Date(),
+            ativo: true
+          };
+          produto.valorComDesconto = precoComDesconto !== undefined && !isNaN(precoComDesconto)
+            ? precoComDesconto
+            : precoMaximo * (1 - desconto);
+          if (produtosExistentes[nomeKey]) {
+            await updateDoc(doc(db, 'produtos', produtosExistentes[nomeKey].id), produto);
+            atualizados++;
+          } else {
+            await addDoc(collection(db, 'produtos'), produto);
+            inseridos++;
+          }
+        }
+        // Inativa produtos não presentes no CSV
+        let inativados = 0;
+        for (const nomeKey in produtosExistentes) {
+          if (!nomesCSV.has(nomeKey)) {
+            const prod = produtosExistentes[nomeKey];
+            if (prod.data.ativo !== false) {
+              await updateDoc(doc(db, 'produtos', prod.id), { ativo: false });
+              inativados++;
+            }
+          }
+        }
+        status.textContent = `Importação concluída: ${inseridos} inseridos, ${atualizados} atualizados, ${inativados} inativados!`;
+        await carregarProdutos();
+      } catch (err) {
+        status.textContent = 'Erro ao importar: ' + err.message;
+      }
+      setTimeout(() => { status.textContent = ''; }, 4000);
+    }
+    document.getElementById('importar-inativar-csv').addEventListener('click', importarEInativarAusentes);
+
+    // Exportação de produtos para CSV
+    function exportarProdutosParaCSV() {
+      // Usa os produtos filtrados na tela
+      const nomeFiltro = document.getElementById('filtro-nome').value.toLowerCase();
+      const catFiltro = document.getElementById('filtro-categoria').value;
+      let filtrados = produtos.filter(p =>
+        (!nomeFiltro || (p.nome && p.nome.toLowerCase().includes(nomeFiltro))) &&
+        (!catFiltro || p.categoria === catFiltro)
+      );
+      if (!filtrados.length) {
+        alert('Nenhum produto para exportar.');
+        return;
+      }
+      // Define as colunas do CSV
+      const headers = [
+        'nome','categoria','subcategoria','ean','cod-red','laboratorio','dcb','precoMaximo','desconto','precoComDesconto','quantidade','tags','descricao','fotos'
+      ];
+      const csvRows = [headers.join(';')];
+      filtrados.forEach(prod => {
+        const row = [
+          prod.nome || '',
+          prod.categoria || '',
+          // Exporta subcategoria como string separada por vírgula
+          Array.isArray(prod.subcategoria) ? prod.subcategoria.join(', ') : (prod.subcategoria || ''),
+          prod.ean || '',
+          prod.codRed || '',
+          prod.laboratorio || '',
+          prod.dcb || '',
+          prod.precoMaximo !== undefined ? String(prod.precoMaximo).replace('.', ',') : '',
+          prod.desconto !== undefined ? String((Number(prod.desconto) * 100).toFixed(2)).replace('.', ',') : '',
+          prod.precoComDesconto !== undefined ? String(prod.precoComDesconto).replace('.', ',') : '',
+          prod.quantidade !== undefined ? prod.quantidade : '',
+          Array.isArray(prod.tags) ? prod.tags.join(', ') : '',
+          prod.descricao || '',
+          Array.isArray(prod.fotos) ? prod.fotos.join(', ') : ''
+        ];
+        // Escapa aspas e ponto e vírgula
+        csvRows.push(row.map(val => '"' + String(val).replace(/"/g, '""') + '"').join(';'));
+      });
+      const csvContent = csvRows.join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'produtos_exportados.csv';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }
+    document.getElementById('exportar-csv').addEventListener('click', exportarProdutosParaCSV);
 
     carregarProdutos();
   </script>
