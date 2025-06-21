@@ -506,11 +506,18 @@
                 <span class="preco-desconto">R$ ${precoDesconto}</span>
               </div>
             </div>
-            <button class="btn-carrinho add-cart-btn">
-              <span class="cart-btn-text"><i class="fas fa-cart-plus"></i> Adicionar ao Carrinho</span>
-              <span class="cart-btn-loading hidden"><i class='fas fa-spinner fa-spin'></i></span>
-              <span class="cart-btn-ok hidden"><i class='fas fa-check text-green-400'></i></span>
-            </button>
+            <div class="flex items-center justify-center gap-2 mt-2">
+              <div class="relative flex items-center mt-3.5 gap-0">
+                <button type="button" class="qty-btn decrement flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">-</button>
+                <input type="number" min="1" value="1" class="input-qty w-7 h-6 text-center text-base font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none mx-1" style="appearance: textfield;" title="Quantidade" />
+                <button type="button" class="qty-btn increment flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">+</button>
+              </div>
+              <button class="btn-carrinho add-cart-btn flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-all duration-150" style="height:2.25rem;">
+                <span class="cart-btn-text flex items-center gap-1"><i class="fas fa-cart-plus"></i>Adicionar</span>
+                <span class="cart-btn-loading hidden"><i class='fas fa-spinner fa-spin'></i></span>
+                <span class="cart-btn-ok hidden"><i class='fas fa-check text-green-400'></i></span>
+              </button>
+            </div>
           </div>
         `;
         productsContainer.appendChild(productElement);
@@ -522,17 +529,20 @@
             window.location.href = `produto_detalhes.html?id=${product.id}`;
           });
         });
-        // Botão com feedback visual
+        // Botão com feedback visual e integração com quantidade
         const btn = productElement.querySelector('.add-cart-btn');
         const btnText = btn.querySelector('.cart-btn-text');
         const btnLoading = btn.querySelector('.cart-btn-loading');
         const btnOk = btn.querySelector('.cart-btn-ok');
+        const inputQty = productElement.querySelector('.input-qty');
         btn.addEventListener('click', async () => {
+          let qty = parseInt(inputQty.value, 10);
+          if (isNaN(qty) || qty < 1) qty = 1;
           btnText.classList.add('hidden');
           btnLoading.classList.remove('hidden');
           await new Promise(r => setTimeout(r, 400)); // Simula loading
           if (window.addToCart) {
-            await window.addToCart(product);
+            await window.addToCart(product, qty);
           }
           btnLoading.classList.add('hidden');
           btnOk.classList.remove('hidden');
@@ -541,6 +551,20 @@
             btnText.classList.remove('hidden');
           }, 900);
         });
+        // Moderniza o input de quantidade com botões + e -
+        const qtyInput = productElement.querySelector('.input-qty');
+        const btnDec = productElement.querySelector('.qty-btn.decrement');
+        const btnInc = productElement.querySelector('.qty-btn.increment');
+        if (qtyInput && btnDec && btnInc) {
+          btnDec.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value, 10) || 1;
+            if (val > 1) qtyInput.value = val - 1;
+          });
+          btnInc.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value, 10) || 1;
+            qtyInput.value = val + 1;
+          });
+        }
       });
     }
 
