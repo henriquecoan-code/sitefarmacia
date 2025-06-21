@@ -53,9 +53,17 @@
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Imagens (URLs separadas por vírgula)</label>
                 <div class="flex gap-2 items-center">
                   <input type="text" id="imagens" class="w-full rounded border px-2 py-1 h-7 text-xs">
-                  <input type="file" id="imagem-upload" accept="image/*" class="hidden">
-                  <button type="button" id="btn-escolher-imagem" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">Escolher imagem</button>
+                  <span id="info-imagem" class="cursor-pointer text-blue-600 text-lg" title="Como adicionar imagens?" style="user-select:none;">&#9432;</span>
                   <span id="upload-status" class="text-xs text-gray-500"></span>
+                </div>
+                <div id="imagem-info-popover" style="display:none; position:absolute; z-index:100; background:#fff; border:1px solid #ccc; border-radius:6px; box-shadow:0 2px 8px #0002; padding:12px; font-size:0.95em; max-width:320px;">
+                  <b>Como adicionar imagens:</b><br>
+                  1. Faça upload da imagem para a pasta <code>img/</code> do seu repositório no GitHub.<br>
+                  2. Após o deploy, use o caminho relativo, ex: <code>img/nome-da-imagem.jpg</code> neste campo.<br>
+                  3. Você pode separar múltiplas imagens por vírgula.<br>
+                  <br>
+                  <b>Exemplo:</b><br>
+                  <code>img/paracetamol750mg.png, img/produto2.jpg</code>
                 </div>
               </div>
             </div>
@@ -349,6 +357,27 @@
       } catch (e) {
         bloquearParaNaoAdmins();
       }
+    });
+  </script>
+  <script>
+    // Popover de instrução para imagens
+    const infoImagem = document.getElementById('info-imagem');
+    const popover = document.getElementById('imagem-info-popover');
+    let popoverTimeout;
+    infoImagem.addEventListener('mouseenter', (e) => {
+      const rect = infoImagem.getBoundingClientRect();
+      popover.style.display = 'block';
+      popover.style.left = (rect.left + window.scrollX + 24) + 'px';
+      popover.style.top = (rect.top + window.scrollY - 8) + 'px';
+    });
+    infoImagem.addEventListener('mouseleave', () => {
+      popoverTimeout = setTimeout(() => { popover.style.display = 'none'; }, 200);
+    });
+    popover.addEventListener('mouseenter', () => {
+      clearTimeout(popoverTimeout);
+    });
+    popover.addEventListener('mouseleave', () => {
+      popover.style.display = 'none';
     });
   </script>
 </body>

@@ -69,57 +69,115 @@
     setupCadastroModalBtn();
     setupLoginModalBtn();
 
-    fetch('http://localhost:3000/produtos')
-      .then(res => res.json())
-      .then(produtos => {
-        const ofertas = produtos.filter(p => p.desconto && p.desconto > 0);
-        const lista = document.getElementById('ofertas-lista');
-        const empty = document.getElementById('ofertas-empty');
-        if (!ofertas.length) {
-          empty.classList.remove('hidden');
-          return;
+    // Buscar ofertas da coleção 'ofertas' do Firestore
+async function carregarOfertas() {
+  const snap = await getDocs(collection(db, 'ofertas'));
+  const ofertas = [];
+  snap.forEach(docu => {
+    const data = docu.data();
+    ofertas.push({ id: docu.id, ...data });
+  });
+  const lista = document.getElementById('ofertas-lista');
+  const empty = document.getElementById('ofertas-empty');
+  if (!ofertas.length) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  ofertas.forEach(oferta => {
+    let fotoSrc = 'img/medicamento.png';
+    if (Array.isArray(oferta.imagens) && oferta.imagens.length > 0) {
+      fotoSrc = oferta.imagens[0] || 'img/medicamento.png';
+    }
+    const el = document.createElement('div');
+    el.className = 'card-produto';
+    el.innerHTML = `
+      <div class="flex justify-center items-center bg-gradient-to-t from-gray-50 to-white h-40 relative overflow-hidden">
+        <img src="${fotoSrc}" alt="Imagem da Oferta" class="w-28 h-28 object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm" onerror="this.onerror=null;this.src='img/medicamento.png';" />
+        <span class="desconto-badge">${oferta.precoOriginal && oferta.precoDesconto ? Math.round(100 - (oferta.precoDesconto/oferta.precoOriginal)*100) : 0}% OFF</span>
+      </div>
+      <div class="info flex flex-col flex-1 justify-between">
+        <div>
+          <h3 class="nome truncate-2-lines" title="${oferta.titulo}">${oferta.titulo}</h3>
+          <p class="descricao truncate-2-lines" title="${oferta.descricao || ''}">${oferta.descricao || ''}</p>
+          <div class="precos">
+            <span class='preco-original'>R$ ${Number(oferta.precoOriginal).toFixed(2)}</span>
+            <span class="preco-desconto">R$ ${Number(oferta.precoDesconto).toFixed(2)}</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-2">
+          <div class="relative flex items-center mt-3.5 gap-0">
+            <button type="button" class="qty-btn decrement flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">-</button>
+            <input type="number" min="1" value="1" class="input-qty w-7 h-6 text-center text-base font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none mx-1" style="appearance: textfield;" title="Quantidade" />
+            <button type="button" class="qty-btn increment flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">+</button>
+          </div>
+          <button class="btn-carrinho add-cart-btn flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-all duration-150" style="height:2.25rem;">
+            <span class="cart-btn-text flex items-center gap-1"><i class="fas fa-cart-plus"></i>Adicionar</span>
+            <span class="cart-btn-loading hidden"><i class='fas fa-spinner fa-spin'></i></span>
+            <span class="cart-btn-ok hidden"><i class='fas fa-check text-green-400'></i></span>
+          </button>
+        </div>
+      </div>
+    `;
+    lista.appendChild(el);
+    // Botão com feedback visual e integração com quantidade
+    const btn = el.querySelector('.add-cart-btn');
+    const btnText = btn.querySelector('.cart-btn-text');
+    const btnLoading = btn.querySelector('.cart-btn-loading');
+    const btnOk = btn.querySelector('.cart-btn-ok');
+    const inputQty = el.querySelector('.input-qty');
+    btn.addEventListener('click', async () => {
+      let qty = parseInt(inputQty.value, 10);
+      if (isNaN(qty) || qty < 1) qty = 1;
+      btnText.classList.add('hidden');
+      btnLoading.classList.remove('hidden');
+      await new Promise(r => setTimeout(r, 400));
+      // Monta objeto seguro para o carrinho
+      const ofertaCarrinho = {
+        id: oferta.id,
+        nome: oferta.titulo || oferta.nome || 'Oferta',
+        precoMaximo: Number(oferta.precoOriginal) || 0,
+        valorComDesconto: Number(oferta.precoDesconto) || 0,
+        imagem: (Array.isArray(oferta.imagens) && oferta.imagens.length > 0) ? oferta.imagens[0] : 'img/medicamento.png',
+        quantidade: qty
+      };
+      if (window.addToCart) {
+        await window.addToCart(ofertaCarrinho, qty);
+      } else {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const idx = cart.findIndex(item => item.id === ofertaCarrinho.id);
+        if (idx > -1) cart[idx].quantidade += qty;
+        else cart.push(ofertaCarrinho);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        const cartCount = document.getElementById('cart-count');
+        if (cartCount) {
+          const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+          cartCount.textContent = total;
         }
-        ofertas.forEach(product => {
-          let fotoSrc = '/uploads/medicamento.png';
-          if (Array.isArray(product.fotos) && product.fotos.length > 0) {
-            fotoSrc = product.fotos[0] || '/uploads/medicamento.png';
-          }
-          const el = document.createElement('div');
-          el.className = 'card-produto';
-          el.innerHTML = `
-            <div class="flex justify-center items-center bg-gradient-to-t from-gray-50 to-white h-40 relative overflow-hidden">
-              <img src="${fotoSrc}" alt="Imagem do Produto" class="w-28 h-28 object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm" onerror="this.onerror=null;this.src='img/medicamento.png';" />
-              <span class="desconto-badge">${Math.round(product.desconto * 100)}% OFF</span>
-            </div>
-            <div class="info flex flex-col flex-1 justify-between">
-              <div>
-                <h3 class="nome truncate-2-lines" title="${product.nome}">${product.nome}</h3>
-                <p class="descricao truncate-2-lines" title="${product.descricao || ''}">${product.descricao || ''}</p>
-                <div class="precos">
-                  <span class='preco-original'>R$ ${Number(product.precoMaximo).toFixed(2)}</span>
-                  <span class="preco-desconto">R$ ${Number(product.valorComDesconto).toFixed(2)}</span>
-                </div>
-              </div>
-              <button class="btn-carrinho mt-4 w-full add-cart-btn">
-                <span class="cart-btn-text"><i class="fas fa-cart-plus"></i> Adicionar ao Carrinho</span>
-              </button>
-            </div>
-          `;
-          lista.appendChild(el);
-          el.querySelector('button').addEventListener('click', () => {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const idx = cart.findIndex(item => item.id === product.id);
-            if (idx > -1) cart[idx].quantidade += 1;
-            else cart.push({ ...product, quantidade: 1 });
-            localStorage.setItem('cart', JSON.stringify(cart));
-            const cartCount = document.getElementById('cart-count');
-            if (cartCount) {
-              const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-              cartCount.textContent = total;
-            }
-          });
-        });
+      }
+      btnLoading.classList.add('hidden');
+      btnOk.classList.remove('hidden');
+      setTimeout(() => {
+        btnOk.classList.add('hidden');
+        btnText.classList.remove('hidden');
+      }, 900);
+    });
+    // Moderniza o input de quantidade com botões + e -
+    const qtyInput = el.querySelector('.input-qty');
+    const btnDec = el.querySelector('.qty-btn.decrement');
+    const btnInc = el.querySelector('.qty-btn.increment');
+    if (qtyInput && btnDec && btnInc) {
+      btnDec.addEventListener('click', () => {
+        let val = parseInt(qtyInput.value, 10) || 1;
+        if (val > 1) qtyInput.value = val - 1;
       });
+      btnInc.addEventListener('click', () => {
+        let val = parseInt(qtyInput.value, 10) || 1;
+        qtyInput.value = val + 1;
+      });
+    }
+  });
+}
+carregarOfertas();
   </script>
   <script src="js/auth-modal.js"></script>
   <script src="js/login-modal-loader.js"></script>
