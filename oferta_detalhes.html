@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes da Oferta</title>
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="stylesheet" href="css/account-styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+  <div id="header-container"></div>
+  <main class="flex-1 p-4 md:mt-0">
+    <div class="max-w-2xl mx-auto bg-white rounded shadow p-6 mt-4">
+      <button onclick="window.history.back()" class="mb-4 text-blue-700 hover:underline flex items-center"><i class="fas fa-arrow-left mr-2"></i>Voltar</button>
+      <div id="detalhes-oferta" class="space-y-4">
+        <div class="text-center text-gray-500">Carregando...</div>
+      </div>
+    </div>
+  </main>
+  <div id="footer-container"></div>
+  <script type="module" src="js/load-components.js"></script>
+  <script type="module" src="js/header-loader.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const db = getFirestore(app);
+    // Pega o id da oferta da query string
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const detalhes = document.getElementById('detalhes-oferta');
+    if (!id) {
+      detalhes.innerHTML = '<div class="text-red-600">ID da oferta não informado.</div>';
+    } else {
+      const docRef = doc(db, 'ofertas', id);
+      getDoc(docRef).then(docSnap => {
+        if (!docSnap.exists()) {
+          detalhes.innerHTML = '<div class="text-red-600">Oferta não encontrada.</div>';
+          return;
+        }
+        const o = docSnap.data();
+        detalhes.innerHTML = `
+          <div class="flex flex-col md:flex-row gap-8 items-center md:items-start bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-lg p-6 border border-blue-100">
+            <div class="flex-shrink-0 flex flex-col items-center w-full md:w-auto">
+              <img src="${o.imagens && o.imagens[0] ? o.imagens[0] : 'img/medicamento.png'}" alt="${o.titulo || 'Oferta'}" class="w-44 h-44 object-contain rounded-xl shadow-md border-2 border-blue-100 bg-white">
+            </div>
+            <div class="flex-1 flex flex-col justify-center w-full">
+              <h1 class="text-3xl font-extrabold text-blue-900 mb-2 leading-tight">${o.titulo || 'Oferta'}</h1>
+              <div class="mt-6">
+                <h2 class="text-lg font-semibold text-blue-800 mb-1">Descrição</h2>
+                <p class="text-gray-800 bg-blue-50 rounded p-3">${o.descricao || '-'}</p>
+              </div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                ${(o.produtos && o.produtos.length) ? `<span class='px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs'>Kit: ${o.produtos.join(', ')}</span>` : ''}
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-base text-gray-700 mb-4">
+                <div><b>Preço original:</b> R$ ${o.precoOriginal ? Number(o.precoOriginal).toFixed(2) : '-'}</div>
+                <div><b>Preço com desconto:</b> <span class="text-green-700 font-bold">R$ ${o.precoDesconto ? Number(o.precoDesconto).toFixed(2) : '-'}</span></div>
+              </div>
+              <div class="flex items-center gap-3 mt-4">
+                <div class="relative flex items-center gap-0">
+                  <button type="button" id="qty-dec" class="qty-btn decrement flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">-</button>
+                  <input type="number" min="1" value="1" id="input-qty" class="input-qty w-10 h-7 text-center text-base font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none mx-1" style="appearance: textfield;" title="Quantidade" />
+                  <button type="button" id="qty-inc" class="qty-btn increment flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">+</button>
+                </div>
+                <button id="btn-add-carrinho" class="px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded font-semibold flex items-center gap-2"><i class="fas fa-cart-plus"></i>Adicionar</button>
+              </div>
+            </div>
+          </div>
+        `;
+        // Adicionar ao carrinho
+        const btnAdd = document.getElementById('btn-add-carrinho');
+        const inputQty = document.getElementById('input-qty');
+        const btnDec = document.getElementById('qty-dec');
+        const btnInc = document.getElementById('qty-inc');
+        btnDec.addEventListener('click', () => {
+          let val = parseInt(inputQty.value, 10) || 1;
+          if (val > 1) inputQty.value = val - 1;
+        });
+        btnInc.addEventListener('click', () => {
+          let val = parseInt(inputQty.value, 10) || 1;
+          inputQty.value = val + 1;
+        });
+        btnAdd.onclick = async () => {
+          let qty = parseInt(inputQty.value, 10);
+          if (isNaN(qty) || qty < 1) qty = 1;
+          const ofertaCarrinho = {
+            id: id,
+            nome: o.titulo || o.nome || 'Oferta',
+            precoMaximo: Number(o.precoOriginal) || 0,
+            valorComDesconto: Number(o.precoDesconto) || 0,
+            imagem: (Array.isArray(o.imagens) && o.imagens.length > 0) ? o.imagens[0] : 'img/medicamento.png',
+            quantidade: qty
+          };
+          if (window.addToCart) {
+            await window.addToCart(ofertaCarrinho, qty);
+          } else {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const idx = cart.findIndex(item => item.id === ofertaCarrinho.id);
+            if (idx > -1) cart[idx].quantidade += qty;
+            else cart.push(ofertaCarrinho);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+              const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+              cartCount.textContent = total;
+            }
+          }
+          btnAdd.innerHTML = '<i class="fas fa-check text-green-400"></i> Adicionado!';
+          setTimeout(() => {
+            btnAdd.innerHTML = '<i class="fas fa-cart-plus"></i>Adicionar ao Carrinho';
+          }, 1200);
+        };
+      });
+    }
+  </script>
+</body>
+</html>

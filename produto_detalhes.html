@@ -21,6 +21,7 @@
   </main>
   <div id="footer-container"></div>
   <script type="module" src="js/load-components.js"></script>
+  <script type="module" src="js/header-loader.js"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
     import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
@@ -67,32 +68,66 @@
                 <div><b>Desconto:</b> <span class="text-green-500 font-semibold">${p.desconto ? (p.desconto * 100).toFixed(2) + '%' : '-'}</span></div>
                 <div class="md:col-span-2 flex flex-col md:flex-row md:items-center gap-4 mt-2">
                   <span><b>Preço com desconto:</b> <span class="text-blue-700 text-lg font-bold">R$ ${p.precoComDesconto !== undefined && !isNaN(p.precoComDesconto) ? Number(p.precoComDesconto).toFixed(2) : (p.valorComDesconto !== undefined ? Number(p.valorComDesconto).toFixed(2) : '-')}</span></span>
-                  <div class="flex items-center gap-2 mt-2 md:mt-0">
-                    <label for="qtd" class="text-sm font-medium text-gray-700">Qtd:</label>
-                    <input id="qtd" type="number" min="1" max="${p.quantidade || 99}" value="1" class="w-16 px-2 py-1 border border-blue-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 text-center" />
-                    <button id="add-carrinho" class="ml-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow transition">Adicionar</button>
+                  <div class="flex items-center gap-3 mt-2 md:mt-0">
+                    <div class="relative flex items-center gap-0">
+                      <button type="button" id="qty-dec" class="qty-btn decrement flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">-</button>
+                      <input type="number" min="1" value="1" id="input-qty" class="input-qty w-10 h-7 text-center text-base font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none mx-1" style="appearance: textfield;" title="Quantidade" />
+                      <button type="button" id="qty-inc" class="qty-btn increment flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">+</button>
+                    </div>
+                    <button id="add-carrinho" class="ml-2 px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded font-semibold flex items-center gap-2"><i class="fas fa-cart-plus"></i>Adicionar</button>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         `;
+        // Adiciona funcionalidade ao botão e quantidade
+        const btnAdd = document.getElementById('add-carrinho');
+        const inputQty = document.getElementById('input-qty');
+        const btnDec = document.getElementById('qty-dec');
+        const btnInc = document.getElementById('qty-inc');
+        btnDec.addEventListener('click', () => {
+          let val = parseInt(inputQty.value, 10) || 1;
+          if (val > 1) inputQty.value = val - 1;
+        });
+        btnInc.addEventListener('click', () => {
+          let val = parseInt(inputQty.value, 10) || 1;
+          inputQty.value = val + 1;
+        });
+        btnAdd.onclick = async () => {
+          let qty = parseInt(inputQty.value, 10);
+          if (isNaN(qty) || qty < 1) qty = 1;
+          const produtoCarrinho = {
+            id: id,
+            nome: p.nome || '',
+            precoMaximo: Number(p.precoMaximo) || 0,
+            valorComDesconto: (p.precoComDesconto !== undefined && !isNaN(p.precoComDesconto)) ? Number(p.precoComDesconto) : (p.valorComDesconto !== undefined ? Number(p.valorComDesconto) : 0),
+            imagem: (Array.isArray(p.fotos) && p.fotos.length > 0) ? p.fotos[0] : 'img/medicamento.png',
+            quantidade: qty
+          };
+          if (window.addToCart) {
+            await window.addToCart(produtoCarrinho, qty);
+          } else {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const idx = cart.findIndex(item => item.id === produtoCarrinho.id);
+            if (idx > -1) cart[idx].quantidade += qty;
+            else cart.push(produtoCarrinho);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+              const total = cart.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+              cartCount.textContent = total;
+            }
+          }
+          btnAdd.innerHTML = '<i class="fas fa-check text-green-400"></i> Adicionado!';
+          setTimeout(() => {
+            btnAdd.innerHTML = '<i class="fas fa-cart-plus"></i>Adicionar ao Carrinho';
+          }, 1200);
+        };
       }).catch(() => {
         detalhes.innerHTML = '<div class="text-red-600">Erro ao buscar produto.</div>';
       });
     }
-    // Adiciona funcionalidade ao botão
-    setTimeout(() => {
-      const btn = document.getElementById('add-carrinho');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          const qtd = parseInt(document.getElementById('qtd').value) || 1;
-          // Aqui você pode integrar com o carrinho real
-          alert(`Adicionado ao carrinho: ${qtd}x ${p.nome}`);
-        });
-      }
-    }, 100);
   </script>
 </body>
 </html>

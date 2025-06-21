@@ -175,6 +175,16 @@ async function carregarOfertas() {
         qtyInput.value = val + 1;
       });
     }
+
+    // Clique na imagem ou nome redireciona para página de detalhes da oferta
+    const img = el.querySelector('img');
+    const nome = el.querySelector('h3');
+    [img, nome].forEach(elemento => {
+      elemento.style.cursor = 'pointer';
+      elemento.addEventListener('click', () => {
+        window.location.href = `oferta_detalhes.html?id=${oferta.id}`;
+      });
+    });
   });
 }
 carregarOfertas();
