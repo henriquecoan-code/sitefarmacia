@@ -391,29 +391,6 @@
       });
     }
 
-    // Carregar todos os pedidos ao autenticar admin
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        showError('Você precisa estar logado como admin para ver os pedidos.');
-        return;
-      }
-      try {
-        let pedidos = [];
-        const q = query(collection(db, 'pedidos'), orderBy('numeroPedido', 'desc'));
-        const snapshot = await getDocs(q);
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          data.__docId = doc.id;
-          pedidos.push(data);
-        });
-        allOrders = pedidos;
-        if (loading) loading.classList.add('hidden');
-        filtrarPedidos();
-      } catch (e) {
-        showError('Erro ao carregar pedidos. Tente novamente mais tarde.');
-      }
-    });
-
     // Eventos de filtro
     ['filtro-busca','filtro-status','filtro-data'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => {
