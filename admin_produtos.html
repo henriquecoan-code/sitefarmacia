@@ -115,6 +115,9 @@
         <select id="filtro-categoria">
           <option value="">Todas as categorias</option>
         </select>
+        <select id="filtro-subcategoria" class="ml-2">
+          <option value="">Todas as subcategorias</option>
+        </select>
       </section>
       <section>
         <div class="produtos-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="produtos-lista"></div>
@@ -268,10 +271,21 @@
       const lista = document.getElementById('produtos-lista');
       const nomeFiltro = document.getElementById('filtro-nome').value.toLowerCase();
       const catFiltro = document.getElementById('filtro-categoria').value;
-      let filtrados = produtos.filter(p =>
-        (!nomeFiltro || (p.nome && p.nome.toLowerCase().includes(nomeFiltro))) &&
-        (!catFiltro || p.categoria === catFiltro)
-      );
+      // Novo: filtro por subcategoria múltipla
+      const subcatFiltro = (document.getElementById('filtro-subcategoria') && document.getElementById('filtro-subcategoria').value) || '';
+      let filtrados = produtos.filter(p => {
+        const nomeOk = !nomeFiltro || (p.nome && p.nome.toLowerCase().includes(nomeFiltro));
+        const catOk = !catFiltro || p.categoria === catFiltro;
+        let subcatOk = true;
+        if (subcatFiltro) {
+          if (Array.isArray(p.subcategoria)) {
+            subcatOk = p.subcategoria.map(s => s.toLowerCase()).includes(subcatFiltro.toLowerCase());
+          } else if (typeof p.subcategoria === 'string') {
+            subcatOk = p.subcategoria.toLowerCase() === subcatFiltro.toLowerCase();
+          }
+        }
+        return nomeOk && catOk && subcatOk;
+      });
       if (filtrados.length === 0) {
         lista.innerHTML = '<div style="color:#888">Nenhum produto encontrado.</div>';
         document.getElementById('paginacao-produtos').innerHTML = '';
@@ -355,6 +369,44 @@
 
     document.getElementById('filtro-nome').addEventListener('input', renderizarProdutos);
     document.getElementById('filtro-categoria').addEventListener('change', renderizarProdutos);
+    document.getElementById('filtro-subcategoria').addEventListener('change', renderizarProdutos);
+
+    // Adiciona filtro de subcategoria dinâmico
+    function atualizarSubcategoriasFiltro() {
+      const select = document.getElementById('filtro-subcategoria');
+      if (!select) return;
+      let subcats = new Set();
+      produtos.forEach(p => {
+        if (Array.isArray(p.subcategoria)) {
+          p.subcategoria.forEach(s => subcats.add(s));
+        } else if (typeof p.subcategoria === 'string' && p.subcategoria) {
+          subcats.add(p.subcategoria);
+        }
+      });
+      const valorAtual = select.value;
+      select.innerHTML = '<option value="">Todas as subcategorias</option>';
+      Array.from(subcats).sort().forEach(sub => {
+        const opt = document.createElement('option');
+        opt.value = sub;
+        opt.textContent = sub;
+        select.appendChild(opt);
+      });
+      select.value = valorAtual;
+    }
+    // Atualiza subcategorias ao carregar produtos e ao trocar categoria
+    carregarProdutos = (function(orig) {
+      return async function() {
+        await orig();
+        atualizarSubcategoriasFiltro();
+      };
+    })(carregarProdutos);
+    document.addEventListener('DOMContentLoaded', atualizarSubcategoriasFiltro);
+    const subcatSelect = document.createElement('select');
+    subcatSelect.id = 'filtro-subcategoria';
+    subcatSelect.className = 'ml-2';
+    const filtrosSection = document.querySelector('section.filtros');
+    if (filtrosSection) filtrosSection.appendChild(subcatSelect);
+    subcatSelect.addEventListener('change', renderizarProdutos);
 
     // Função para parsear CSV simples (assume ; como separador)
     function parseCSV(text) {
