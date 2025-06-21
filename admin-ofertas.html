@@ -32,7 +32,10 @@
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Produtos do Kit (IDs separados por vírgula)</label>
-                <input type="text" id="produtos" class="w-full rounded border px-2 py-1 h-7 text-xs" placeholder="Ex: id1, id2, id3" required>
+                <div class="flex gap-2 items-center">
+                  <input type="text" id="produtos" class="w-full rounded border px-2 py-1 h-7 text-xs" placeholder="Ex: id1, id2, id3">
+                  <button type="button" id="btn-visualizar-produtos" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" title="Visualizar produtos"><i class="fas fa-eye"></i> Ver Produtos</button>
+                </div>
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço Original (R$)</label>
@@ -48,7 +51,12 @@
               </div>
               <div class="md:col-span-2">
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Imagens (URLs separadas por vírgula)</label>
-                <input type="text" id="imagens" class="w-full rounded border px-2 py-1 h-7 text-xs">
+                <div class="flex gap-2 items-center">
+                  <input type="text" id="imagens" class="w-full rounded border px-2 py-1 h-7 text-xs">
+                  <input type="file" id="imagem-upload" accept="image/*" class="hidden">
+                  <button type="button" id="btn-escolher-imagem" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">Escolher imagem</button>
+                  <span id="upload-status" class="text-xs text-gray-500"></span>
+                </div>
               </div>
             </div>
             <div class="flex gap-1">
@@ -80,6 +88,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     window.auth = auth;
+    window.db = db;
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
 
@@ -225,6 +234,122 @@
 
     carregarOfertas();
   </script>
+  <!-- Modal de visualização de produtos -->
+  <div id="modal-produtos" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-0 relative overflow-hidden">
+      <div class="flex justify-between items-center px-4 py-2 border-b bg-blue-700">
+        <h2 class="text-base font-bold text-white">Selecionar Produto</h2>
+        <button id="fechar-modal-produtos" class="text-white text-2xl leading-none hover:text-red-300">&times;</button>
+      </div>
+      <div class="p-4">
+        <input type="text" id="filtro-modal-produtos" class="w-full mb-2 rounded border px-2 py-1 text-xs" placeholder="Buscar por nome ou categoria...">
+        <div id="lista-produtos-modal" class="max-h-72 overflow-y-auto text-xs border rounded">
+          <!-- Lista de produtos será inserida aqui -->
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-4 py-2 border-t bg-gray-50">
+        <button id="btn-cancelar-modal-produtos" class="px-3 py-1 rounded bg-gray-300 text-gray-700 hover:bg-gray-400 text-xs">Cancelar</button>
+      </div>
+    </div>
+  </div>
   <div id="cadastro-modal-placeholder" class="hidden"></div>
+  <script type="module">
+    import { getDocs, collection } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    // Adiciona lógica JS para abrir o modal e listar produtos
+    let produtosCadastrados = [];
+    async function carregarProdutosCadastrados() {
+      const snap = await getDocs(collection(window.db, 'produtos'));
+      produtosCadastrados = [];
+      snap.forEach(docu => {
+        const data = docu.data();
+        produtosCadastrados.push({ id: docu.id, ...data });
+      });
+    }
+
+    const btnVisualizarProdutos = document.getElementById('btn-visualizar-produtos');
+    const modalProdutos = document.getElementById('modal-produtos');
+    const fecharModalProdutos = document.getElementById('fechar-modal-produtos');
+    const cancelarModalProdutos = document.getElementById('btn-cancelar-modal-produtos');
+    const listaProdutosModal = document.getElementById('lista-produtos-modal');
+    const filtroModalProdutos = document.getElementById('filtro-modal-produtos');
+    const inputProdutos = document.getElementById('produtos');
+
+    function renderizarListaProdutosModal(filtro = '') {
+      let lista = produtosCadastrados;
+      if (filtro) {
+        const f = filtro.toLowerCase();
+        lista = lista.filter(p => ((p["codRed"] && p["codRed"].toLowerCase().includes(f)) || (p.nome && p.nome.toLowerCase().includes(f)) || (p.categoria && p.categoria.toLowerCase().includes(f))));
+      }
+      if (!lista.length) {
+        listaProdutosModal.innerHTML = '<div class="text-gray-500 p-2">Nenhum produto encontrado.</div>';
+        return;
+      }
+      listaProdutosModal.innerHTML = `<table class='w-full text-xs'><thead><tr><th class='text-left'>codRed</th><th class='text-left'>Nome</th><th class='text-left'>Categoria</th><th></th></tr></thead><tbody>` +
+        lista.map(p => `<tr>
+          <td class='pr-2 text-gray-500'>${p["codRed"] || '<span class="text-red-500">(sem codRed)</span>'}</td>
+          <td class='pr-2'>${p.nome || ''}</td>
+          <td class='pr-2'>${p.categoria || ''}</td>
+          <td>${p["codRed"] ? `<button type='button' class='px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs select-produto-btn' data-codred='${p["codRed"]}'>Selecionar</button>` : ''}</td>
+        </tr>`).join('') + '</tbody></table>';
+      // Adiciona evento aos botões
+      listaProdutosModal.querySelectorAll('.select-produto-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Adiciona o codRed ao input, mantendo vírgulas
+          let codreds = inputProdutos.value.split(',').map(s => s.trim()).filter(Boolean);
+          if (!codreds.includes(btn.dataset.codred)) codreds.push(btn.dataset.codred);
+          inputProdutos.value = codreds.join(', ');
+          modalProdutos.classList.add('hidden');
+        });
+      });
+    }
+
+    btnVisualizarProdutos.addEventListener('click', async () => {
+      await carregarProdutosCadastrados();
+      filtroModalProdutos.value = '';
+      renderizarListaProdutosModal();
+      modalProdutos.classList.remove('hidden');
+    });
+    fecharModalProdutos.addEventListener('click', () => {
+      modalProdutos.classList.add('hidden');
+    });
+    cancelarModalProdutos.addEventListener('click', () => {
+      modalProdutos.classList.add('hidden');
+    });
+    modalProdutos.addEventListener('click', (e) => {
+      if (e.target === modalProdutos) modalProdutos.classList.add('hidden');
+    });
+    filtroModalProdutos.addEventListener('input', (e) => {
+      renderizarListaProdutosModal(e.target.value);
+    });
+  </script>
+  <script type="module">
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getDoc, doc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+
+    function bloquearParaNaoAdmins() {
+      const main = document.querySelector('main');
+      main.style.display = 'none';
+      document.body.insertAdjacentHTML('beforeend', `<div id="acesso-negado" class="fixed inset-0 flex items-center justify-center bg-white z-50"><div class="bg-white p-8 rounded shadow text-center"><h2 class="text-2xl font-bold text-red-600 mb-2">Acesso negado</h2><p class="text-gray-700">Esta página é restrita a administradores.</p></div></div>`);
+    }
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        bloquearParaNaoAdmins();
+        return;
+      }
+      try {
+        const userDoc = await getDoc(doc(window.db, 'usuarios', user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+          bloquearParaNaoAdmins();
+        } else {
+          document.querySelector('main').style.display = '';
+          const acessoNegado = document.getElementById('acesso-negado');
+          if (acessoNegado) acessoNegado.remove();
+        }
+      } catch (e) {
+        bloquearParaNaoAdmins();
+      }
+    });
+  </script>
 </body>
 </html>
