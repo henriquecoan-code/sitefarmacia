@@ -30,8 +30,16 @@
             <input type="hidden" id="produto-id">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red</label>
+                <input type="text" id="cod-red" class="w-20 rounded border px-2 py-1 h-7 text-xs">
+              </div>
+              <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Nome</label>
                 <input type="text" id="nome" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN</label>
+                <input type="text" id="ean" class="w-full rounded border px-2 py-1 h-7 text-xs">
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Categoria</label>
@@ -47,15 +55,7 @@
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Sub Categoria</label>
                 <input type="text" id="subcategoria" class="w-full rounded border px-2 py-1 h-7 text-xs">
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-0.5">EAN</label>
-                <input type="text" id="ean" class="w-full rounded border px-2 py-1 h-7 text-xs">
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-0.5">Cod-Red</label>
-                <input type="text" id="cod-red" class="w-full rounded border px-2 py-1 h-7 text-xs">
-              </div>
+              </div>              
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-0.5">Laboratório</label>
                 <input type="text" id="laboratorio" class="w-full rounded border px-2 py-1 h-7 text-xs">
@@ -456,17 +456,17 @@
         const produtosCSV = parseCSV(text);
         if (!produtosCSV.length) throw new Error('CSV vazio ou inválido');
         status.textContent = 'Salvando produtos no Firestore...';
-        // Busca todos os produtos existentes para upsert por nome
+        // Busca todos os produtos existentes para upsert por codRed
         const snap = await getDocs(collection(db, 'produtos'));
         const produtosExistentes = {};
         snap.forEach(docu => {
           const data = docu.data();
-          if (data.nome) produtosExistentes[data.nome.trim().toLowerCase()] = docu.id;
+          if (data.codRed) produtosExistentes[String(data.codRed).trim().toLowerCase()] = docu.id;
         });
         let inseridos = 0, atualizados = 0;
         for (const prod of produtosCSV) {
-          const nomeKey = (prod.nome || '').trim().toLowerCase();
-          if (!nomeKey) continue;
+          const codRedKey = (prod['cod-red'] || prod.codRed || '').trim().toLowerCase();
+          if (!codRedKey) continue;
           // Monta objeto produto conforme modelo
           let precoMaximo = prod.precoMaximo ? parseFloat(prod.precoMaximo.replace(',', '.')) : 0;
           let precoComDesconto = prod.precoComDesconto ? parseFloat(prod.precoComDesconto.replace(',', '.')) : undefined;
@@ -481,7 +481,7 @@
             // Suporte a múltiplas subcategorias separadas por vírgula
             subcategoria: prod.subcategoria ? prod.subcategoria.split(',').map(s => s.trim()).filter(Boolean) : [],
             ean: prod.ean || '',
-            codRed: prod['cod-red'] || '',
+            codRed: prod['cod-red'] || prod.codRed || '',
             laboratorio: prod.laboratorio || '',
             dcb: prod.dcb || '',
             precoMaximo,
@@ -496,8 +496,8 @@
           produto.valorComDesconto = precoComDesconto !== undefined && !isNaN(precoComDesconto)
             ? precoComDesconto
             : precoMaximo * (1 - desconto);
-          if (produtosExistentes[nomeKey]) {
-            await updateDoc(doc(db, 'produtos', produtosExistentes[nomeKey]), produto);
+          if (produtosExistentes[codRedKey]) {
+            await updateDoc(doc(db, 'produtos', produtosExistentes[codRedKey]), produto);
             atualizados++;
           } else {
             await addDoc(collection(db, 'produtos'), produto);
@@ -529,15 +529,15 @@
         const produtosExistentes = {};
         snap.forEach(docu => {
           const data = docu.data();
-          if (data.nome) produtosExistentes[data.nome.trim().toLowerCase()] = { id: docu.id, data };
+          if (data.codRed) produtosExistentes[String(data.codRed).trim().toLowerCase()] = { id: docu.id, data };
         });
-        // Monta set de nomes do CSV
-        const nomesCSV = new Set();
+        // Monta set de codRed do CSV
+        const codRedsCSV = new Set();
         let inseridos = 0, atualizados = 0;
         for (const prod of produtosCSV) {
-          const nomeKey = (prod.nome || '').trim().toLowerCase();
-          if (!nomeKey) continue;
-          nomesCSV.add(nomeKey);
+          const codRedKey = (prod['cod-red'] || prod.codRed || '').trim().toLowerCase();
+          if (!codRedKey) continue;
+          codRedsCSV.add(codRedKey);
           let precoMaximo = prod.precoMaximo ? parseFloat(prod.precoMaximo.replace(',', '.')) : 0;
           let precoComDesconto = prod.precoComDesconto ? parseFloat(prod.precoComDesconto.replace(',', '.')) : undefined;
           let desconto = prod.desconto ? (parseFloat(prod.desconto.replace(',', '.')) > 1 ? parseFloat(prod.desconto.replace(',', '.')) / 100 : parseFloat(prod.desconto.replace(',', '.'))) : 0;
@@ -549,7 +549,7 @@
             categoria: categoriaPorCodigo(prod.categoria || ''),
             subcategoria: prod.subcategoria ? prod.subcategoria.split(',').map(s => s.trim()).filter(Boolean) : [],
             ean: prod.ean || '',
-            codRed: prod['cod-red'] || '',
+            codRed: prod['cod-red'] || prod.codRed || '',
             laboratorio: prod.laboratorio || '',
             dcb: prod.dcb || '',
             precoMaximo,
@@ -565,8 +565,8 @@
           produto.valorComDesconto = precoComDesconto !== undefined && !isNaN(precoComDesconto)
             ? precoComDesconto
             : precoMaximo * (1 - desconto);
-          if (produtosExistentes[nomeKey]) {
-            await updateDoc(doc(db, 'produtos', produtosExistentes[nomeKey].id), produto);
+          if (produtosExistentes[codRedKey]) {
+            await updateDoc(doc(db, 'produtos', produtosExistentes[codRedKey].id), produto);
             atualizados++;
           } else {
             await addDoc(collection(db, 'produtos'), produto);
@@ -575,9 +575,9 @@
         }
         // Inativa produtos não presentes no CSV
         let inativados = 0;
-        for (const nomeKey in produtosExistentes) {
-          if (!nomesCSV.has(nomeKey)) {
-            const prod = produtosExistentes[nomeKey];
+        for (const codRedKey in produtosExistentes) {
+          if (!codRedsCSV.has(codRedKey)) {
+            const prod = produtosExistentes[codRedKey];
             if (prod.data.ativo !== false) {
               await updateDoc(doc(db, 'produtos', prod.id), { ativo: false });
               inativados++;
@@ -648,6 +648,42 @@
     document.getElementById('exportar-csv').addEventListener('click', exportarProdutosParaCSV);
 
     carregarProdutos();
+
+    // Preenche o formulário ao digitar um Cod-Red existente
+    const codRedInput = document.getElementById('cod-red');
+    codRedInput.addEventListener('blur', async function() {
+      const codRed = codRedInput.value.trim().toLowerCase();
+      if (!codRed) return;
+      // Busca produto pelo codRed
+      const snap = await getDocs(collection(db, 'produtos'));
+      let found = null;
+      snap.forEach(docu => {
+        const data = docu.data();
+        if (data.codRed && String(data.codRed).trim().toLowerCase() === codRed) {
+          found = { id: docu.id, ...data };
+        }
+      });
+      if (found) {
+        document.getElementById('produto-id').value = found.id;
+        document.getElementById('nome').value = found.nome || '';
+        document.getElementById('descricao').value = found.descricao || '';
+        document.getElementById('precoMaximo').value = found.precoMaximo || '';
+        document.getElementById('desconto').value = found.desconto || '';
+        document.getElementById('quantidade').value = found.quantidade || '';
+        document.getElementById('categoria').value = found.categoria || '';
+        document.getElementById('subcategoria').value = found.subcategoria || '';
+        document.getElementById('ean').value = found.ean || '';
+        document.getElementById('cod-red').value = found.codRed || '';
+        document.getElementById('laboratorio').value = found.laboratorio || '';
+        document.getElementById('dcb').value = found.dcb || '';
+        document.getElementById('tags').value = (found.tags || []).join(', ');
+        document.getElementById('fotos').value = (found.fotos || []).join(', ');
+        document.getElementById('precoComDesconto').value = found.precoComDesconto || '';
+        btnCancelar.classList.remove('hidden');
+        formStatus.textContent = 'Produto carregado pelo Cod-Red.';
+        setTimeout(() => { formStatus.textContent = ''; }, 2000);
+      }
+    });
   </script>
   <div id="cadastro-modal-placeholder" class="hidden"></div>
 </body>
