@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração de Ofertas</title>
+  <link rel="stylesheet" href="css/estilo.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="css/account-styles.css">
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+  <div id="header-container"></div>
+  <div class="w-full flex flex-row flex-wrap gap-2 px-2 py-4 justify-center items-center mt-[56px] md:mt-0">
+    <a href="admin.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-gray-700"><i class="fas fa-user-shield"></i>Administradores</a>
+    <a href="admin_produtos.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-gray-700"><i class="fas fa-pills"></i>Produtos</a>
+    <a href="admin-ofertas.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-blue-900 bg-blue-50"><i class="fas fa-tags"></i>Ofertas</a>
+    <a href="admin-pedidos.html" class="px-4 py-2 rounded font-medium flex items-center gap-2 hover:bg-blue-100 transition text-gray-700"><i class="fas fa-clipboard-list"></i>Pedidos</a>
+  </div>
+  <main class="flex-1 p-4 md:mt-0">
+    <div class="max-w-4xl mx-auto">
+      <div class="w-full flex justify-center">
+        <div class="w-full">
+          <h1 class="text-2xl font-bold mb-6 text-center text-blue-900">Administração de Ofertas</h1>
+          <!-- Formulário manual de oferta -->
+          <form id="form-oferta" class="bg-white rounded-lg shadow p-2 mb-4 space-y-2 w-full mx-auto text-xs" style="font-size:0.92rem;">
+            <input type="hidden" id="oferta-id">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Título da Oferta</label>
+                <input type="text" id="titulo" class="w-full rounded border px-2 py-1 h-7 text-xs" required>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Produtos do Kit (IDs separados por vírgula)</label>
+                <input type="text" id="produtos" class="w-full rounded border px-2 py-1 h-7 text-xs" placeholder="Ex: id1, id2, id3" required>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço Original (R$)</label>
+                <input type="number" id="precoOriginal" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" required>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Preço com Desconto (R$)</label>
+                <input type="number" id="precoDesconto" class="w-full rounded border px-2 py-1 h-7 text-xs" step="0.01" min="0" required>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Descrição</label>
+                <textarea id="descricao" class="w-full rounded border px-2 py-1 text-xs" rows="1" style="min-height:1.5em;"></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-0.5">Imagens (URLs separadas por vírgula)</label>
+                <input type="text" id="imagens" class="w-full rounded border px-2 py-1 h-7 text-xs">
+              </div>
+            </div>
+            <div class="flex gap-1">
+              <button type="submit" id="btn-salvar-oferta" class="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 transition text-xs h-7">Salvar</button>
+              <button type="button" id="btn-cancelar-oferta" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 transition hidden text-xs h-7">Cancelar</button>
+            </div>
+            <div id="form-status-oferta" class="text-xs mt-1"></div>
+          </form>
+        </div>
+      </div>
+      <section>
+        <div class="ofertas-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="ofertas-lista"></div>
+        <div id="paginacao-ofertas" class="flex justify-center items-center gap-2 mt-6"></div>
+      </section>
+    </div>
+  </main>
+  <div id="footer-container"></div>
+  <script type="module" src="js/load-components.js"></script>
+  <script src="js/auth-modal.js"></script>
+  <script src="js/auth-mobile.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { loadHeader } from './js/header-loader.js';
+    import { loadFooter } from './js/footer-loader.js';
+    import { firebaseConfig } from './js/firebase-config.js';
+    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.auth = auth;
+    await loadHeader('header-container', 'authContainerSecondary');
+    await loadFooter('footer-container');
+
+    // Carrega o modal de cadastro dinamicamente
+    async function loadCadastroModal() {
+      const resp = await fetch('partials/cadastro-modal.html');
+      const html = await resp.text();
+      document.getElementById('cadastro-modal-placeholder').innerHTML = html;
+    }
+    await loadCadastroModal();
+
+    import { setupCadastroModalBtn } from './js/utils.js';
+    setupCadastroModalBtn();
+
+    let ofertas = [];
+
+    async function carregarOfertas() {
+      const lista = document.getElementById('ofertas-lista');
+      lista.innerHTML = '<div>Carregando ofertas...</div>';
+      ofertas = [];
+      const snap = await getDocs(collection(db, 'ofertas'));
+      snap.forEach(docu => {
+        const data = docu.data();
+        ofertas.push({ id: docu.id, ...data });
+      });
+      renderizarOfertas();
+    }
+
+    // Formulário manual
+    const form = document.getElementById('form-oferta');
+    const formStatus = document.getElementById('form-status-oferta');
+    const btnCancelar = document.getElementById('btn-cancelar-oferta');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('oferta-id').value;
+      const titulo = document.getElementById('titulo').value.trim();
+      const descricao = document.getElementById('descricao').value.trim();
+      const precoOriginal = parseFloat(document.getElementById('precoOriginal').value);
+      const precoDesconto = parseFloat(document.getElementById('precoDesconto').value);
+      const produtos = document.getElementById('produtos').value.split(',').map(t => t.trim()).filter(Boolean);
+      const imagens = document.getElementById('imagens').value.split(',').map(f => f.trim()).filter(Boolean);
+      const oferta = { titulo, descricao, precoOriginal, precoDesconto, produtos, imagens, criadoEm: new Date() };
+      try {
+        if (id) {
+          await updateDoc(doc(db, 'ofertas', id), oferta);
+          formStatus.textContent = 'Oferta atualizada com sucesso!';
+        } else {
+          await addDoc(collection(db, 'ofertas'), oferta);
+          formStatus.textContent = 'Oferta cadastrada com sucesso!';
+        }
+        form.reset();
+        document.getElementById('oferta-id').value = '';
+        btnCancelar.classList.add('hidden');
+        await carregarOfertas();
+      } catch (err) {
+        formStatus.textContent = 'Erro ao salvar: ' + err.message;
+      }
+      setTimeout(() => { formStatus.textContent = ''; }, 3000);
+    });
+    btnCancelar.addEventListener('click', () => {
+      form.reset();
+      document.getElementById('oferta-id').value = '';
+      btnCancelar.classList.add('hidden');
+      formStatus.textContent = '';
+    });
+
+    let paginaAtual = 1;
+    const ofertasPorPagina = 8;
+
+    function renderizarOfertas() {
+      const lista = document.getElementById('ofertas-lista');
+      if (!ofertas.length) {
+        lista.innerHTML = '<div style="color:#888">Nenhuma oferta encontrada.</div>';
+        document.getElementById('paginacao-ofertas').innerHTML = '';
+        return;
+      }
+      const totalPaginas = Math.ceil(ofertas.length / ofertasPorPagina);
+      if (paginaAtual > totalPaginas) paginaAtual = 1;
+      const inicio = (paginaAtual - 1) * ofertasPorPagina;
+      const fim = inicio + ofertasPorPagina;
+      const pagina = ofertas.slice(inicio, fim);
+      lista.innerHTML = '';
+      pagina.forEach(oferta => {
+        const card = document.createElement('div');
+        card.className = 'oferta-card bg-white rounded shadow p-3 flex flex-col items-center text-center';
+        card.innerHTML = `
+          <img src="${oferta.imagens && oferta.imagens[0] ? oferta.imagens[0] : 'img/medicamento.png'}" alt="${oferta.titulo}" class="w-20 h-20 object-contain mb-2 rounded">
+          <h3 class="font-bold text-blue-900 text-base mb-1">${oferta.titulo || ''}</h3>
+          <p class="text-sm text-gray-600 mb-1">Kit: ${(oferta.produtos || []).join(', ')}</p>
+          <p class="text-lg font-semibold text-green-700 mb-2">De R$ ${oferta.precoOriginal ? Number(oferta.precoOriginal).toFixed(2) : '-'} por <span class="text-blue-700">R$ ${oferta.precoDesconto ? Number(oferta.precoDesconto).toFixed(2) : '-'}</span></p>
+          <div class="flex gap-2 mt-2 justify-center">
+            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded edit-btn" data-id="${oferta.id}"><i class="fas fa-edit"></i></button>
+            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded delete-btn" data-id="${oferta.id}"><i class="fas fa-trash"></i></button>
+          </div>
+        `;
+        lista.appendChild(card);
+      });
+      // Paginação UI
+      const paginacao = document.getElementById('paginacao-ofertas');
+      paginacao.innerHTML = '';
+      if (totalPaginas > 1) {
+        for (let i = 1; i <= totalPaginas; i++) {
+          const btn = document.createElement('button');
+          btn.textContent = i;
+          btn.className = 'px-3 py-1 rounded border ' + (i === paginaAtual ? 'bg-blue-700 text-white' : 'bg-white text-blue-700 hover:bg-blue-100');
+          btn.addEventListener('click', () => {
+            paginaAtual = i;
+            renderizarOfertas();
+          });
+          paginacao.appendChild(btn);
+        }
+      }
+      // Botões de edição
+      lista.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const oferta = ofertas.find(o => o.id === btn.dataset.id);
+          if (!oferta) return;
+          document.getElementById('oferta-id').value = oferta.id;
+          document.getElementById('titulo').value = oferta.titulo || '';
+          document.getElementById('descricao').value = oferta.descricao || '';
+          document.getElementById('precoOriginal').value = oferta.precoOriginal || '';
+          document.getElementById('precoDesconto').value = oferta.precoDesconto || '';
+          document.getElementById('produtos').value = (oferta.produtos || []).join(', ');
+          document.getElementById('imagens').value = (oferta.imagens || []).join(', ');
+          btnCancelar.classList.remove('hidden');
+        });
+      });
+      // Botões de exclusão
+      lista.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Tem certeza que deseja excluir esta oferta?')) return;
+          try {
+            await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js').then(({ deleteDoc, doc }) =>
+              deleteDoc(doc(db, 'ofertas', btn.dataset.id))
+            );
+            await carregarOfertas();
+          } catch (err) {
+            alert('Erro ao excluir: ' + err.message);
+          }
+        });
+      });
+    }
+
+    carregarOfertas();
+  </script>
+  <div id="cadastro-modal-placeholder" class="hidden"></div>
+</body>
+</html>
