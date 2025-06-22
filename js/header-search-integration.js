@@ -19,6 +19,7 @@
       form.addEventListener('submit', handleHeaderSearchSubmit);
     });
   }
+  // Removido disparo automático de busca em branco ao carregar a página
   document.addEventListener('DOMContentLoaded', attachHeaderSearchListener);
   document.addEventListener('headerLoaded', attachHeaderSearchListener);
   setTimeout(attachHeaderSearchListener, 1000);

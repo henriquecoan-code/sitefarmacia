@@ -14,6 +14,9 @@ export function loadHeader(headerContainerId, authContainerId) {
       }
       headerContainer.innerHTML = html;
 
+      // Dispara evento customizado para sinalizar que o header foi carregado
+      document.dispatchEvent(new Event('headerLoaded'));
+
       // Carrega o script auth-mobile.js dinamicamente após inserir o header
       const script = document.createElement('script');
       script.src = './js/auth-mobile.js';

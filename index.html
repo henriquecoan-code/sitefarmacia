@@ -220,7 +220,13 @@
           return;
         }
         emptyState.classList.add('hidden');
-        applyFilters();
+        // Exibe todos os produtos se não houver filtro/busca
+        if (!currentCategory && !currentSubcategory && !currentSearch) {
+          renderProducts(allProducts);
+          renderPagination(allProducts.length, currentPage, PRODUCTS_PER_PAGE);
+        } else {
+          applyFilters();
+        }
         updateSubcategories();
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -614,19 +620,9 @@
     // Inicialização
     // Se houver busca na query string, aplica na busca
     document.addEventListener('DOMContentLoaded', function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const buscaParam = urlParams.get('busca');
-      if (buscaParam) {
-        currentSearch = buscaParam;
-        if (searchInput) searchInput.value = buscaParam;
-        if (!allProducts || allProducts.length === 0) {
-          fetchProducts();
-        } else {
-          applyFilters();
-        }
-      } else {
-        fetchProducts();
-      }
+      currentSearch = '';
+      if (searchInput) searchInput.value = '';
+      fetchProducts(); // Sempre busca e exibe todos os produtos ao carregar
     });
 
     // Botão para abrir o login-modal
