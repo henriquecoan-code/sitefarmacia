@@ -312,7 +312,7 @@
         filtered = filtered.filter(p => normalize(p.categoria) === normalize(currentCategory));
       }
       if (currentSubcategory) {
-        filtered = filtered.filter(p => normalize(p.subcategoria) === normalize(currentSubcategory));
+        filtered = filtered.filter(p => normalize(String(p.subcategoria || '')) === normalize(currentSubcategory));
       }
       if (currentSearch) {
         const terms = currentSearch.toLowerCase().split(/\s+/).filter(Boolean);
@@ -324,7 +324,7 @@
             (p.ean && String(p.ean).toLowerCase().includes(term)) ||
             (p.codRed && String(p.codRed).toLowerCase().includes(term)) ||
             (p.laboratorio && p.laboratorio.toLowerCase().includes(term)) ||
-            (p.subcategoria && p.subcategoria.toLowerCase().includes(term)) ||
+            (p.subcategoria && String(p.subcategoria).toLowerCase().includes(term)) ||
             (p.dcb && p.dcb.toLowerCase().includes(term))
           )
         );
@@ -349,13 +349,13 @@
       const subcatSelect = document.getElementById('filtro-subcategoria');
       let subcats = new Set();
       allProducts.forEach(p => {
-        if (!currentCategory || (p.categoria || '').toLowerCase() === currentCategory) {
-          if (p.subcategoria) subcats.add(p.subcategoria);
+        if (!currentCategory || normalize(String(p.categoria || '')) === normalize(currentCategory)) {
+          if (p.subcategoria) subcats.add(String(p.subcategoria));
         }
       });
       subcatSelect.innerHTML = '<option value="">Todas as subcategorias</option>';
       Array.from(subcats).sort().forEach(sub => {
-        subcatSelect.innerHTML += `<option value="${sub.toLowerCase()}">${sub}</option>`;
+        subcatSelect.innerHTML += `<option value="${normalize(sub)}">${sub}</option>`;
       });
     }
 
@@ -369,7 +369,23 @@
       searchInput.addEventListener('input', function () {
         currentSearch = this.value;
         currentPage = 1;
-        applyFilters();
+        if (!allProducts || allProducts.length === 0) {
+          fetchProducts(); // Busca do Firebase se ainda não carregou
+        } else {
+          applyFilters();
+        }
+      });
+      // Permite buscar ao pressionar Enter
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          currentSearch = this.value;
+          currentPage = 1;
+          if (!allProducts || allProducts.length === 0) {
+            fetchProducts();
+          } else {
+            applyFilters();
+          }
+        }
       });
     }
 
@@ -381,10 +397,12 @@
         const buscaParam = urlParams.get('busca');
         if (buscaParam) {
           currentSearch = buscaParam;
+          if (searchInput) searchInput.value = buscaParam; // Sincroniza campo de busca
           currentPage = 1;
           applyFilters();
         } else {
           currentSearch = '';
+          if (searchInput) searchInput.value = '';
           currentPage = 1;
           applyFilters();
         }
@@ -407,9 +425,13 @@
     // Escuta o evento customizado de busca do header
     window.addEventListener('headerSearch', function(e) {
       currentSearch = e.detail || '';
+      if (searchInput) searchInput.value = currentSearch; // Sincroniza campo de busca principal
+      var headerInput = document.querySelector('#header-search-input');
+      if (headerInput) headerInput.value = currentSearch;
       currentPage = 1;
+      // Se produtos ainda não carregaram, busca e só filtra depois
       if (!allProducts || allProducts.length === 0) {
-        fetchProducts(); // fetchProducts já chama applyFilters ao final
+        fetchProducts().then(() => applyFilters());
       } else {
         applyFilters();
       }
@@ -591,14 +613,21 @@
 
     // Inicialização
     // Se houver busca na query string, aplica na busca
-    const urlParams = new URLSearchParams(window.location.search);
-    const buscaParam = urlParams.get('busca');
-    if (buscaParam) {
-      currentSearch = buscaParam;
-      applyFilters();
-    } else {
-      fetchProducts();
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const buscaParam = urlParams.get('busca');
+      if (buscaParam) {
+        currentSearch = buscaParam;
+        if (searchInput) searchInput.value = buscaParam;
+        if (!allProducts || allProducts.length === 0) {
+          fetchProducts();
+        } else {
+          applyFilters();
+        }
+      } else {
+        fetchProducts();
+      }
+    });
 
     // Botão para abrir o login-modal
     document.body.addEventListener('click', (e) => {
