@@ -475,14 +475,23 @@
           if (precoMaximo > 0 && precoComDesconto !== undefined && !isNaN(precoComDesconto)) {
             desconto = 1 - (precoComDesconto / precoMaximo);
           }
+          // Lógica para imagem padrão de genéricos
+          let fotos = prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [];
+          const categoria = categoriaPorCodigo(prod.categoria || '');
+          const laboratorio = (prod.laboratorio || '').trim();
+          if (fotos.length === 0 && categoria === 'Genéricos' && laboratorio) {
+            // Remove acentos, minúsculas, troca espaços por hífen
+            const labFile = laboratorio.normalize('NFD').replace(/[ -]/g,"").replace(/\s+/g,'-').toLowerCase();
+            fotos = [`img/produtos/${labFile}.png`];
+          }
           const produto = {
             nome: prod.nome || '',
-            categoria: categoriaPorCodigo(prod.categoria || ''),
+            categoria,
             // Suporte a múltiplas subcategorias separadas por vírgula
             subcategoria: prod.subcategoria ? prod.subcategoria.split(',').map(s => s.trim()).filter(Boolean) : [],
             ean: prod.ean || '',
             codRed: prod['cod-red'] || prod.codRed || '',
-            laboratorio: prod.laboratorio || '',
+            laboratorio,
             dcb: prod.dcb || '',
             precoMaximo,
             desconto,
@@ -490,7 +499,7 @@
             quantidade: prod.quantidade ? parseInt(prod.quantidade, 10) : 0,
             tags: prod.tags ? prod.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
             descricao: prod.descricao || '',
-            fotos: prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [],
+            fotos,
             criadoEm: new Date()
           };
           produto.valorComDesconto = precoComDesconto !== undefined && !isNaN(precoComDesconto)
@@ -544,13 +553,21 @@
           if (precoMaximo > 0 && precoComDesconto !== undefined && !isNaN(precoComDesconto)) {
             desconto = 1 - (precoComDesconto / precoMaximo);
           }
+          // Lógica para imagem padrão de genéricos
+          let fotos = prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [];
+          const categoria = categoriaPorCodigo(prod.categoria || '');
+          const laboratorio = (prod.laboratorio || '').trim();
+          if (fotos.length === 0 && categoria === 'Genéricos' && laboratorio) {
+            const labFile = laboratorio.normalize('NFD').replace(/[ -]/g,"").replace(/\s+/g,'-').toLowerCase();
+            fotos = [`img/produtos/${labFile}.png`];
+          }
           const produto = {
             nome: prod.nome || '',
-            categoria: categoriaPorCodigo(prod.categoria || ''),
+            categoria,
             subcategoria: prod.subcategoria ? prod.subcategoria.split(',').map(s => s.trim()).filter(Boolean) : [],
             ean: prod.ean || '',
             codRed: prod['cod-red'] || prod.codRed || '',
-            laboratorio: prod.laboratorio || '',
+            laboratorio,
             dcb: prod.dcb || '',
             precoMaximo,
             desconto,
@@ -558,7 +575,7 @@
             quantidade: prod.quantidade ? parseInt(prod.quantidade, 10) : 0,
             tags: prod.tags ? prod.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
             descricao: prod.descricao || '',
-            fotos: prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [],
+            fotos,
             criadoEm: new Date(),
             ativo: true
           };
