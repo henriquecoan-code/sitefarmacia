@@ -537,24 +537,23 @@
         const temDesconto = product.desconto && product.desconto > 0;
         const precoOriginal = Number(product.precoMaximo).toFixed(2);
         const precoDesconto = Number(product.valorComDesconto).toFixed(2);
+        const descontoPercent = temDesconto ? Math.round(product.desconto * 100) : null;
         const productElement = document.createElement('div');
-        productElement.className = 'card-produto';
+        productElement.className = 'card-produto bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col p-3 transition-transform hover:scale-[1.025] hover:shadow-2xl duration-150';
         productElement.innerHTML = `
-          <div class="flex justify-center items-center bg-gradient-to-t from-gray-50 to-white h-40 relative overflow-hidden">
-            <img src="${fotoSrc}" alt="Imagem do Produto" class="w-28 h-28 object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-sm cursor-pointer" onerror="this.onerror=null;this.src='img/medicamento.png';" data-produto-id="${product.id}" />
-            ${temDesconto ? `<span class='desconto-badge'>${Math.round(product.desconto * 100)}% OFF</span>` : ''}
+          <div class="relative flex flex-col items-center justify-center bg-gradient-to-t from-gray-50 to-white rounded-xl overflow-hidden pt-3 pb-2">
+            ${temDesconto ? `<span class='absolute top-2 right-2 bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border border-red-200 z-10'>-${descontoPercent}%</span>` : ''}
+            <img src="${fotoSrc}" alt="Imagem do Produto" class="w-24 h-24 object-contain bg-white rounded shadow border border-gray-200" onerror="this.onerror=null;this.src='img/medicamento.png';" data-produto-id="${product.id}" />
           </div>
-          <div class="info flex flex-col flex-1 justify-between">
-            <div>
-              <h3 class="nome truncate-2-lines cursor-pointer" title="${product.nome}" data-produto-id="${product.id}">${product.nome}</h3>
-              <p class="descricao truncate-2-lines" title="${product.descricao || ''}">${product.descricao || ''}</p>
-              <div class="precos">
-                ${temDesconto ? `<span class='preco-original'>R$ ${precoOriginal}</span>` : ''}
-                <span class="preco-desconto">R$ ${precoDesconto}</span>
-              </div>
+          <div class="flex flex-col flex-1 justify-between mt-2">
+            ${product.codRed ? `<span class='inline-block mb-1 bg-blue-100 text-blue-800 text-[0.70rem] font-semibold px-2 py-0.5 rounded-full self-center'>Cod: ${product.codRed}</span>` : ''}
+            <h3 class="nome text-blue-900 font-bold text-base leading-tight truncate-2-lines cursor-pointer text-center mb-1" title="${product.nome}" data-produto-id="${product.id}">${product.nome}</h3>
+            <div class="flex flex-row items-end justify-end gap-2 mb-2 w-full">
+              ${temDesconto ? `<span class='text-xs text-gray-400 line-through'>R$ ${precoOriginal}</span>` : ''}
+              <span class="text-lg font-bold text-green-700">R$ ${precoDesconto}</span>
             </div>
             <div class="flex items-center justify-center gap-2 mt-2">
-              <div class="relative flex items-center mt-3.5 gap-0">
+              <div class="relative flex items-center gap-0">
                 <button type="button" class="qty-btn decrement flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">-</button>
                 <input type="number" min="1" value="1" class="input-qty w-7 h-6 text-center text-base font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none mx-1" style="appearance: textfield;" title="Quantidade" />
                 <button type="button" class="qty-btn increment flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">+</button>
