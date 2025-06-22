@@ -162,7 +162,6 @@
     const db = getFirestore(app);
     window.auth = auth;
 
-    // Carrega header e footer
     await loadHeader('header-container', 'authContainerSecondary');
     await loadFooter('footer-container');
 
@@ -194,9 +193,13 @@
     let currentCategory = '';
     let currentSubcategory = '';
     let currentSearch = '';
+    // Flag para controle de carregamento
+    let isLoadingProducts = false;
 
     // Função para buscar e renderizar produtos
     async function fetchProducts() {
+      if (isLoadingProducts) return; // Evita concorrência
+      isLoadingProducts = true;
       const productsContainer = document.getElementById('lista-produtos');
       const loadingSkeleton = document.getElementById('loading-skeleton');
       const emptyState = document.getElementById('empty-state');
@@ -227,6 +230,8 @@
         console.error('Erro ao buscar produtos:', error);
         loadingSkeleton.classList.add('hidden');
         emptyState.classList.remove('hidden');
+      } finally {
+        isLoadingProducts = false;
       }
     }
 
@@ -432,7 +437,9 @@
       currentPage = 1;
       // Se produtos ainda não carregaram, busca e só filtra depois
       if (!allProducts || allProducts.length === 0) {
-        fetchProducts().then(() => applyFilters());
+        if (!isLoadingProducts) {
+          fetchProducts().then(() => applyFilters());
+        }
       } else {
         applyFilters();
       }
@@ -442,8 +449,11 @@
     const asideLinks = document.querySelectorAll('aside nav a[data-categoria], #aside-todos');
 
     asideLinks.forEach(link => {
-      link.addEventListener('click', e => {
+      link.addEventListener('click', async e => {
         e.preventDefault();
+        // Limpa o campo de busca do header visualmente
+        var headerInput = document.querySelector('#header-search-input');
+        if (headerInput) headerInput.value = '';
         // Atualiza categoria
         if (link.id === 'aside-todos') {
           currentCategory = '';
@@ -454,8 +464,13 @@
         }
         currentSubcategory = '';
         subcatSelect.value = '';
+        currentSearch = '';
         updateSubcategories();
-        applyFilters();
+        if (!allProducts || allProducts.length === 0) {
+          await fetchProducts();
+        } else {
+          applyFilters();
+        }
         // Atualiza destaque visual
         asideLinks.forEach(l => l.classList.remove('font-bold', 'text-blue-900'));
         link.classList.add('font-bold', 'text-blue-900');
@@ -602,21 +617,21 @@
 
     // Inicialização
     // Se houver busca na query string, aplica na busca
-    document.addEventListener('DOMContentLoaded', function() {
-      currentSearch = '';
-      if (searchInput) searchInput.value = '';
-      fetchProducts(); // Sempre busca e exibe todos os produtos ao carregar
-      // Ajusta grid de produtos para 2 colunas no mobile após DOM pronto
-      const productsContainer = document.getElementById('lista-produtos');
-      if (productsContainer) {
-        productsContainer.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
-      }
-      // Também ajusta o skeleton para manter o padrão
-      const loadingSkeleton = document.getElementById('loading-skeleton');
-      if (loadingSkeleton) {
-        loadingSkeleton.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
-      }
-    });
+    // Removido: document.addEventListener('DOMContentLoaded', ...)
+    // Em vez disso, chame fetchProducts explicitamente após tudo carregar:
+    currentSearch = '';
+    if (searchInput) searchInput.value = '';
+    fetchProducts(); // Sempre busca e exibe todos os produtos ao carregar
+    // Ajusta grid de produtos para 2 colunas no mobile após DOM pronto
+    const productsContainer = document.getElementById('lista-produtos');
+    if (productsContainer) {
+      productsContainer.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
+    }
+    // Também ajusta o skeleton para manter o padrão
+    const loadingSkeleton = document.getElementById('loading-skeleton');
+    if (loadingSkeleton) {
+      loadingSkeleton.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
+    }
 
     // Botão para abrir o login-modal
     document.body.addEventListener('click', (e) => {
