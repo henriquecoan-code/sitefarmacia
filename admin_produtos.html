@@ -476,12 +476,17 @@
             desconto = 1 - (precoComDesconto / precoMaximo);
           }
           // Lógica para imagem padrão de genéricos
-          let fotos = prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [];
+          let fotos = [];
+          if (prod.fotos) {
+            fotos = prod.fotos.split(',').map(f => f.trim()).filter(Boolean);
+          } else if (prod.imagem) {
+            fotos = prod.imagem.split(',').map(f => f.trim()).filter(Boolean);
+          }
           const categoria = categoriaPorCodigo(prod.categoria || '');
           const laboratorio = (prod.laboratorio || '').trim();
           if (fotos.length === 0 && categoria === 'Genéricos' && laboratorio) {
             // Remove acentos, minúsculas, troca espaços por hífen
-            const labFile = laboratorio.normalize('NFD').replace(/[ -]/g,"").replace(/\s+/g,'-').toLowerCase();
+            const labFile = laboratorio.normalize('NFD').replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g,'-').toLowerCase();
             fotos = [`img/produtos/${labFile}.png`];
           }
           const produto = {
@@ -554,11 +559,16 @@
             desconto = 1 - (precoComDesconto / precoMaximo);
           }
           // Lógica para imagem padrão de genéricos
-          let fotos = prod.fotos ? prod.fotos.split(',').map(f => f.trim()).filter(Boolean) : [];
+          let fotos = [];
+          if (prod.fotos) {
+            fotos = prod.fotos.split(',').map(f => f.trim()).filter(Boolean);
+          } else if (prod.imagem) {
+            fotos = prod.imagem.split(',').map(f => f.trim()).filter(Boolean);
+          }
           const categoria = categoriaPorCodigo(prod.categoria || '');
           const laboratorio = (prod.laboratorio || '').trim();
           if (fotos.length === 0 && categoria === 'Genéricos' && laboratorio) {
-            const labFile = laboratorio.normalize('NFD').replace(/[ -]/g,"").replace(/\s+/g,'-').toLowerCase();
+            const labFile = laboratorio.normalize('NFD').replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g,'-').toLowerCase();
             fotos = [`img/produtos/${labFile}.png`];
           }
           const produto = {
