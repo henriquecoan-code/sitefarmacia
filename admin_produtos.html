@@ -235,8 +235,13 @@
       const subcategoria = document.getElementById('subcategoria').value.trim();
       const dcb = document.getElementById('dcb').value.trim();
       const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean);
-      const fotos = document.getElementById('fotos').value.split(',').map(f => f.trim()).filter(Boolean);
+      let fotos = document.getElementById('fotos').value.split(',').map(f => f.trim()).filter(Boolean);
       // Atualiza campo visual
+      if (fotos.length === 0 && categoria === 'Genéricos' && laboratorio) {
+        // Remove acentos, minúsculas, troca espaços por hífen
+        const labFile = laboratorio.normalize('NFD').replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g,'-').toLowerCase();
+        fotos = [`img/produtos/${labFile}.png`];
+      }
       document.getElementById('precoComDesconto').value = valorComDesconto.toFixed(2);
       const produto = { nome, descricao, precoMaximo, desconto, valorComDesconto, precoComDesconto, quantidade, categoria, subcategoria, laboratorio, dcb, ean, codRed, tags, fotos, criadoEm: new Date() };
       try {
