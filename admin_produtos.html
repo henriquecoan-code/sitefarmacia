@@ -574,6 +574,7 @@
           const categoria = categoriaPorCodigo(prod.categoria || '');
           const laboratorio = (prod.laboratorio || '').trim();
           if (fotos.length === 0 && categoria === 'Genéricos' && laboratorio) {
+            // Remove acentos, minúsculas, troca espaços por hífen
             const labFile = laboratorio.normalize('NFD').replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g,'-').toLowerCase();
             fotos = [`img/produtos/${labFile}.png`];
           }
