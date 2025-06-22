@@ -81,10 +81,10 @@
                                 <option value="">Todas as subcategorias</option>
                             </select>
                         </div>
-                        <div class="relative w-full sm:w-auto">
+<!--                        <div class="relative w-full sm:w-auto">
                             <input type="text" id="busca-produto" placeholder="Buscar por nome, descrição, tags, EAN, Cod-Red, laboratório, subcategoria ou DCB..." class="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
-                    </div>
+-->                    </div>
                 </div>
 
                 <!-- Loading Skeleton -->
@@ -220,13 +220,8 @@
           return;
         }
         emptyState.classList.add('hidden');
-        // Exibe todos os produtos se não houver filtro/busca
-        if (!currentCategory && !currentSubcategory && !currentSearch) {
-          renderProducts(allProducts);
-          renderPagination(allProducts.length, currentPage, PRODUCTS_PER_PAGE);
-        } else {
-          applyFilters();
-        }
+        currentPage = 1; // Garante que sempre começa na página 1
+        applyFilters(); // Sempre aplica filtros para renderizar produtos
         updateSubcategories();
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -605,24 +600,22 @@
       });
     }
 
-    // Ajusta grid de produtos para 2 colunas no mobile
-    const productsContainer = document.getElementById('lista-produtos');
-    if (productsContainer) {
-      productsContainer.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
-    }
-
-    // Também ajusta o skeleton para manter o padrão
-    const loadingSkeleton = document.getElementById('loading-skeleton');
-    if (loadingSkeleton) {
-      loadingSkeleton.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
-    }
-
     // Inicialização
     // Se houver busca na query string, aplica na busca
     document.addEventListener('DOMContentLoaded', function() {
       currentSearch = '';
       if (searchInput) searchInput.value = '';
       fetchProducts(); // Sempre busca e exibe todos os produtos ao carregar
+      // Ajusta grid de produtos para 2 colunas no mobile após DOM pronto
+      const productsContainer = document.getElementById('lista-produtos');
+      if (productsContainer) {
+        productsContainer.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
+      }
+      // Também ajusta o skeleton para manter o padrão
+      const loadingSkeleton = document.getElementById('loading-skeleton');
+      if (loadingSkeleton) {
+        loadingSkeleton.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
+      }
     });
 
     // Botão para abrir o login-modal
@@ -638,5 +631,7 @@
     <script src="js/auth-modal.js"></script>
     <script type="module" src="./js/header-search-integration.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+          <script type="module" src="./js/header-search-integration.js"></script>
+
 </body>
 </html>
