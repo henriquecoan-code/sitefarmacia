@@ -339,7 +339,8 @@
           document.getElementById('nome').value = prod.nome || '';
           document.getElementById('descricao').value = prod.descricao || '';
           document.getElementById('precoMaximo').value = prod.precoMaximo || '';
-          document.getElementById('desconto').value = prod.desconto || '';
+          // Corrige: mostra desconto em porcentagem
+          document.getElementById('desconto').value = prod.desconto !== undefined && prod.desconto !== null ? (Number(prod.desconto) * 100).toFixed(2) : '';
           document.getElementById('quantidade').value = prod.quantidade || '';
           document.getElementById('categoria').value = prod.categoria || '';
           document.getElementById('subcategoria').value = prod.subcategoria || '';
@@ -695,7 +696,7 @@
         document.getElementById('nome').value = found.nome || '';
         document.getElementById('descricao').value = found.descricao || '';
         document.getElementById('precoMaximo').value = found.precoMaximo || '';
-        document.getElementById('desconto').value = found.desconto || '';
+        document.getElementById('desconto').value = found.desconto !== undefined && found.desconto !== null ? (Number(found.desconto) * 100).toFixed(2) : '';
         document.getElementById('quantidade').value = found.quantidade || '';
         document.getElementById('categoria').value = found.categoria || '';
         document.getElementById('subcategoria').value = found.subcategoria || '';
