@@ -146,12 +146,12 @@
 
     <!-- Footer -->
     <div id="footer-container"></div>
-    <div id="cadastro-modal-placeholder"></div>
+    <div id="cadastro-modal-placeholder" class="hidden"></div>
 
     <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs, getCountFromServer } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -193,21 +193,54 @@
     let currentCategory = '';
     let currentSubcategory = '';
     let currentSearch = '';
-    // Flag para controle de carregamento
+    let totalProductsCount = 0; // Novo: total de produtos para paginação
     let isLoadingProducts = false;
+    let pageCursors = [null]; // Novo: guarda o último doc de cada página
+    // Variáveis globais de elementos DOM
+    const productsContainer = document.getElementById('lista-produtos');
+    const loadingSkeleton = document.getElementById('loading-skeleton');
+    const emptyState = document.getElementById('empty-state');
+    const catSelect = document.getElementById('filtro-categoria');
+    const subcatSelect = document.getElementById('filtro-subcategoria');
+    const searchInput = document.getElementById('busca-produto');
 
-    // Função para buscar e renderizar produtos
-    async function fetchProducts() {
-      if (isLoadingProducts) return; // Evita concorrência
+    // Função para montar query do Firestore com filtros e busca
+    function buildProductQuery(page = 1) {
+      const { query, limit, startAfter, orderBy, where } = window.firestoreHelpers;
+      let queryRef = collection(db, 'produtos');
+      let clauses = [orderBy('nome'), limit(PRODUCTS_PER_PAGE)];
+      if (currentCategory) {
+        clauses.unshift(where('categoria', '==', currentCategory));
+      }
+      if (currentSubcategory) {
+        clauses.unshift(where('subcategoria', '==', currentSubcategory));
+      }
+      // Busca por nome (simples, pode ser expandida)
+      if (currentSearch) {
+        // Busca por nome exata (Firestore não suporta contains nativo)
+        clauses.unshift(where('nome', '>=', currentSearch), where('nome', '<=', currentSearch + '\uf8ff'));
+      }
+      if (page > 1 && pageCursors[page - 1]) {
+        clauses.push(startAfter(pageCursors[page - 1]));
+      }
+      return query(queryRef, ...clauses);
+    }
+
+    // Função para buscar e renderizar produtos paginados do Firestore com filtros
+    async function fetchProductsPaginated(page = 1) {
+      if (isLoadingProducts) return;
       isLoadingProducts = true;
-      const productsContainer = document.getElementById('lista-produtos');
-      const loadingSkeleton = document.getElementById('loading-skeleton');
-      const emptyState = document.getElementById('empty-state');
       loadingSkeleton.classList.remove('hidden');
       productsContainer.innerHTML = '';
       try {
-        const snapshot = await getDocs(collection(db, 'produtos'));
-        const produtos = [];
+        // Importa helpers do Firestore uma vez e guarda globalmente
+        if (!window.firestoreHelpers) {
+          window.firestoreHelpers = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        }
+        const { getDocs } = window.firestoreHelpers;
+        let produtos = [];
+        let q = buildProductQuery(page);
+        const snapshot = await getDocs(q);
         snapshot.forEach(doc => {
           const data = doc.data();
           data.id = doc.id;
@@ -216,15 +249,21 @@
           }
           produtos.push(data);
         });
-        allProducts = produtos; // Salva todos os produtos para filtrar depois
+        // Salva o cursor do último doc da página
+        if (produtos.length > 0) {
+          pageCursors[page] = snapshot.docs[snapshot.docs.length - 1];
+        }
+        allProducts = produtos;
         loadingSkeleton.classList.add('hidden');
         if (!Array.isArray(produtos) || produtos.length === 0) {
           emptyState.classList.remove('hidden');
+          renderPagination(totalProductsCount, page, PRODUCTS_PER_PAGE);
           return;
         }
         emptyState.classList.add('hidden');
-        currentPage = 1; // Garante que sempre começa na página 1
-        applyFilters(); // Sempre aplica filtros para renderizar produtos
+        currentPage = page;
+        renderPagination(totalProductsCount, page, PRODUCTS_PER_PAGE);
+        renderProducts(produtos);
         updateSubcategories();
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -264,8 +303,7 @@
       prevBtn.disabled = page === 1;
       prevBtn.onclick = () => {
         if (currentPage > 1) {
-          currentPage--;
-          applyFilters();
+          fetchProductsPaginated(currentPage - 1);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       };
@@ -280,8 +318,7 @@
         btn.className = 'px-3 py-1 rounded ' + (i === page ? 'bg-blue-700 text-white font-bold' : 'bg-gray-200 hover:bg-blue-200 text-blue-900');
         btn.disabled = i === page;
         btn.onclick = () => {
-          currentPage = i;
-          applyFilters();
+          fetchProductsPaginated(i);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         container.appendChild(btn);
@@ -293,8 +330,7 @@
       nextBtn.disabled = page === totalPages;
       nextBtn.onclick = () => {
         if (currentPage < totalPages) {
-          currentPage++;
-          applyFilters();
+          fetchProductsPaginated(currentPage + 1);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       };
@@ -363,144 +399,34 @@
       Array.from(subcats).sort().forEach(sub => {
         subcatSelect.innerHTML += `<option value="${normalize(sub)}">${sub}</option>`;
       });
-    }
-
-    // Listeners dos filtros
-    const catSelect = document.getElementById('filtro-categoria');
-    const subcatSelect = document.getElementById('filtro-subcategoria');
-    const searchInput = document.getElementById('busca-produto');
-
-    // Campo de busca local
-    if (searchInput) {
-      searchInput.addEventListener('input', function () {
-        currentSearch = this.value;
-        currentPage = 1;
-        if (!allProducts || allProducts.length === 0) {
-          fetchProducts(); // Busca do Firebase se ainda não carregou
-        } else {
-          applyFilters();
-        }
-      });
-      // Permite buscar ao pressionar Enter
-      searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          currentSearch = this.value;
-          currentPage = 1;
-          if (!allProducts || allProducts.length === 0) {
-            fetchProducts();
-          } else {
-            applyFilters();
-          }
-        }
-      });
-    }
-
-    // Integra busca do header/topbar ao filtro local
-    function listenHeaderSearch() {
-      // Observa mudanças na URL (popstate e pushState)
-      function onUrlChange() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const buscaParam = urlParams.get('busca');
-        if (buscaParam) {
-          currentSearch = buscaParam;
-          if (searchInput) searchInput.value = buscaParam; // Sincroniza campo de busca
-          currentPage = 1;
-          applyFilters();
-        } else {
-          currentSearch = '';
-          if (searchInput) searchInput.value = '';
-          currentPage = 1;
-          applyFilters();
-        }
-      }
-      window.addEventListener('popstate', onUrlChange);
-      // Monkey patch pushState/replaceState para detectar navegação via JS
-      const origPushState = history.pushState;
-      history.pushState = function() {
-        origPushState.apply(this, arguments);
-        onUrlChange();
-      };
-      const origReplaceState = history.replaceState;
-      history.replaceState = function() {
-        origReplaceState.apply(this, arguments);
-        onUrlChange();
-      };
-    }
-    listenHeaderSearch();
-
-    // Escuta o evento customizado de busca do header
-    window.addEventListener('headerSearch', function(e) {
-      currentSearch = e.detail || '';
-      if (searchInput) searchInput.value = currentSearch; // Sincroniza campo de busca principal
-      var headerInput = document.querySelector('#header-search-input');
-      if (headerInput) headerInput.value = currentSearch;
-      currentPage = 1;
-      // Se produtos ainda não carregaram, busca e só filtra depois
-      if (!allProducts || allProducts.length === 0) {
-        if (!isLoadingProducts) {
-          fetchProducts().then(() => applyFilters());
-        }
-      } else {
-        applyFilters();
-      }
-    });
-
-    // Menu lateral esquerdo
-    const asideLinks = document.querySelectorAll('aside nav a[data-categoria], #aside-todos');
-
-    asideLinks.forEach(link => {
-      link.addEventListener('click', async e => {
-        e.preventDefault();
-        // Limpa o campo de busca do header visualmente
-        var headerInput = document.querySelector('#header-search-input');
-        if (headerInput) headerInput.value = '';
-        // Atualiza categoria
-        if (link.id === 'aside-todos') {
-          currentCategory = '';
-          catSelect.value = '';
-        } else {
-          currentCategory = link.getAttribute('data-categoria');
-          catSelect.value = currentCategory;
-        }
+      // Se a subcategoria atual não existir mais, limpa
+      if (currentSubcategory && !Array.from(subcats).map(normalize).includes(normalize(currentSubcategory))) {
         currentSubcategory = '';
         subcatSelect.value = '';
-        currentSearch = '';
-        updateSubcategories();
-        if (!allProducts || allProducts.length === 0) {
-          await fetchProducts();
-        } else {
-          applyFilters();
-        }
-        // Atualiza destaque visual
-        asideLinks.forEach(l => l.classList.remove('font-bold', 'text-blue-900'));
-        link.classList.add('font-bold', 'text-blue-900');
-      });
-    });
+      }
+    }
 
-    catSelect.addEventListener('change', e => {
-      currentCategory = e.target.value;
-      currentSubcategory = '';
-      updateSubcategories();
-      subcatSelect.value = '';
-      currentPage = 1;
-      applyFilters();
-      // Atualiza menu lateral
-      asideLinks.forEach(link => {
-        if (link.id === 'aside-todos' && !currentCategory) {
-          link.classList.add('font-bold', 'text-blue-900');
-        } else if (normalize(link.getAttribute('data-categoria')) === normalize(currentCategory)) {
-          link.classList.add('font-bold', 'text-blue-900');
-        } else {
-          link.classList.remove('font-bold', 'text-blue-900');
-        }
-      });
-    });
+    // Atualiza a contagem total de produtos para filtros/busca
+    async function updateTotalCount() {
+      const { getCountFromServer, query, where, collection: coll } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+      let queryRef = coll(db, 'produtos');
+      let clauses = [];
+      if (currentCategory) clauses.push(where('categoria', '==', currentCategory));
+      if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategoria));
+      if (currentSearch) {
+        clauses.push(where('nome', '>=', currentSearch), where('nome', '<=', currentSearch + '\uf8ff'));
+      }
+      let q = clauses.length ? query(queryRef, ...clauses) : queryRef;
+      const countSnap = await getCountFromServer(q);
+      totalProductsCount = countSnap.data().count || 0;
+    }
 
-    subcatSelect.addEventListener('change', e => {
-      currentSubcategory = e.target.value;
-      currentPage = 1;
-      applyFilters();
-    });
+    // Inicialização: busca total e carrega a primeira página
+    async function initPaginatedProducts() {
+      await updateTotalCount();
+      pageCursors = [null];
+      fetchProductsPaginated(1);
+    }
 
     // Função para renderizar produtos (substitua a função renderProducts existente)
     function renderProducts(produtos) {
@@ -616,22 +542,9 @@
 
     // Inicialização
     // Se houver busca na query string, aplica na busca
-    // Removido: document.addEventListener('DOMContentLoaded', ...)
-    // Em vez disso, chame fetchProducts explicitamente após tudo carregar:
     currentSearch = '';
     if (searchInput) searchInput.value = '';
-    fetchProducts(); // Sempre busca e exibe todos os produtos ao carregar
-    // Ajusta grid de produtos para 2 colunas no mobile após DOM pronto
-    const productsContainer = document.getElementById('lista-produtos');
-    if (productsContainer) {
-      productsContainer.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
-    }
-    // Também ajusta o skeleton para manter o padrão
-    const loadingSkeleton = document.getElementById('loading-skeleton');
-    if (loadingSkeleton) {
-      loadingSkeleton.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
-    }
-
+    initPaginatedProducts();
     // Botão para abrir o login-modal
     document.body.addEventListener('click', (e) => {
       if (e.target.id === 'openLoginModalBtn' || (e.target.closest && e.target.closest('#openLoginModalBtn'))) {
@@ -639,6 +552,81 @@
         if (window.openLoginModal) window.openLoginModal();
       }
     });
+
+    // === EVENT LISTENERS PARA FILTROS E BUSCA ===
+
+    // Menu lateral (aside)
+    document.querySelectorAll('aside nav a[data-categoria], #aside-todos').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        // Atualiza categoria
+        if (link.id === 'aside-todos') {
+          currentCategory = '';
+          catSelect.value = '';
+        } else {
+          currentCategory = link.getAttribute('data-categoria') || '';
+          catSelect.value = currentCategory;
+        }
+        // Limpa subcategoria e busca
+        currentSubcategory = '';
+        subcatSelect.value = '';
+        currentSearch = '';
+        if (searchInput) searchInput.value = '';
+        initPaginatedProducts();
+      });
+    });
+
+    // Select de categoria
+    if (catSelect) {
+      catSelect.addEventListener('change', e => {
+        currentCategory = catSelect.value;
+        // Limpa subcategoria e busca
+        currentSubcategory = '';
+        subcatSelect.value = '';
+        currentSearch = '';
+        if (searchInput) searchInput.value = '';
+        initPaginatedProducts();
+      });
+    }
+
+    // Select de subcategoria
+    if (subcatSelect) {
+      subcatSelect.addEventListener('change', e => {
+        currentSubcategory = subcatSelect.value;
+        // Não limpa categoria, mas limpa busca
+        currentSearch = '';
+        if (searchInput) searchInput.value = '';
+        initPaginatedProducts();
+      });
+    }
+
+    // Busca local (input de busca, se estiver visível)
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        currentSearch = searchInput.value.trim();
+        // Limpa categoria e subcategoria
+        currentCategory = '';
+        catSelect.value = '';
+        currentSubcategory = '';
+        subcatSelect.value = '';
+        initPaginatedProducts();
+      });
+    }
+
+    // Integra busca do header (header-search-integration.js)
+    window.setHeaderSearchHandler = function (searchTerm) {
+      currentSearch = searchTerm.trim();
+      // Limpa categoria e subcategoria
+      currentCategory = '';
+      if (catSelect) catSelect.value = '';
+      currentSubcategory = '';
+      if (subcatSelect) subcatSelect.value = '';
+      if (searchInput) searchInput.value = searchTerm;
+      initPaginatedProducts();
+    };
+
+    // Atualiza subcategorias ao trocar categoria (após renderização dos produtos)
+
     </script>
     
     
