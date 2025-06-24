@@ -236,31 +236,81 @@
       loadingSkeleton.classList.remove('hidden');
       productsContainer.innerHTML = '';
       try {
-        // Importa helpers do Firestore uma vez e guarda globalmente
         if (!window.firestoreHelpers) {
           window.firestoreHelpers = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
         }
-        const { getDocs } = window.firestoreHelpers;
+        const { getDocs, query, collection, where, orderBy, limit, startAfter } = window.firestoreHelpers;
         let produtos = [];
-        let q = buildProductQuery(page);
-        const snapshot = await getDocs(q);
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          data.id = doc.id;
-          if (typeof data.valorComDesconto === 'undefined' && typeof data.precoMaximo === 'number' && typeof data.desconto === 'number') {
-            data.valorComDesconto = data.precoMaximo * (1 - data.desconto);
+        let searchUpper = currentSearch ? currentSearch.toUpperCase() : '';
+        let nomeDocs = [], dcbDocs = [];
+        let snapNome = null, snapDcb = null;
+        if (currentSearch && currentSearch.length >= 2) {
+          // Busca ampla: traz até 300 produtos para filtrar localmente
+          let qNome = query(collection(db, 'produtos'), orderBy('nome'), limit(300));
+          snapNome = await getDocs(qNome);
+          nomeDocs = snapNome.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
+          // Query por DCB (exato, case-insensitive)
+          let qDcb = query(collection(db, 'produtos'), where('dcb', '==', searchUpper), orderBy('nome'));
+          snapDcb = await getDocs(qDcb);
+          dcbDocs = snapDcb.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
+          // Junta e remove duplicados por id
+          let all = [...nomeDocs, ...dcbDocs];
+          const seen = new Set();
+          produtos = all.filter(p => {
+            if (seen.has(p.id)) return false;
+            seen.add(p.id);
+            return true;
+          });
+          // Filtro local: substring no nome ou DCB (case-insensitive)
+          const searchNorm = currentSearch.toLowerCase();
+          produtos = produtos.filter(p =>
+            (p.nome && p.nome.toLowerCase().includes(searchNorm)) ||
+            (p.dcb && p.dcb.toLowerCase().includes(searchNorm))
+          );
+          // Paginação manual sobre o resultado filtrado
+          totalProductsCount = produtos.length;
+          allProducts = produtos;
+          const startIdx = (page - 1) * PRODUCTS_PER_PAGE;
+          const endIdx = startIdx + PRODUCTS_PER_PAGE;
+          produtos = produtos.slice(startIdx, endIdx);
+        } else if (currentSearch) {
+          // Busca por prefixo (1 caractere): mantém busca Firestore
+          let qNome = buildProductQuery(page);
+          snapNome = await getDocs(qNome);
+          nomeDocs = snapNome.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
+          let qDcb = query(collection(db, 'produtos'), where('dcb', '==', searchUpper), orderBy('nome'));
+          snapDcb = await getDocs(qDcb);
+          dcbDocs = snapDcb.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
+          let all = [...nomeDocs, ...dcbDocs];
+          const seen = new Set();
+          produtos = all.filter(p => {
+            if (seen.has(p.id)) return false;
+            seen.add(p.id);
+            return true;
+          });
+          totalProductsCount = produtos.length;
+          allProducts = produtos;
+          const startIdx = (page - 1) * PRODUCTS_PER_PAGE;
+          const endIdx = startIdx + PRODUCTS_PER_PAGE;
+          produtos = produtos.slice(startIdx, endIdx);
+          if (nomeDocs.length > 0 && snapNome.docs.length > 0) {
+            pageCursors[page] = snapNome.docs[snapNome.docs.length - 1];
           }
-          produtos.push(data);
-        });
-        // Salva o cursor do último doc da página
-        if (produtos.length > 0) {
-          pageCursors[page] = snapshot.docs[snapshot.docs.length - 1];
+        } else {
+          // Sem busca: só paginação normal por nome
+          let qNome = buildProductQuery(page);
+          snapNome = await getDocs(qNome);
+          nomeDocs = snapNome.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
+          produtos = nomeDocs;
+          if (snapNome.docs.length > 0) {
+            pageCursors[page] = snapNome.docs[snapNome.docs.length - 1];
+          }
+          allProducts = nomeDocs; // garante que allProducts é a lista completa sem paginação
         }
-        allProducts = produtos;
         loadingSkeleton.classList.add('hidden');
         if (!Array.isArray(produtos) || produtos.length === 0) {
           emptyState.classList.remove('hidden');
-          renderPagination(totalProductsCount, page, PRODUCTS_PER_PAGE);
+          renderPagination(0, 1, PRODUCTS_PER_PAGE);
           return;
         }
         emptyState.classList.add('hidden');
@@ -407,7 +457,7 @@
       let queryRef = coll(db, 'produtos');
       let clauses = [];
       if (currentCategory) clauses.push(where('categoria', '==', currentCategory));
-      if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategoria));
+      if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategory));
       if (currentSearch) {
         clauses.push(where('nome', '>=', currentSearch), where('nome', '<=', currentSearch + '\uf8ff'));
       }
