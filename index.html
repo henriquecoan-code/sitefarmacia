@@ -215,10 +215,13 @@
       if (currentSubcategory) {
         clauses.unshift(where('subcategoria', '==', currentSubcategory));
       }
-      // Busca por nome (simples, pode ser expandida)
+      // Busca por nome ou DCB (case-insensitive: converte para maiúsculo)
       if (currentSearch) {
-        // Busca por nome exata (Firestore não suporta contains nativo)
-        clauses.unshift(where('nome', '>=', currentSearch), where('nome', '<=', currentSearch + '\uf8ff'));
+        const searchUpper = currentSearch.toUpperCase();
+        // Busca por nome (prefixo)
+        clauses.unshift(where('nome', '>=', searchUpper), where('nome', '<=', searchUpper + '\uf8ff'));
+        // Para DCB, seria necessário um índice separado ou buscar localmente após carregar a página
+        // Aqui, priorizamos nome, mas a busca local abaixo cobre DCB
       }
       if (page > 1 && pageCursors[page - 1]) {
         clauses.push(startAfter(pageCursors[page - 1]));
@@ -347,28 +350,20 @@
     }
 
     // Aplica filtros e busca
-    // Busca aprimorada: múltiplos termos, fuzzy, busca por ID
+    // Busca aprimorada: nome e DCB, case-insensitive
     function applyFilters() {
       let filtered = allProducts;
       if (currentCategory) {
         filtered = filtered.filter(p => normalize(p.categoria) === normalize(currentCategory));
       }
       if (currentSubcategory) {
-        filtered = filtered.filter(p => normalize(String(p.subcategoria || '')) === normalize(currentSubcategory));
+        filtered = filtered.filter(p => normalize(String(p.subcategoria || '')) === normalize(currentSubcategoria));
       }
       if (currentSearch) {
-        const terms = currentSearch.toLowerCase().split(/\s+/).filter(Boolean);
+        const searchUpper = currentSearch.toUpperCase();
         filtered = filtered.filter(p =>
-          terms.every(term =>
-            (p.nome && p.nome.toLowerCase().includes(term)) ||
-            (p.descricao && p.descricao.toLowerCase().includes(term)) ||
-            (Array.isArray(p.tags) && p.tags.some(tag => tag.toLowerCase().includes(term))) ||
-            (p.ean && String(p.ean).toLowerCase().includes(term)) ||
-            (p.codRed && String(p.codRed).toLowerCase().includes(term)) ||
-            (p.laboratorio && p.laboratorio.toLowerCase().includes(term)) ||
-            (p.subcategoria && String(p.subcategoria).toLowerCase().includes(term)) ||
-            (p.dcb && p.dcb.toLowerCase().includes(term))
-          )
+          (p.nome && p.nome.toUpperCase().includes(searchUpper)) ||
+          (p.dcb && p.dcb.toUpperCase().includes(searchUpper))
         );
       }
       filteredProducts = filtered;
@@ -625,8 +620,11 @@
       initPaginatedProducts();
     };
 
-    // Atualiza subcategorias ao trocar categoria (após renderização dos produtos)
-
+window.addEventListener('headerSearch', function(e) {
+  if (e && e.detail) {
+    window.setHeaderSearchHandler(e.detail);
+  }
+});
     </script>
     
     
