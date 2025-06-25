@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-gray-50">
+<body class="min-h-screen flex flex-col bg-gray-50 mt-[56px] md:mt-0">
   <div id="login-modal-placeholder"></div>
   <div id="header-container"></div>
   <div id="cadastro-modal-placeholder"></div>
@@ -123,37 +123,37 @@
         const endereco = order.endereco || {};
         const detailsId = `order-details-${idx}`;
         const html = `
-          <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between cursor-pointer" onclick="toggleOrderDetails('${detailsId}')">
-              <div>
-                <span class="font-bold text-blue-800">Pedido #${order.numeroPedido || ''}</span>
-                <span class="ml-4 text-gray-500 text-sm">${order.dataPedido || ''}</span>
-                <span class="ml-4 px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+          <div class="bg-white rounded-lg shadow p-4 mb-4 border border-blue-100 flex flex-col gap-2">
+            <div class="flex flex-col gap-2">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <span class="font-bold text-blue-800 text-lg">Pedido #${order.numeroPedido || ''}</span>
+                  <span class="ml-2 text-gray-500 text-sm">${order.dataPedido || ''}</span>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold ${order.status === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
                   ${order.status || 'Pendente'}
                 </span>
               </div>
-              <button type="button" aria-label="Ver detalhes do pedido ${order.numeroPedido || ''}" class="ml-2 focus:outline-none" aria-expanded="false" aria-controls="${detailsId}">
+              <div class="flex flex-col gap-1 text-gray-700 text-sm">
+                <div><i class="fas fa-map-marker-alt mr-1"></i> ${endereco.rua || ''}, ${endereco.numero || ''} - ${endereco.bairro || ''}, ${endereco.cidade || ''}</div>
+                <div><i class="fas fa-credit-card mr-1"></i> ${order.pagamento || ''}</div>
+              </div>
+              <button type="button" aria-label="Ver detalhes do pedido ${order.numeroPedido || ''}" class="mt-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-900 rounded-lg py-2 font-semibold flex items-center justify-center gap-2 transition sm:hidden" aria-expanded="false" aria-controls="${detailsId}" onclick="toggleOrderDetails('${detailsId}')">
+                <span>Detalhes do pedido</span>
                 <i id="arrow-${detailsId}" class="fas fa-chevron-down transition-transform duration-200"></i>
               </button>
             </div>
-            <div id="${detailsId}" class="hidden mt-4" role="region" aria-labelledby="arrow-${detailsId}">
-              <div class="mb-2">
+            <div id="${detailsId}" class="hidden mt-3 sm:mt-0 sm:block" role="region" aria-labelledby="arrow-${detailsId}">
+              <div class="mb-2 text-gray-700 text-sm">
                 <span class="font-semibold">Nome:</span> ${order.nomeUsuario || ''}
-                ${order.emailUsuario ? `<span class="ml-4 font-semibold">Email:</span> ${order.emailUsuario}` : ''}
-                <span class="ml-4 font-semibold">Telefone:</span> ${order.telefone || ''}
+                ${order.emailUsuario ? `<span class="ml-2 font-semibold">Email:</span> ${order.emailUsuario}` : ''}
+                <span class="ml-2 font-semibold">Telefone:</span> ${order.telefone || ''}
               </div>
-              <div class="mb-2">
-                <span class="font-semibold">Endereço:</span>
-                Rua ${endereco.rua || ''}, Nº ${endereco.numero || ''}, ${endereco.bairro || ''}, ${endereco.cidade || ''} ${endereco.complemento ? ', ' + endereco.complemento : ''}
-              </div>
-              <div class="mb-2">
-                <span class="font-semibold">Forma de pagamento:</span> ${order.pagamento || ''}
-              </div>
-              <div class="mb-2">
+              <div class="mb-2 text-gray-700 text-sm">
                 <span class="font-semibold">Observações:</span> ${order.observacoes || 'Nenhuma'}
               </div>
-              <div class="overflow-x-auto mt-4">
-                <table class="min-w-full text-sm border">
+              <div class="overflow-x-auto mt-2">
+                <table class="min-w-full text-xs border">
                   <thead>
                     <tr class="bg-gray-100">
                       <th class="px-2 py-1">Qnt</th>
@@ -167,7 +167,7 @@
                   </tbody>
                 </table>
               </div>
-              <div class="text-right mt-4 text-xl font-bold text-blue-900">
+              <div class="text-right mt-2 text-base font-bold text-blue-900">
                 Total: R$ ${order.total || ''}
               </div>
             </div>
