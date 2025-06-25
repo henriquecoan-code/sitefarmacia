@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrinho Moderno</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .skeleton { animation: pulse 2s infinite ease-in-out; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .sticky-summary { position: sticky; top: 2rem; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <div id="header-container"></div>
+  <main class="flex-1 container mx-auto px-2 md:px-8 py-8 flex flex-col md:flex-row gap-8">
+    <!-- Lista de produtos do carrinho -->
+    <section class="flex-1">
+      <h2 class="text-3xl font-extrabold text-blue-900 mb-6">Meu Carrinho</h2>
+      <div id="cart-list" class="space-y-6"></div>
+      <div id="empty-cart" class="text-center text-gray-400 mt-24 hidden">
+        <i class="fas fa-shopping-cart text-7xl mb-6 animate-bounce"></i>
+        <p class="text-xl">Seu carrinho está vazio.</p>
+      </div>
+      <!-- Sugestão de produtos -->
+      <div class="mt-12">
+        <h3 class="text-xl font-bold text-blue-900 mb-4">Você também pode gostar</h3>
+        <div id="sugestoes" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+      </div>
+    </section>
+    <!-- Resumo do pedido (fixo em desktop) -->
+    <aside class="w-full md:w-96">
+      <div class="bg-white rounded-2xl shadow-2xl p-6 sticky top-8 z-30">
+        <h3 class="text-xl font-bold text-blue-900 mb-4">Resumo do Pedido</h3>
+        <div class="mb-3 flex justify-between">
+          <span>Subtotal</span>
+          <span id="subtotal" class="font-bold">R$ 0,00</span>
+        </div>
+        <div class="mb-3 flex justify-between items-center">
+          <span>Frete</span>
+          <span id="frete-info" class="font-bold text-blue-700">Calcule o frete</span>
+        </div>
+        <div class="mb-3">
+          <input id="cep-frete" type="text" maxlength="9" placeholder="Digite seu CEP" class="border rounded px-2 py-1 w-full" />
+          <button id="calcular-frete" class="mt-2 w-full bg-blue-700 text-white rounded py-2 font-bold hover:bg-blue-800 transition">Calcular Frete</button>
+        </div>
+        <div class="mb-3 flex justify-between text-lg font-bold">
+          <span>Total</span>
+          <span id="total" class="text-blue-900">R$ 0,00</span>
+        </div>
+        <button id="finalizar-compra" class="w-full bg-green-600 text-white rounded-lg py-3 mt-4 font-bold text-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          Finalizar Compra
+        </button>
+      </div>
+      <!-- Endereço e pagamento -->
+      <div class="bg-white rounded-2xl shadow p-6 mt-6">
+        <h4 class="font-bold text-blue-900 mb-2">Endereço de Entrega</h4>
+        <select id="endereco-select" class="border p-2 w-full rounded mb-2"></select>
+        <a href="endereco-entrega.html" class="text-blue-600 hover:underline text-sm">Adicionar novo endereço</a>
+        <h4 class="font-bold text-blue-900 mt-4 mb-2">Forma de Pagamento</h4>
+        <select id="pagamento" class="border p-2 w-full rounded mb-2">
+          <option value="">Selecione</option>
+          <option value="Pix">Pix</option>
+          <option value="Cartão">Cartão</option>
+          <option value="Dinheiro">Dinheiro</option>
+        </select>
+        <textarea id="observacoes" placeholder="Observações (opcional)" class="border p-2 w-full mb-2 rounded"></textarea>
+      </div>
+    </aside>
+  </main>
+  <div id="footer-container"></div>
+  <script type="module">
+// Firebase imports (ajuste o caminho conforme seu projeto)
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+import { firebaseConfig } from './js/firebase-config.js';
+import { loadHeader } from './js/header-loader.js';
+import { loadFooter } from './js/footer-loader.js';
+const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let cart = [];
+let userId = null;
+let frete = 0;
+
+// Persistência local
+function salvarCarrinhoLocal() {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+function carregarCarrinhoLocal() {
+  const local = localStorage.getItem('cart');
+  return local ? JSON.parse(local) : [];
+}
+
+// Firebase: carregar/salvar carrinho
+async function carregarCarrinhoFirebase(userId) {
+  const cartRef = doc(db, 'carrinhos', userId);
+  const cartSnap = await getDoc(cartRef);
+  return (cartSnap.exists() && Array.isArray(cartSnap.data().itens)) ? cartSnap.data().itens : [];
+}
+async function salvarCarrinhoFirebase(userId, cart) {
+  const cartRef = doc(db, 'carrinhos', userId);
+  await setDoc(cartRef, { itens: cart }, { merge: true });
+}
+
+// Sincronização ao login
+async function onLogin(userId) {
+  const firebaseCart = await carregarCarrinhoFirebase(userId);
+  const localCart = carregarCarrinhoLocal();
+  // Mesclar carrinhos (pode aprimorar lógica)
+  const mergedCart = [...firebaseCart, ...localCart.filter(lc => !firebaseCart.some(fc => fc.id === lc.id))];
+  cart = mergedCart;
+  await salvarCarrinhoFirebase(userId, cart);
+  localStorage.removeItem('cart');
+}
+
+// Carrega o carrinho do Firestore ou localStorage e renderiza
+async function fetchAndRenderCart() {
+  if (userId) {
+    cart = await carregarCarrinhoFirebase(userId);
+  } else {
+    cart = carregarCarrinhoLocal();
+  }
+  renderCart();
+}
+
+// Endereços do usuário
+async function carregarEnderecosUsuario(userId) {
+  const subRef = collection(db, 'usuarios', userId, 'enderecos');
+  const subSnap = await getDocs(subRef);
+  let enderecos = [];
+  subSnap.forEach(docSnap => {
+    const data = docSnap.data();
+    enderecos.push({ id: docSnap.id, ...data });
+  });
+  return enderecos;
+}
+async function popularEnderecos(userId) {
+  const enderecos = await carregarEnderecosUsuario(userId);
+  const select = document.getElementById('endereco-select');
+  select.innerHTML = '';
+  enderecos.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e.id;
+    opt.textContent = `${e.rua || ''}, ${e.numero || ''} - ${e.bairro || ''}, ${e.cidade || ''}`;
+    select.appendChild(opt);
+  });
+}
+
+// Cálculo de frete por CEP
+function calcularFretePorCep(cep) {
+  const freteInfo = document.getElementById('frete-info');
+  const subtotal = parseFloat(document.getElementById('subtotal').textContent.replace('R$', '').replace(',', '.')) || 0;
+  if (subtotal >= 50) {
+    frete = 0;
+    freteInfo.textContent = 'Frete grátis!';
+  } else if (cep && cep.startsWith('8888')) {
+    frete = 7;
+    freteInfo.textContent = 'R$ 7,00';
+  } else {
+    frete = 15;
+    freteInfo.textContent = 'R$ 15,00';
+  }
+  updateTotal();
+}
+
+// Atualiza total com frete
+function updateTotal() {
+  const subtotal = parseFloat(document.getElementById('subtotal').textContent.replace('R$', '').replace(',', '.')) || 0;
+  document.getElementById('total').textContent = `R$ ${(subtotal + frete).toFixed(2)}`;
+  // Exibe o valor do frete no campo de frete
+  const freteInfo = document.getElementById('frete-info');
+  if (freteInfo && typeof frete === 'number') {
+    if (frete === 0 && subtotal > 0) {
+      freteInfo.textContent = 'Frete grátis!';
+    } else if (frete > 0) {
+      freteInfo.textContent = `R$ ${frete.toFixed(2)}`;
+    } else {
+      freteInfo.textContent = 'Calcule o frete';
+    }
+  }
+}
+
+// Renderiza carrinho
+function renderCart() {
+  const cartList = document.getElementById('cart-list');
+  const subtotalEl = document.getElementById('subtotal');
+  const totalEl = document.getElementById('total');
+  const emptyCart = document.getElementById('empty-cart');
+  cartList.innerHTML = '';
+  let subtotal = 0;
+  if (!cart.length) {
+    emptyCart.classList.remove('hidden');
+    subtotalEl.textContent = 'R$ 0,00';
+    totalEl.textContent = 'R$ 0,00';
+    document.getElementById('finalizar-compra').disabled = true;
+    return;
+  }
+  emptyCart.classList.add('hidden');
+  document.getElementById('finalizar-compra').disabled = false;
+  cart.forEach((item, idx) => {
+    // Busca o valor igual ao carrinho-novo.html
+    let preco = 0;
+    if (typeof item.valorComDesconto === 'number') {
+      preco = item.valorComDesconto;
+    } else if (typeof item.precoMaximo === 'number') {
+      preco = item.precoMaximo;
+    } else if (typeof item.preco === 'number') {
+      preco = item.preco;
+    } else if (window.produtos && Array.isArray(window.produtos)) {
+      const prod = window.produtos.find(p => p.id === item.id);
+      if (prod) {
+        if (typeof prod.valorComDesconto === 'number') preco = prod.valorComDesconto;
+        else if (typeof prod.precoMaximo === 'number') preco = prod.precoMaximo;
+        else if (typeof prod.preco === 'number') preco = prod.preco;
+      }
+    }
+    if (!preco) {
+      preco = 0;
+      console.warn('Produto sem preço válido no carrinho:', item.nome || item.id);
+    }
+    const itemSubtotal = item.quantidade * preco;
+    subtotal += itemSubtotal;
+    const el = document.createElement('div');
+    el.className = "flex flex-col md:flex-row items-center bg-white rounded-2xl shadow p-4 gap-6 border border-blue-100";
+    el.innerHTML = `
+      <img src="${item.fotos && item.fotos[0] ? item.fotos[0] : '/img/medicamento.png'}" alt="${item.nome}" class="w-24 h-24 object-contain rounded-xl bg-blue-50 border border-blue-200 shadow mb-4 md:mb-0">
+      <div class="flex-1 w-full flex flex-col justify-between">
+        <h3 class="font-bold text-lg text-blue-900 mb-1">${item.nome}</h3>
+        <p class="text-gray-500 text-sm mb-2">${item.descricao || ''}</p>
+        <div class="flex items-center gap-3 mt-2">
+          <button class="btn-qty bg-blue-100 px-3 py-1 rounded-lg text-xl font-bold hover:bg-blue-200" data-id="${item.id}" data-delta="-1">-</button>
+          <span class="mx-2 min-w-[36px] text-center text-lg font-semibold">${item.quantidade}</span>
+          <button class="btn-qty bg-blue-100 px-3 py-1 rounded-lg text-xl font-bold hover:bg-blue-200" data-id="${item.id}" data-delta="1">+</button>
+          <span class="ml-6 text-blue-700 font-bold text-lg">R$ ${preco.toFixed(2)}${preco === 0 ? ' <span style=\'color:red\'>(sem preço)</span>' : ''}</span>
+          <button class="btn-remove ml-8 text-red-600 hover:text-red-800 px-3 py-1 rounded-lg" data-id="${item.id}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="text-right font-bold text-lg w-28 min-w-[100px] text-blue-900">
+        Subtotal:<br><span class="text-xl">R$ ${itemSubtotal.toFixed(2)}</span>
+      </div>
+    `;
+    cartList.appendChild(el);
+  });
+  subtotalEl.textContent = `R$ ${subtotal.toFixed(2)}`;
+  updateTotal();
+}
+// Atualiza quantidade e remove item
+// Corrigido: salva no Firestore/localStorage após alteração
+document.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('btn-qty')) {
+    const id = e.target.getAttribute('data-id');
+    const delta = parseInt(e.target.getAttribute('data-delta'), 10);
+    const idx = cart.findIndex(item => item.id === id);
+    if (idx > -1) {
+      cart[idx].quantidade += delta;
+      if (cart[idx].quantidade < 1) cart[idx].quantidade = 1;
+      if (userId) {
+        await salvarCarrinhoFirebase(userId, cart);
+      } else {
+        salvarCarrinhoLocal();
+      }
+      renderCart();
+    }
+  }
+  if (e.target.classList.contains('btn-remove')) {
+    const id = e.target.getAttribute('data-id');
+    let newCart = cart.filter(item => item.id !== id);
+    if (userId) {
+      await salvarCarrinhoFirebase(userId, newCart);
+    } else {
+      cart = newCart;
+      salvarCarrinhoLocal();
+    }
+    cart = newCart;
+    renderCart();
+  }
+});
+// Renderiza sugestões
+function renderSugestoes() {
+  const sugDiv = document.getElementById('sugestoes');
+  sugDiv.innerHTML = '';
+  sugestoes.forEach(prod => {
+    const el = document.createElement('div');
+    el.className = "bg-white rounded-xl shadow p-3 flex flex-col items-center";
+    el.innerHTML = `
+      <img src="${prod.img}" class="w-20 h-20 object-contain mb-2" alt="${prod.nome}">
+      <div class="font-bold text-blue-900 text-sm mb-1">${prod.nome}</div>
+      <div class="text-blue-700 font-bold mb-2">R$ ${prod.preco.toFixed(2)}</div>
+      <button class="bg-blue-700 text-white rounded px-3 py-1 text-xs font-bold hover:bg-blue-800 transition">Adicionar</button>
+    `;
+    sugDiv.appendChild(el);
+  });
+}
+// Inicialização
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadHeader('header-container', 'authContainerSecondary');
+  await loadFooter('footer-container');
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      userId = user.uid;
+      await onLogin(userId);
+      await popularEnderecos(userId);
+      await fetchAndRenderCart();
+    } else {
+      cart = carregarCarrinhoLocal();
+      renderCart();
+    }
+  });
+});
+// Cálculo de frete ao trocar endereço
+const enderecoSelect = document.getElementById('endereco-select');
+if (enderecoSelect) {
+  enderecoSelect.addEventListener('change', async function() {
+    const selectedId = this.value;
+    if (!userId) return;
+    const enderecos = await carregarEnderecosUsuario(userId);
+    const endereco = enderecos.find(e => e.id === selectedId);
+    if (endereco && endereco.cep) {
+      calcularFretePorCep(endereco.cep);
+    }
+  });
+}
+// Cálculo de frete manual
+const btnFrete = document.getElementById('calcular-frete');
+if (btnFrete) {
+  btnFrete.addEventListener('click', () => {
+    const cep = document.getElementById('cep-frete').value.replace(/\D/g, '');
+    calcularFretePorCep(cep);
+  });
+}
+// Finalização de compra
+const btnFinalizar = document.getElementById('finalizar-compra');
+if (btnFinalizar) {
+  btnFinalizar.addEventListener('click', async () => {
+    // Validação obrigatória da forma de pagamento
+    const pagamento = document.getElementById('pagamento').value;
+    if (!['Pix','Cartão','Dinheiro'].includes(pagamento)) {
+      alert('Por favor, selecione a forma de pagamento.');
+      document.getElementById('pagamento').focus();
+      return;
+    }
+    // Validação de endereço
+    const enderecoSelect = document.getElementById('endereco-select');
+    let enderecoId = enderecoSelect && enderecoSelect.value;
+    if (!enderecoId) {
+      alert('Selecione um endereço de entrega.');
+      return;
+    }
+    if (!userId) {
+      alert('Você precisa estar logado para finalizar a compra.');
+      return;
+    }
+    // Buscar endereço selecionado
+    const enderecos = await carregarEnderecosUsuario(userId);
+    const endereco = enderecos.find(e => e.id === enderecoId);
+    if (!endereco) {
+      alert('Endereço selecionado não encontrado.');
+      return;
+    }
+    // Buscar nome, telefone e email do usuário autenticado
+    let nomeUsuario = '';
+    let telefone = '';
+    let emailUsuario = '';
+    const user = auth.currentUser;
+    if (user) {
+      if (user.displayName) nomeUsuario = user.displayName;
+      if (user.email) emailUsuario = user.email;
+      try {
+        const docUserRef = doc(db, 'usuarios', user.uid);
+        const docUserSnap = await getDoc(docUserRef);
+        if (docUserSnap.exists()) {
+          const data = docUserSnap.data();
+          if (data.nome) nomeUsuario = data.nome;
+          if (data.telefone) telefone = data.telefone;
+        }
+      } catch (e) {}
+    }
+    const observacoes = document.getElementById('observacoes').value;
+    // Busca o carrinho do Firestore
+    let cartPedido = await carregarCarrinhoFirebase(userId);
+    if (!cartPedido.length) {
+      alert('Seu carrinho está vazio!');
+      return;
+    }
+    let total = 0;
+    const produtos = cartPedido.map(item => {
+      const preco = item.preco || 0;
+      const subtotal = preco * item.quantidade;
+      total += subtotal;
+      return {
+        nome: item.nome,
+        quantidade: item.quantidade,
+        valor: preco.toFixed(2),
+        subtotal: subtotal.toFixed(2)
+      };
+    });
+    // Gera número de pedido crescente
+    let lastOrderNumber = parseInt(localStorage.getItem('lastOrderNumber') || '0', 10);
+    lastOrderNumber += 1;
+    localStorage.setItem('lastOrderNumber', lastOrderNumber);
+    const numeroPedido = lastOrderNumber;
+    const dataPedido = new Date().toLocaleString('pt-BR');
+    // Salva o pedido no Firestore
+    try {
+      await addDoc(collection(db, 'pedidos'), {
+        numeroPedido,
+        dataPedido,
+        userId,
+        nomeUsuario,
+        emailUsuario,
+        telefone,
+        endereco,
+        observacoes,
+        pagamento,
+        produtos,
+        total: (total + frete).toFixed(2),
+        status: 'Pendente'
+      });
+    } catch (e) {
+      alert('Erro ao salvar pedido no servidor.');
+      return;
+    }
+    // Exibe mensagem de pedido concluído
+    const main = document.querySelector('main');
+    main.innerHTML = `
+      <div class="flex flex-col items-center justify-center min-h-[60vh]">
+        <i class="fas fa-check-circle text-green-500 text-6xl mb-6"></i>
+        <h2 class="text-3xl font-bold text-green-700 mb-4">Pedido realizado com sucesso!</h2>
+        <p class="text-lg text-gray-700 mb-2">Seu pedido foi enviado para a farmácia e está sendo processado.</p>
+        <p class="text-md text-gray-600 mb-6">Você receberá atualizações pelo WhatsApp ou poderá acompanhar pelo painel de pedidos.</p>
+        <div class="flex gap-4 mt-4">
+          <a href="index.html" class="px-6 py-3 bg-blue-700 text-white rounded font-bold hover:bg-blue-800 transition">Voltar para a Home</a>
+          <a href="pedidos.html" class="px-6 py-3 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Ver meus Pedidos</a>
+        </div>
+      </div>
+    `;
+    // Limpa o carrinho
+    await salvarCarrinhoFirebase(userId, []);
+    localStorage.removeItem('cart');
+  });
+}
+  </script>
+</body>
+</html>

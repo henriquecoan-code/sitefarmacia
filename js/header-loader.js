@@ -25,8 +25,10 @@ export function loadHeader(headerContainerId, authContainerId) {
         if (window.Alpine && window.Alpine.initTree) {
           window.Alpine.initTree(document.body);
         }
-        // Atualiza o estado de autenticação no header
-        handleAuthState(authContainerId);
+        // Atualiza o estado de autenticação no header SOMENTE se o ID for definido e o elemento existir
+        if (authContainerId && document.getElementById(authContainerId)) {
+          handleAuthState(authContainerId);
+        }
         // Garante que o menu mobile funcione após o carregamento dinâmico
         if (window.setupMobileMenu) window.setupMobileMenu();
         // Aguarda o carregamento do footer e do script auth-mobile.js
