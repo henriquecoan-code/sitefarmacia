@@ -271,13 +271,12 @@ document.addEventListener('click', async (e) => {
   if (e.target.classList.contains('btn-remove')) {
     const id = e.target.getAttribute('data-id');
     let newCart = cart.filter(item => item.id !== id);
+    cart = newCart; // Atualiza a variável global ANTES de salvar
     if (userId) {
-      await salvarCarrinhoFirebase(userId, newCart);
+      await salvarCarrinhoFirebase(userId, cart);
     } else {
-      cart = newCart;
       salvarCarrinhoLocal();
     }
-    cart = newCart;
     renderCart();
   }
 });

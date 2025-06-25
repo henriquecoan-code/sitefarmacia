@@ -32,18 +32,19 @@ export function loadHeader(headerContainerId, authContainerId) {
         // Garante que o menu mobile funcione após o carregamento dinâmico
         if (window.setupMobileMenu) window.setupMobileMenu();
         // Aguarda o carregamento do footer e do script auth-mobile.js
-        function waitForAuthMobile(retries = 10) {
+        function waitForAuthMobile(retries = 20) { // aumenta tentativas
           if (window.auth && window.renderMobileAuth && window.renderAuthMobileMenu) {
             window.auth.onAuthStateChanged(function(user) {
               window.renderMobileAuth(user);
-              // window.renderAuthMobileMenu(user); // Removido para evitar loop
             });
-            // Chama manualmente para garantir renderização inicial
             window.renderAuthMobileMenu(window.auth.currentUser);
           } else if (retries > 0) {
-            setTimeout(() => waitForAuthMobile(retries - 1), 150);
+            setTimeout(() => waitForAuthMobile(retries - 1), 200); // aumenta tempo
           } else {
-            console.warn('Funções de autenticação mobile não disponíveis após aguardar o footer.');
+            // Só mostra o aviso se o usuário estiver em tela mobile
+            if (window.innerWidth < 768) {
+              console.warn('Funções de autenticação mobile não disponíveis após aguardar o footer.');
+            }
           }
         }
         waitForAuthMobile();
@@ -57,8 +58,12 @@ export function loadHeader(headerContainerId, authContainerId) {
 
 // Função para obter o ID do usuário logado (ou null)
 function getUserId() {
-  return auth.currentUser ? auth.currentUser.uid : null;
+  if (window.auth && window.auth.currentUser) {
+    return window.auth.currentUser.uid;
+  }
+  return null;
 }
+window.getUserId = getUserId;
 
 // Função para salvar o carrinho no Firestore
 async function saveCartToFirestore(cart) {
@@ -146,6 +151,19 @@ function listenCartCount(uidOrCallback, callback, returnArray) {
 }
 window.listenCartCount = listenCartCount;
 
+// Função utilitária para garantir que só campos serializáveis e definidos vão para o Firestore
+function sanitizeProduct(prod) {
+  const allowed = [
+    'id', 'nome', 'fotos', 'descricao', 'valorComDesconto', 'precoMaximo', 'preco', 'quantidade',
+    'desconto', 'codRed', 'ean', 'laboratorio', 'categoria', 'subcategoria', 'dcb'
+  ];
+  const clean = {};
+  for (const key of allowed) {
+    if (prod[key] !== undefined) clean[key] = prod[key];
+  }
+  return clean;
+}
+
 // Adiciona ao carrinho: sempre salva no Firestore se logado, senão localStorage
 async function addToCart(product, quantidade = 1) {
   let cart = [];
@@ -157,16 +175,18 @@ async function addToCart(product, quantidade = 1) {
     if (index > -1) {
       cart[index].quantidade += quantidade;
     } else {
-      cart.push({ ...product, quantidade });
+      cart.push({ ...sanitizeProduct(product), quantidade });
     }
-    await saveCartToFirestore(cart);
+    // Sanitiza todos os itens antes de salvar
+    const cartSanitized = cart.map(sanitizeProduct);
+    await saveCartToFirestore(cartSanitized);
   } else {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
     const index = cart.findIndex(item => item.id === product.id);
     if (index > -1) {
       cart[index].quantidade += quantidade;
     } else {
-      cart.push({ ...product, quantidade });
+      cart.push({ ...sanitizeProduct(product), quantidade });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
   }
