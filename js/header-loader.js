@@ -32,18 +32,21 @@ export function loadHeader(headerContainerId, authContainerId) {
         // Garante que o menu mobile funcione após o carregamento dinâmico
         if (window.setupMobileMenu) window.setupMobileMenu();
         // Aguarda o carregamento do footer e do script auth-mobile.js
-        function waitForAuthMobile(retries = 20) { // aumenta tentativas
+        function waitForAuthMobile(retries = 40) { // aumenta tentativas
           if (window.auth && window.renderMobileAuth && window.renderAuthMobileMenu) {
             window.auth.onAuthStateChanged(function(user) {
               window.renderMobileAuth(user);
             });
             window.renderAuthMobileMenu(window.auth.currentUser);
           } else if (retries > 0) {
-            setTimeout(() => waitForAuthMobile(retries - 1), 200); // aumenta tempo
+            setTimeout(() => waitForAuthMobile(retries - 1), 250); // aumenta tempo
           } else {
-            // Só mostra o aviso se o usuário estiver em tela mobile
             if (window.innerWidth < 768) {
-              console.warn('Funções de autenticação mobile não disponíveis após aguardar o footer.');
+              console.warn('[MOBILE] Funções de autenticação mobile não disponíveis após aguardar o footer.', {
+                auth: !!window.auth,
+                renderMobileAuth: !!window.renderMobileAuth,
+                renderAuthMobileMenu: !!window.renderAuthMobileMenu
+              });
             }
           }
         }
