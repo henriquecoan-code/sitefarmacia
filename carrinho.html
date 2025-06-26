@@ -270,8 +270,11 @@ document.addEventListener('click', async (e) => {
       renderCart();
     }
   }
-  if (e.target.classList.contains('btn-remove')) {
-    const id = e.target.getAttribute('data-id');
+  if (e.target.classList.contains('btn-remove') || e.target.closest('.btn-remove')) {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = e.target.closest('.btn-remove');
+    const id = btn.getAttribute('data-id');
     let newCart = cart.filter(item => item.id !== id);
     cart = newCart; // Atualiza a variável global ANTES de salvar
     if (userId) {
@@ -280,6 +283,7 @@ document.addEventListener('click', async (e) => {
       salvarCarrinhoLocal();
     }
     renderCart();
+    return;
   }
 });
 // Renderiza sugestões
