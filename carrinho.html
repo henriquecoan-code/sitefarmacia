@@ -7,13 +7,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="css/estilo.css">
   <style>
     .skeleton { animation: pulse 2s infinite ease-in-out; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .sticky-summary { position: sticky; top: 2rem; }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col mt-[56px] md:mt-0">
   <div id="header-container"></div>
   <main class="flex-1 container mx-auto px-2 md:px-8 py-8 flex flex-col md:flex-row gap-8">
     <!-- Lista de produtos do carrinho -->
@@ -69,6 +70,9 @@
     </aside>
   </main>
   <div id="footer-container"></div>
+  <script type="module" src="./js/header-search-integration.js"></script>
+<script src="js/auth-modal.js"></script>
+<script src="js/login-modal-loader.js"></script>
   <script type="module">
 // Firebase imports (ajuste o caminho conforme seu projeto)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
@@ -77,6 +81,7 @@ import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc } from '
 import { firebaseConfig } from './js/firebase-config.js';
 import { loadHeader } from './js/header-loader.js';
 import { loadFooter } from './js/footer-loader.js';
+
 const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
 const auth = getAuth(app);
 window.auth = auth;
@@ -303,10 +308,51 @@ function renderSugestoes() {
 // Inicialização
 window.addEventListener('DOMContentLoaded', async () => {
   await loadHeader('header-container', 'authContainerSecondary');
-  // Garante que Alpine.js processe o header dinâmico
   if (window.Alpine && window.Alpine.initTree) {
     window.Alpine.initTree(document.body);
   }
+  // Script robusto para menu mobile: redireciona para index.html?categoria=...
+  function patchMenuMobileLinks() {
+    document.querySelectorAll('.mobile-menu a, .menu-mobile a').forEach(link => {
+      const texto = link.textContent.trim();
+      const dataCat = link.getAttribute('data-categoria');
+      // Todos os Produtos
+      if (link.id === 'aside-todos' || texto.match(/todos os produtos/i)) {
+        link.setAttribute('href', 'index.html');
+        link.onclick = function(e) {
+          e.preventDefault();
+          window.location.href = 'index.html';
+        };
+      } else if (dataCat) {
+        // Categoria pelo atributo data-categoria
+        link.setAttribute('href', `index.html?categoria=${encodeURIComponent(dataCat)}`);
+        link.onclick = function(e) {
+          e.preventDefault();
+          window.location.href = `index.html?categoria=${encodeURIComponent(dataCat)}`;
+        };
+      } else {
+        // Categoria pelo texto
+        const categorias = [
+          'Referência', 'Referencia', 'Similares', 'Genéricos', 'Genericos', 'Perfumaria', 'Vitaminas', 'Suplementos', 'Hospitalar'
+        ];
+        const cat = categorias.find(cat => texto.toLowerCase().includes(cat.toLowerCase()));
+        if (cat) {
+          link.setAttribute('href', `index.html?categoria=${encodeURIComponent(cat)}`);
+          link.onclick = function(e) {
+            e.preventDefault();
+            window.location.href = `index.html?categoria=${encodeURIComponent(cat)}`;
+          };
+        }
+      }
+    });
+  }
+  // Observa o DOM para garantir que o patch seja aplicado mesmo após re-renderizações
+  const observer = new MutationObserver(() => {
+    patchMenuMobileLinks();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  // Chama uma vez após pequeno delay para garantir
+  setTimeout(patchMenuMobileLinks, 1000);
   await loadFooter('footer-container');
   const freteGuestContainer = document.getElementById('frete-guest-container');
   auth.onAuthStateChanged(async user => {
@@ -398,18 +444,26 @@ if (btnFinalizar) {
       alert('Seu carrinho está vazio!');
       return;
     }
-    let total = 0;
-    const produtos = cartPedido.map(item => {
-      const preco = item.preco || 0;
-      const subtotal = preco * item.quantidade;
-      total += subtotal;
-      return {
-        nome: item.nome,
-        quantidade: item.quantidade,
-        valor: preco.toFixed(2),
-        subtotal: subtotal.toFixed(2)
-      };
-    });
+let total = 0;
+const produtos = cartPedido.map(item => {
+  // Busca o valor igual ao renderCart
+  let preco = 0;
+  if (typeof item.valorComDesconto === 'number') {
+    preco = item.valorComDesconto;
+  } else if (typeof item.precoMaximo === 'number') {
+    preco = item.precoMaximo;
+  } else if (typeof item.preco === 'number') {
+    preco = item.preco;
+  }
+  const subtotal = preco * item.quantidade;
+  total += subtotal;
+  return {
+    nome: item.nome,
+    quantidade: item.quantidade,
+    valor: preco.toFixed(2),
+    subtotal: subtotal.toFixed(2)
+  };
+});
     // Gera número de pedido crescente
     let lastOrderNumber = parseInt(localStorage.getItem('lastOrderNumber') || '0', 10);
     lastOrderNumber += 1;
