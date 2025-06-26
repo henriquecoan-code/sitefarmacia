@@ -42,7 +42,7 @@
           <span>Frete</span>
           <span id="frete-info" class="font-bold text-blue-700">Calcule o frete</span>
         </div>
-        <div class="mb-3">
+        <div class="mb-3" id="frete-guest-container">
           <input id="cep-frete" type="text" maxlength="9" placeholder="Digite seu CEP" class="border rounded px-2 py-1 w-full" />
           <button id="calcular-frete" class="mt-2 w-full bg-blue-700 text-white rounded py-2 font-bold hover:bg-blue-800 transition">Calcular Frete</button>
         </div>
@@ -50,12 +50,6 @@
           <span>Total</span>
           <span id="total" class="text-blue-900">R$ 0,00</span>
         </div>
-        <button id="finalizar-compra" class="w-full bg-green-600 text-white rounded-lg py-3 mt-4 font-bold text-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-          Finalizar Compra
-        </button>
-      </div>
-      <!-- Endereço e pagamento -->
-      <div class="bg-white rounded-2xl shadow p-6 mt-6">
         <h4 class="font-bold text-blue-900 mb-2">Endereço de Entrega</h4>
         <select id="endereco-select" class="border p-2 w-full rounded mb-2"></select>
         <a href="endereco-entrega.html" class="text-blue-600 hover:underline text-sm">Adicionar novo endereço</a>
@@ -67,6 +61,10 @@
           <option value="Dinheiro">Dinheiro</option>
         </select>
         <textarea id="observacoes" placeholder="Observações (opcional)" class="border p-2 w-full mb-2 rounded"></textarea>
+      </div>
+        <button id="finalizar-compra" class="w-full bg-green-600 text-white rounded-lg py-3 mt-4 font-bold text-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          Finalizar Compra
+        </button>
       </div>
     </aside>
   </main>
@@ -310,15 +308,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     window.Alpine.initTree(document.body);
   }
   await loadFooter('footer-container');
+  const freteGuestContainer = document.getElementById('frete-guest-container');
   auth.onAuthStateChanged(async user => {
     if (user) {
       userId = user.uid;
       await onLogin(userId);
       await popularEnderecos(userId);
       await fetchAndRenderCart();
+      if (freteGuestContainer) freteGuestContainer.style.display = 'none';
     } else {
       cart = carregarCarrinhoLocal();
       renderCart();
+      if (freteGuestContainer) freteGuestContainer.style.display = '';
     }
   });
 });
@@ -438,7 +439,7 @@ if (btnFinalizar) {
     // Exibe mensagem de pedido concluído
     const main = document.querySelector('main');
     main.innerHTML = `
-      <div class="flex flex-col items-center justify-center min-h-[60vh]">
+      <div class="flex flex-col text-center items-center justify-center min-h-[60vh]">
         <i class="fas fa-check-circle text-green-500 text-6xl mb-6"></i>
         <h2 class="text-3xl font-bold text-green-700 mb-4">Pedido realizado com sucesso!</h2>
         <p class="text-lg text-gray-700 mb-2">Seu pedido foi enviado para a farmácia e está sendo processado.</p>
