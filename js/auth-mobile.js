@@ -110,7 +110,6 @@ function renderAuthMobileMenu(user) {
           }
         };
       }
-      console.log('Conteúdo após render (não autenticado):', container.innerHTML);
       return; // Não faz mais tentativas
     }
     // ...código original para usuário autenticado...
