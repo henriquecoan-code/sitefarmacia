@@ -167,13 +167,19 @@
     if (window.Alpine && typeof window.Alpine.initTree === 'function') {
       window.Alpine.initTree(document.getElementById('header-container'));
     } else {
-      // Se Alpine ainda não carregou, tenta novamente após um pequeno delay
       setTimeout(() => {
         if (window.Alpine && typeof window.Alpine.initTree === 'function') {
           window.Alpine.initTree(document.getElementById('header-container'));
         }
       }, 100);
     }
+    // Garante o binding do botão de cadastro após o header ser carregado
+    import { setupCadastroModalBtn } from './js/utils.js';
+    setupCadastroModalBtn();
+    // Se o header for recarregado dinamicamente, rebind também
+    document.addEventListener('headerLoaded', () => {
+      setupCadastroModalBtn();
+    });
     // Garante que o auth-mobile.js é carregado após o header
     const scriptAuthMobile = document.createElement('script');
     scriptAuthMobile.src = 'js/auth-mobile.js';
@@ -199,9 +205,6 @@
       document.getElementById('cadastro-modal-placeholder').innerHTML = html;
     }
     await loadCadastroModal();
-
-    import { setupCadastroModalBtn } from './js/utils.js';
-    setupCadastroModalBtn();
 
     // Variáveis globais para filtros
     let allProducts = [];
