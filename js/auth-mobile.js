@@ -126,7 +126,9 @@ function renderAuthMobileMenu(user) {
     if (sair) {
       sair.onclick = function(e) {
         e.preventDefault();
-        if (window.auth) {
+        if (typeof window.handleLogout === 'function') {
+          window.handleLogout();
+        } else if (window.auth && window.auth.signOut) {
           window.auth.signOut().then(function () {
             window.location.reload();
           });
@@ -187,23 +189,19 @@ function observeMobileMenuAuth() {
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function() {
         if (container.offsetParent !== null && !container.classList.contains('hidden')) {
-          // Só renderiza se o conteúdo não estiver correto para o usuário atual
-          let expectedHtml;
           if (window.currentAuthUser) {
-            expectedHtml = '<div class="flex flex-col space-y-1">' +
-              '<a href="minha-conta.html" id="mobileMenuMinhaConta" class="text-blue-900 font-medium hover:underline">Minha Conta</a>' +
-              '<a href="#" id="logoutBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Sair</a>' +
-              '</div>';
+            // Só re-renderiza se não existir o botão Sair
+            if (!document.getElementById('logoutBtnMobileMenu')) {
+              if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
+                window.renderAuthMobileMenu(window.currentAuthUser);
+              }
+            }
           } else {
-            expectedHtml = '<div class="flex flex-col space-y-1">' +
-              '<a href="#" id="loginBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Entrar</a>' +
-              '<a href="#" id="registerBtnMobileMenu" class="text-blue-900 font-medium hover:underline">Cadastrar</a>' +
-              '</div>';
-          }
-          const clean = s => s.replace(/\s+/g, ' ').trim();
-          if (clean(container.innerHTML) !== clean(expectedHtml)) {
-            if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
-              window.renderAuthMobileMenu(window.currentAuthUser);
+            // Para não autenticado, compara estrutura mínima
+            if (!document.getElementById('loginBtnMobileMenu')) {
+              if (window.renderAuthMobileMenu && window.currentAuthUser !== undefined) {
+                window.renderAuthMobileMenu(window.currentAuthUser);
+              }
             }
           }
         }

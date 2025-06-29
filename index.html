@@ -163,6 +163,21 @@
     window.auth = auth;
 
     await loadHeader('header-container', 'authContainerSecondary');
+    // Força Alpine a inicializar o header dinâmico
+    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+      window.Alpine.initTree(document.getElementById('header-container'));
+    } else {
+      // Se Alpine ainda não carregou, tenta novamente após um pequeno delay
+      setTimeout(() => {
+        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+          window.Alpine.initTree(document.getElementById('header-container'));
+        }
+      }, 100);
+    }
+    // Garante que o auth-mobile.js é carregado após o header
+    const scriptAuthMobile = document.createElement('script');
+    scriptAuthMobile.src = 'js/auth-mobile.js';
+    document.body.appendChild(scriptAuthMobile);
     await loadFooter('footer-container');
 
     // Carrega o modal de login dinamicamente
@@ -457,7 +472,7 @@
       let queryRef = coll(db, 'produtos');
       let clauses = [];
       if (currentCategory) clauses.push(where('categoria', '==', currentCategory));
-      if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategory));
+      if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategoria));
       if (currentSearch) {
         clauses.push(where('nome', '>=', currentSearch), where('nome', '<=', currentSearch + '\uf8ff'));
       }
@@ -676,13 +691,58 @@ window.addEventListener('headerSearch', function(e) {
     window.setHeaderSearchHandler(e.detail);
   }
 });
+
+// Função global para logout, usada tanto no desktop quanto no mobile
+window.handleLogout = async function(options = {}) {
+  if (window.auth && window.auth.signOut) {
+    try {
+      await window.auth.signOut();
+    } catch (err) {
+      console.error('Erro ao sair:', err);
+    }
+  }
+  // Fecha o menu mobile se estiver aberto
+  const mobileMenu = document.querySelector('#header-container [data-mobile-menu], #header-container .mobile-menu, #header-container .menu-mobile');
+  if (mobileMenu && mobileMenu.classList.contains('open')) {
+    mobileMenu.classList.remove('open');
+  }
+  // Opcional: recarrega a página ou executa callback
+  if (options.reload !== false) {
+    window.location.reload();
+  } else if (typeof options.onLogout === 'function') {
+    options.onLogout();
+  }
+}
+
+// --- Garantia de binding do botão Sair no menu mobile ---
+setTimeout(() => {
+  const btnSairMobile = document.querySelector('#header-container [data-logout-mobile], #header-container .btn-logout-mobile, #header-container .mobile-logout, #logoutBtnMobileMenu');
+  if (btnSairMobile) {
+    btnSairMobile.onclick = function(e) {
+      e.preventDefault();
+      window.handleLogout();
+    }
+  }
+}, 600);
+
+// Função utilitária para garantir o binding do botão Sair mobile
+window.setupMobileLogoutButton = function(options = {}) {
+  setTimeout(() => {
+    const btnSairMobile = document.querySelector('#header-container [data-logout-mobile], #header-container .btn-logout-mobile, #header-container .mobile-logout, #logoutBtnMobileMenu');
+    if (btnSairMobile) {
+      btnSairMobile.onclick = function(e) {
+        e.preventDefault();
+        window.handleLogout(options);
+      }
+    }
+  }, options.delay || 600);
+}
+
+// Chama a função utilitária ao final do carregamento
+window.setupMobileLogoutButton();
     </script>
-    
-    
-    <script src="js/auth-modal.js"></script>
     <script type="module" src="./js/header-search-integration.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
-          <script type="module" src="./js/header-search-integration.js"></script>
-
+    <script src="js/auth-modal.js"></script>
 </body>
 </html>

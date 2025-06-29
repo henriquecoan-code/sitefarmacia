@@ -367,5 +367,48 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
   });
 })();
 </script>
+<script>
+// Função global para logout (desktop e mobile)
+window.handleLogout = async function(options = {}) {
+  if (window.auth && window.auth.signOut) {
+    try {
+      await window.auth.signOut();
+    } catch (err) {
+      console.error('Erro ao sair:', err);
+    }
+  }
+  // Fecha o menu mobile se estiver aberto
+  const mobileMenu = document.querySelector('#topbar-fixed aside');
+  if (mobileMenu && mobileMenu.parentElement && mobileMenu.parentElement.style.display !== 'none') {
+    // Fecha o menu mobile via Alpine
+    const topbar = document.querySelector('#topbar-fixed');
+    if (topbar && topbar.__x && topbar.__x.$data) {
+      topbar.__x.$data.mobileMenuOpen = false;
+    }
+  }
+  // Recarrega a página
+  window.location.reload();
+};
+
+// Função para garantir o binding do botão Sair mobile SEM loop
+window.setupMobileLogoutButton = function(options = {}) {
+  // Aguarda o menu mobile ser renderizado
+  setTimeout(() => {
+    // Seleciona o botão sair do menu mobile (ajuste o seletor conforme seu HTML)
+    const btnSairMobile = document.querySelector('#authContainerSecondaryMobileMenu [id^="logoutBtn"], #authContainerSecondaryMobileMenu .btn-logout-mobile, #authContainerSecondaryMobileMenu [data-logout-mobile]');
+    if (btnSairMobile) {
+      btnSairMobile.onclick = function(e) {
+        e.preventDefault();
+        window.handleLogout(options);
+      };
+    }
+  }, options.delay || 300);
+};
+
+// Garante o binding sempre que o menu mobile abrir
+window.addEventListener('mobileMenuOpened', function() {
+  window.setupMobileLogoutButton();
+});
+</script>
 </body>
 </html>
