@@ -308,6 +308,67 @@ function renderSugestoes() {
 // Inicialização
 window.addEventListener('DOMContentLoaded', async () => {
   await loadHeader('header-container', 'authContainerSecondary');
+  document.dispatchEvent(new CustomEvent('headerLoaded'));
+
+  // Garante que o modal de login está presente e funcional
+  async function ensureLoginModal() {
+    if (!document.getElementById('login-modal-overlay')) {
+      // Carrega o HTML do modal
+      const resp = await fetch('partials/login-modal.html');
+      const html = await resp.text();
+      let placeholder = document.getElementById('login-modal-placeholder');
+      if (!placeholder) {
+        placeholder = document.createElement('div');
+        placeholder.id = 'login-modal-placeholder';
+        document.body.prepend(placeholder);
+      }
+      placeholder.innerHTML = html;
+    }
+    // Carrega o script do modal como módulo
+    if (!window.openLoginModal) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = './js/login-modal.js';
+      document.body.appendChild(script);
+    }
+  }
+  await ensureLoginModal();
+
+  // Rebind do botão Entrar
+  setTimeout(() => {
+    let btnEntrar = document.querySelector('#loginBtn');
+    if (btnEntrar) {
+      btnEntrar.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (window.openLoginModal) {
+          window.openLoginModal();
+        } else {
+          console.warn('window.openLoginModal não está disponível!');
+        }
+      });
+      console.log('Evento de login/cadastro rebindado no botão Entrar (#loginBtn).');
+    } else {
+      console.warn('Botão Entrar (#loginBtn) não encontrado no header após loadHeader.');
+    }
+    // Botão de cadastro (opcional)
+    let btnCadastro = document.querySelector('#registerBtn');
+    if (btnCadastro) {
+      btnCadastro.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (window.showCadastroModal) {
+          window.showCadastroModal();
+        } else if (typeof abrirCadastroModal === 'function') {
+          abrirCadastroModal();
+        } else if (typeof setupCadastroModalBtn === 'function') {
+          setupCadastroModalBtn();
+        } else {
+          console.warn('Nenhuma função de modal de cadastro encontrada!');
+        }
+      });
+      console.log('Evento de cadastro rebindado no botão Cadastrar (#registerBtn).');
+    }
+  }, 1000);
+
   if (window.Alpine && window.Alpine.initTree) {
     window.Alpine.initTree(document.body);
   }
