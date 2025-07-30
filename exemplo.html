@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Emitir NF-e (Teste)</title>
+</head>
+<body>
+  <h1>Emissão de Nota Fiscal de Produto (Homologação)</h1>
+  <form id="nfeForm">
+    <label>Nome do cliente: <input type="text" name="nome" required></label><br>
+    <label>Email do cliente: <input type="email" name="email" required></label><br>
+    <label>Produto: <input type="text" name="produto" required></label><br>
+    <label>Valor: <input type="number" name="valor" required></label><br>
+    <button type="submit">Emitir NF-e</button>
+  </form>
+  <pre id="resultado"></pre>
+  <script>
+    document.getElementById('nfeForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const nome = e.target.nome.value;
+      const email = e.target.email.value;
+      const produto = e.target.produto.value;
+      const valor = e.target.valor.value;
+
+      // Dados mínimos simulados para NFE.io (ajuste conforme docs)
+      const nfeData = {
+        customer: {
+          name: nome,
+          email: email,
+          federalTaxId: '00000000000', // CPF/CNPJ fictício para teste
+        },
+        items: [{
+          description: produto,
+          quantity: 1,
+          price: parseFloat(valor),
+          cfop: '5102', // CFOP padrão para vendas internas
+        }],
+        operationNature: 'Venda de mercadoria',
+        // outros campos obrigatórios podem ser necessários
+      };
+
+      const response = await fetch('http://localhost:3000/emitir-nfe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nfeData)
+      });
+      const result = await response.json();
+      document.getElementById('resultado').textContent = JSON.stringify(result, null, 2);
+    };
+  </script>
+</body>
+</html>
