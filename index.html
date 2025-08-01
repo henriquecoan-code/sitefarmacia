@@ -59,6 +59,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" onerror="console.warn('FontAwesome CDN failed')">
     <!-- Fallback dependencies -->
     <script src="js/fallback-loader.js"></script>
+    <script src="js/demo-products.js"></script>
     <script src="js/performance-init.js" defer></script>
     <link rel="stylesheet" href="css/estilo.css">
     <link rel="stylesheet" href="css/performance.css">
@@ -204,6 +205,11 @@
     <div id="cadastro-modal-placeholder" class="hidden"></div>
 
     <script type="module">
+    // Define global functions before module initialization
+    window.loadDemoProductsIntoPage = function() {
+      console.log('loadDemoProductsIntoPage called, but not yet initialized');
+    };
+
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
     import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
     import { getFirestore, collection, getDocs, getCountFromServer } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
@@ -569,25 +575,106 @@
 
     // Atualiza a contagem total de produtos para filtros/busca
     async function updateTotalCount() {
-      const { getCountFromServer, query, where, collection: coll } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-      let queryRef = coll(db, 'produtos');
-      let clauses = [];
-      if (currentCategory) clauses.push(where('categoria', '==', currentCategory));
-      if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategoria));
-      if (currentSearch) {
-        clauses.push(where('nome', '>=', currentSearch), where('nome', '<=', currentSearch + '\uf8ff'));
+      try {
+        const { getCountFromServer, query, where, collection: coll } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        let queryRef = coll(db, 'produtos');
+        let clauses = [];
+        if (currentCategory) clauses.push(where('categoria', '==', currentCategory));
+        if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategory));
+        if (currentSearch) {
+          clauses.push(where('nome', '>=', currentSearch), where('nome', '<=', currentSearch + '\uf8ff'));
+        }
+        let q = clauses.length ? query(queryRef, ...clauses) : queryRef;
+        const countSnap = await getCountFromServer(q);
+        totalProductsCount = countSnap.data().count || 0;
+      } catch (error) {
+        console.warn('Could not update total count from Firebase, using demo data');
+        totalProductsCount = window.demoProducts ? window.demoProducts.length : 0;
       }
-      let q = clauses.length ? query(queryRef, ...clauses) : queryRef;
-      const countSnap = await getCountFromServer(q);
-      totalProductsCount = countSnap.data().count || 0;
     }
 
     // Inicialização: busca total e carrega a primeira página
     async function initPaginatedProducts() {
-      await updateTotalCount();
-      pageCursors = [null];
-      fetchProductsPaginated(1);
+      // Check if Firebase is available
+      try {
+        if (window.firebaseApp || window.firebase) {
+          await updateTotalCount();
+          pageCursors = [null];
+          fetchProductsPaginated(1);
+        } else {
+          // Firebase not available, wait for demo products
+          setTimeout(function() {
+            if (window.demoProducts) {
+              loadDemoProductsIntoPage();
+            } else {
+              // If still no demo products, try again
+              setTimeout(function() {
+                if (window.demoProducts) {
+                  loadDemoProductsIntoPage();
+                } else {
+                  console.warn('No products available in offline mode');
+                  loadingSkeleton.classList.add('hidden');
+                  emptyState.classList.remove('hidden');
+                }
+              }, 1000);
+            }
+          }, 500);
+        }
+      } catch (error) {
+        console.error('Error initializing products:', error);
+        // Fallback to demo products
+        setTimeout(function() {
+          if (window.demoProducts) {
+            loadDemoProductsIntoPage();
+          }
+        }, 500);
+      }
     }
+    
+    // Function to load demo products into the page
+    window.loadDemoProductsIntoPage = function() {
+      if (!window.demoProducts) {
+        console.warn('No demo products available');
+        return;
+      }
+      
+      console.log('Loading demo products into page...');
+      
+      allProducts = window.demoProducts;
+      totalProductsCount = allProducts.length;
+      currentPage = 1;
+      
+      loadingSkeleton.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      
+      // Apply current filters
+      let filtered = allProducts;
+      if (currentCategory) {
+        filtered = filtered.filter(p => normalize(p.categoria) === normalize(currentCategory));
+      }
+      if (currentSubcategory) {
+        filtered = filtered.filter(p => normalize(String(p.subcategoria || '')) === normalize(currentSubcategoria));
+      }
+      if (currentSearch) {
+        const searchUpper = currentSearch.toUpperCase();
+        filtered = filtered.filter(p =>
+          (p.nome && p.nome.toUpperCase().includes(searchUpper)) ||
+          (p.dcb && p.dcb.toUpperCase().includes(searchUpper))
+        );
+      }
+      
+      filteredProducts = filtered;
+      renderPagination(filtered.length, currentPage, PRODUCTS_PER_PAGE);
+      
+      // Show first page
+      const startIdx = (currentPage - 1) * PRODUCTS_PER_PAGE;
+      const endIdx = startIdx + PRODUCTS_PER_PAGE;
+      renderProducts(filtered.slice(startIdx, endIdx));
+      
+      updateSubcategories();
+      
+      console.log('Demo products loaded successfully:', filtered.length, 'products');
+    };
 
     // Função para renderizar produtos (substitua a função renderProducts existente)
     function renderProducts(produtos) {

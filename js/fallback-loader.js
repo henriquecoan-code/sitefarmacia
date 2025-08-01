@@ -100,7 +100,7 @@
         }
     }, 1500);
     
-    // Firebase fallback - provide basic structure
+    // Firebase fallback - provide basic structure and demo products
     setTimeout(function() {
         if (!window.firebase && !window.firebaseApp) {
             console.warn('Firebase not loaded - site will run in offline mode');
@@ -109,7 +109,162 @@
                 apps: [],
                 initializeApp: function() { return {}; }
             };
+            
+            // Load demo products for offline mode
+            loadDemoProducts();
         }
     }, 2000);
+    
+    // Function to load demo products when Firebase is unavailable
+    function loadDemoProducts() {
+        // Demo products based on the CSV data and available images
+        window.demoProducts = [
+            {
+                id: 'demo-1',
+                nome: 'Paracetamol 750mg',
+                categoria: 'Medicamentos',
+                subcategoria: 'Analgésico',
+                ean: '7891234567890',
+                codRed: '12345',
+                laboratorio: 'Farmalab',
+                dcb: 'Paracetamol',
+                precoMaximo: 22.50,
+                desconto: 0.12,
+                valorComDesconto: 19.80,
+                quantidade: 100,
+                tags: 'analgésico, febre',
+                descricao: 'Analgésico para dores e febre',
+                fotos: ['img/paracetamol750mg.png']
+            },
+            {
+                id: 'demo-2',
+                nome: 'Shampoo Anticaspa',
+                categoria: 'Perfumaria',
+                subcategoria: 'Higiene Pessoal',
+                ean: '7891234567001',
+                codRed: '54321',
+                laboratorio: 'BelezaCo',
+                dcb: 'Piroctona Olamina',
+                precoMaximo: 18.00,
+                desconto: 0.17,
+                valorComDesconto: 14.94,
+                quantidade: 50,
+                tags: 'shampoo, anticaspa',
+                descricao: 'Shampoo para controle de caspa',
+                fotos: ['img/produtos/produto2.jpg']
+            },
+            {
+                id: 'demo-3',
+                nome: 'Vitamina C 1g',
+                categoria: 'Suplementos',
+                subcategoria: 'Vitaminas',
+                ean: '7891234567002',
+                codRed: '67890',
+                laboratorio: 'NutriLab',
+                dcb: 'Ácido Ascórbico',
+                precoMaximo: 30.00,
+                desconto: 0.17,
+                valorComDesconto: 24.90,
+                quantidade: 80,
+                tags: 'vitamina, suplemento',
+                descricao: 'Suplemento de vitamina C',
+                fotos: ['img/produtos/produto3.jpg']
+            },
+            {
+                id: 'demo-4',
+                nome: 'Dipirona 500mg',
+                categoria: 'Genéricos',
+                subcategoria: 'Analgésico',
+                ean: '7891234567004',
+                codRed: '33445',
+                laboratorio: 'GenericLab',
+                dcb: 'Dipirona',
+                precoMaximo: 15.50,
+                desconto: 0.10,
+                valorComDesconto: 13.95,
+                quantidade: 75,
+                tags: 'analgésico, antitérmico',
+                descricao: 'Analgésico e antitérmico genérico',
+                fotos: ['img/produtos/produto4.jpg']
+            },
+            {
+                id: 'demo-5',
+                nome: 'Protetor Solar FPS 60',
+                categoria: 'Perfumaria',
+                subcategoria: 'Proteção Solar',
+                ean: '7891234567005',
+                codRed: '55667',
+                laboratorio: 'SolarCare',
+                dcb: 'Octinoxato',
+                precoMaximo: 45.00,
+                desconto: 0.15,
+                valorComDesconto: 38.25,
+                quantidade: 30,
+                tags: 'protetor solar, fps60',
+                descricao: 'Protetor solar com fator de proteção 60',
+                fotos: ['img/produtos/produto5.jpg']
+            },
+            {
+                id: 'demo-6',
+                nome: 'Multivitamínico Adulto',
+                categoria: 'Suplementos',
+                subcategoria: 'Vitaminas',
+                ean: '7891234567006',
+                codRed: '77889',
+                laboratorio: 'VitaLab',
+                dcb: 'Multivitamínico',
+                precoMaximo: 55.00,
+                desconto: 0.20,
+                valorComDesconto: 44.00,
+                quantidade: 60,
+                tags: 'multivitamínico, adulto',
+                descricao: 'Complexo vitamínico para adultos',
+                fotos: ['img/produtos/produto6.webp']
+            },
+            {
+                id: 'demo-7',
+                nome: 'Ibuprofeno 600mg',
+                categoria: 'Similares',
+                subcategoria: 'Anti-inflamatório',
+                ean: '7891234567007',
+                codRed: '99001',
+                laboratorio: 'MediLab',
+                dcb: 'Ibuprofeno',
+                precoMaximo: 28.50,
+                desconto: 0.08,
+                valorComDesconto: 26.22,
+                quantidade: 45,
+                tags: 'anti-inflamatório, analgésico',
+                descricao: 'Anti-inflamatório e analgésico',
+                fotos: ['img/produtos/produto1.jpg']
+            },
+            {
+                id: 'demo-8',
+                nome: 'Soro Fisiológico 500ml',
+                categoria: 'Hospitalar',
+                subcategoria: 'Soluções',
+                ean: '7891234567008',
+                codRed: '11223',
+                laboratorio: 'HospitalCare',
+                dcb: 'Cloreto de Sódio',
+                precoMaximo: 12.00,
+                desconto: 0.05,
+                valorComDesconto: 11.40,
+                quantidade: 120,
+                tags: 'soro, fisiológico',
+                descricao: 'Soro fisiológico para uso hospitalar',
+                fotos: ['img/medicamento.png']
+            }
+        ];
+        
+        // Trigger products loaded event for the main script
+        setTimeout(function() {
+            if (typeof window.loadDemoProductsIntoPage === 'function') {
+                window.loadDemoProductsIntoPage();
+            }
+        }, 500);
+        
+        console.log('Loaded demo products for offline mode');
+    }
     
 })();
