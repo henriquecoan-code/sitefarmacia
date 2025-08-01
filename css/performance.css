@@ -1,0 +1,80 @@
+/* Performance optimizations */
+
+/* Lazy loading for images */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}
+
+/* Optimize animations to use GPU */
+.transition-transform,
+.hover\:scale-\[1\.025\]:hover,
+.card-produto {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .shimmer::after {
+    animation: none;
+  }
+  
+  .animate-pulse {
+    animation: none;
+  }
+}
+
+/* Improve text rendering */
+body {
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize for high DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Critical CSS for above the fold content */
+.critical-section {
+  contain: layout style paint;
+}
+
+/* Lazy load third-party content */
+.third-party-widget {
+  contain: layout style paint;
+  will-change: auto;
+}
+
+/* Optimize focus states for accessibility */
+.focus\:ring-2:focus {
+  transition: box-shadow 0.15s ease-in-out;
+}
+
+/* Improve scrolling performance */
+.overflow-y-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Resource hints for critical assets */
+.preload-hint::after {
+  content: '';
+  display: none;
+  background: url('img/logo.png'), url('img/medicamento.png');
+}

@@ -24,7 +24,7 @@
 
 ## Limpeza de segurança e otimização
 
-- [ ] Excluir a pasta `backend/` e todo seu conteúdo, pois não é mais necessário para o funcionamento do site.
-- [ ] Remover eventuais referências ao backend em `README.md` ou outros arquivos de documentação.
-- [ ] Garantir que o fluxo de produtos está 100% via frontend + Firebase.
-- [ ] Testar o site após a exclusão para garantir que tudo funciona normalmente.
+- [x] Excluir a pasta `backend/` e todo seu conteúdo, pois não é mais necessário para o funcionamento do site.
+- [x] Remover eventuais referências ao backend em `README.md` ou outros arquivos de documentação.
+- [x] Garantir que o fluxo de produtos está 100% via frontend + Firebase.
+- [x] Testar o site após a exclusão para garantir que tudo funciona normalmente.

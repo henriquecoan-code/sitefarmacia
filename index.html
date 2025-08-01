@@ -3,16 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farmácia Online - Produtos</title>
-    <meta id="meta-description" name="description" content="Produtos de farmácia, medicamentos, perfumaria, genéricos, suplementos e mais. Entrega rápida e preço baixo.">
-    <script id="ldjson-schema" type="application/ld+json"></script>
+    <title>Farmácia São Benedito - Medicamentos Online com Entrega Rápida</title>
+    <meta id="meta-description" name="description" content="Farmácia online com medicamentos de referência, genéricos, similares, perfumaria e suplementos. Compre com segurança na Farmácia São Benedito - entrega rápida e preços baixos.">
+    <meta name="keywords" content="farmácia online, medicamentos, genéricos, similares, perfumaria, suplementos, vitaminas, entrega rápida">
+    <meta name="author" content="Farmácia São Benedito">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="Farmácia São Benedito - Medicamentos Online">
+    <meta property="og:description" content="Farmácia online com medicamentos de referência, genéricos, similares, perfumaria e suplementos. Entrega rápida e preços baixos.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://farmaciasaobenedito.com.br">
+    <meta property="og:image" content="img/logo.png">
+    <meta property="og:locale" content="pt_BR">
+    
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Farmácia São Benedito - Medicamentos Online">
+    <meta name="twitter:description" content="Farmácia online com medicamentos de referência, genéricos, similares, perfumaria e suplementos.">
+    <meta name="twitter:image" content="img/logo.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/estilo.css" as="style">
+    <link rel="preload" href="js/fallback-loader.js" as="script">
+    
+    <script id="ldjson-schema" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Farmácia São Benedito",
+      "description": "Farmácia online com medicamentos de referência, genéricos, similares, perfumaria e suplementos. Entrega rápida e preços baixos.",
+      "url": "https://farmaciasaobenedito.com.br",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://farmaciasaobenedito.com.br/?busca={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Farmácia São Benedito",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://farmaciasaobenedito.com.br/img/logo.png"
+        }
+      }
+    }
+    </script>
     <!-- External dependencies with fallbacks -->
     <script src="https://cdn.tailwindcss.com" onerror="console.warn('Tailwind CDN failed')"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer onerror="console.warn('Alpine CDN failed')"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" onerror="console.warn('FontAwesome CDN failed')">
     <!-- Fallback dependencies -->
     <script src="js/fallback-loader.js"></script>
+    <script src="js/performance-init.js" defer></script>
     <link rel="stylesheet" href="css/estilo.css">
+    <link rel="stylesheet" href="css/performance.css">
     <!-- Removidos scripts compat e inicialização duplicada do Firebase -->
     <style>
       .shimmer {
@@ -48,15 +97,15 @@
     <!-- Wrapper centralizado -->
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row">
         <!-- Menu Lateral Esquerdo -->
-        <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto">
+        <aside class="hidden md:block w-60 bg-white shadow-lg overflow-y-auto" role="navigation" aria-label="Categorias de produtos">
             <nav class="flex flex-col space-y-4 px-6 mt-8">
-                <a href="#" class="text-blue-900 font-bold hover:text-blue-700 transition" id="aside-todos">Todos os Produtos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Referência">Referência</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Similares">Similares</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Genéricos">Genéricos</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Perfumaria">Perfumaria</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Suplementos">Vitaminas</a>
-                <a href="#" class="text-gray-700 hover:text-blue-700 transition" data-categoria="Hospitalar">Hospitalar</a>
+                <a href="#" class="text-blue-900 font-bold hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" id="aside-todos" aria-label="Todos os produtos">Todos os Produtos</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" data-categoria="Referência" aria-label="Medicamentos de referência">Referência</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" data-categoria="Similares" aria-label="Medicamentos similares">Similares</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" data-categoria="Genéricos" aria-label="Medicamentos genéricos">Genéricos</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" data-categoria="Perfumaria" aria-label="Produtos de perfumaria">Perfumaria</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" data-categoria="Suplementos" aria-label="Vitaminas e suplementos">Vitaminas</a>
+                <a href="#" class="text-gray-700 hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" data-categoria="Hospitalar" aria-label="Produtos hospitalares">Hospitalar</a>
             </nav>
         </aside>
         <!-- Conteúdo principal -->
@@ -66,7 +115,8 @@
                     <h2 class="text-3xl font-bold text-blue-900 mr-4 mb-4 md:mb-0">Nossos Produtos</h2>
                     <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
                         <div class="relative w-full sm:w-auto">
-                            <select id="filtro-categoria" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                            <label for="filtro-categoria" class="sr-only">Filtrar por categoria</label>
+                            <select id="filtro-categoria" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto" aria-label="Selecionar categoria">
                                 <option value="">Todas as categorias</option>
                                 <option value="Referência">Referência</option>
                                 <option value="Similares">Similares</option>
@@ -75,12 +125,13 @@
                                 <option value="Suplementos">Vitaminas</option>
                                 <option value="Hospitalar">Hospitalar</option>
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700" aria-hidden="true">
                                 <i class="fas fa-chevron-down"></i>
                             </div>
                         </div>
                         <div class="relative w-full sm:w-auto">
-                            <select id="filtro-subcategoria" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto ml-0 mt-2 sm:ml-2 sm:mt-0">
+                            <label for="filtro-subcategoria" class="sr-only">Filtrar por subcategoria</label>
+                            <select id="filtro-subcategoria" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto ml-0 mt-2 sm:ml-2 sm:mt-0" aria-label="Selecionar subcategoria">
                                 <option value="">Todas as subcategorias</option>
                             </select>
                         </div>
@@ -91,57 +142,58 @@
                 </div>
 
                 <!-- Loading Skeleton -->
-                <div id="loading-skeleton" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div id="loading-skeleton" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" role="status" aria-label="Carregando produtos" aria-live="polite">
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
-                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
+                        <div class="bg-gray-200 h-40 w-full shimmer" aria-hidden="true"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
-                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer" aria-hidden="true"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer" aria-hidden="true"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer" aria-hidden="true"></div>
                         </div>
                     </div>
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
-                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
+                        <div class="bg-gray-200 h-40 w-full shimmer" aria-hidden="true"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
-                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer" aria-hidden="true"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer" aria-hidden="true"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer" aria-hidden="true"></div>
                         </div>
                     </div>
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
-                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
+                        <div class="bg-gray-200 h-40 w-full shimmer" aria-hidden="true"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
-                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer" aria-hidden="true"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer" aria-hidden="true"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer" aria-hidden="true"></div>
                         </div>
                     </div>
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden skeleton animate-pulse border border-gray-100">
-                        <div class="bg-gray-200 h-40 w-full shimmer"></div>
+                        <div class="bg-gray-200 h-40 w-full shimmer" aria-hidden="true"></div>
                         <div class="p-4">
-                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer"></div>
-                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer"></div>
-                            <div class="h-10 bg-gray-200 rounded shimmer"></div>
+                            <div class="h-6 bg-gray-200 rounded w-2/3 mb-3 shimmer" aria-hidden="true"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-4 shimmer" aria-hidden="true"></div>
+                            <div class="h-10 bg-gray-200 rounded shimmer" aria-hidden="true"></div>
                         </div>
                     </div>
+                    <span class="sr-only">Carregando produtos da farmácia...</span>
                 </div>
 
                 <!-- Lista de Produtos -->
-                <div id="lista-produtos" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div id="lista-produtos" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" role="main" aria-label="Lista de produtos da farmácia">
                     <!-- Os produtos serão inseridos via Firebase -->
                 </div>
 
                 <!-- Empty State -->
-                <div id="empty-state" class="hidden text-center py-12">
-                    <i class="fas fa-search text-5xl text-gray-300 mb-4"></i>
+                <div id="empty-state" class="hidden text-center py-12" role="status" aria-live="polite">
+                    <i class="fas fa-search text-5xl text-gray-300 mb-4" aria-hidden="true"></i>
                     <h3 class="text-xl font-medium text-gray-500">Nenhum produto encontrado</h3>
                     <p class="text-gray-400 mt-2">Tente ajustar sua busca ou filtro</p>
                 </div>
 
                 <!-- Paginação -->
-                <div id="pagination-container" class="flex justify-center items-center mt-8 mb-4 space-x-2 hidden">
+                <nav id="pagination-container" class="flex justify-center items-center mt-8 mb-4 space-x-2 hidden" role="navigation" aria-label="Navegação da paginação de produtos">
                     <!-- Os botões de paginação serão inseridos aqui -->
-                </div>
+                </nav>
             </section>
         </main>
         </div>
@@ -373,8 +425,12 @@
       // Botão anterior
       const prevBtn = document.createElement('button');
       prevBtn.textContent = 'Anterior';
-      prevBtn.className = 'px-3 py-1 rounded bg-gray-200 hover:bg-blue-200 text-blue-900 disabled:opacity-50';
+      prevBtn.className = 'px-3 py-1 rounded bg-gray-200 hover:bg-blue-200 text-blue-900 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500';
       prevBtn.disabled = page === 1;
+      prevBtn.setAttribute('aria-label', 'Página anterior');
+      if (page === 1) {
+        prevBtn.setAttribute('aria-disabled', 'true');
+      }
       prevBtn.onclick = () => {
         if (currentPage > 1) {
           fetchProductsPaginated(currentPage - 1);
@@ -389,8 +445,12 @@
       for (let i = start; i <= end; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
-        btn.className = 'px-3 py-1 rounded ' + (i === page ? 'bg-blue-700 text-white font-bold' : 'bg-gray-200 hover:bg-blue-200 text-blue-900');
+        btn.className = 'px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ' + (i === page ? 'bg-blue-700 text-white font-bold' : 'bg-gray-200 hover:bg-blue-200 text-blue-900');
         btn.disabled = i === page;
+        btn.setAttribute('aria-label', `Página ${i}`);
+        if (i === page) {
+          btn.setAttribute('aria-current', 'page');
+        }
         btn.onclick = () => {
           fetchProductsPaginated(i);
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -400,8 +460,12 @@
       // Botão próximo
       const nextBtn = document.createElement('button');
       nextBtn.textContent = 'Próxima';
-      nextBtn.className = 'px-3 py-1 rounded bg-gray-200 hover:bg-blue-200 text-blue-900 disabled:opacity-50';
+      nextBtn.className = 'px-3 py-1 rounded bg-gray-200 hover:bg-blue-200 text-blue-900 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500';
       nextBtn.disabled = page === totalPages;
+      nextBtn.setAttribute('aria-label', 'Próxima página');
+      if (page === totalPages) {
+        nextBtn.setAttribute('aria-disabled', 'true');
+      }
       nextBtn.onclick = () => {
         if (currentPage < totalPages) {
           fetchProductsPaginated(currentPage + 1);
@@ -532,29 +596,31 @@
         const descontoPercent = temDesconto ? Math.round(product.desconto * 100) : null;
         const productElement = document.createElement('div');
         productElement.className = 'card-produto bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col p-3 transition-transform hover:scale-[1.025] hover:shadow-2xl duration-150';
+        productElement.setAttribute('role', 'article');
+        productElement.setAttribute('aria-label', `Produto: ${product.nome}`);
         productElement.innerHTML = `
           <div class="relative flex flex-col items-center justify-center bg-gradient-to-t from-gray-50 to-white rounded-xl overflow-hidden pt-3 pb-2">
-            ${temDesconto ? `<span class='absolute top-2 right-2 bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border border-red-200 z-10'>-${descontoPercent}%</span>` : ''}
-            <img src="${fotoSrc}" alt="Imagem do Produto" class="w-24 h-24 object-contain bg-white rounded shadow border border-gray-200" onerror="this.onerror=null;this.src='img/medicamento.png';" data-produto-id="${product.id}" />
+            ${temDesconto ? `<span class='absolute top-2 right-2 bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border border-red-200 z-10' aria-label='Desconto de ${descontoPercent}%'>-${descontoPercent}%</span>` : ''}
+            <img src="${fotoSrc}" alt="Imagem do produto ${product.nome}" class="w-24 h-24 object-contain bg-white rounded shadow border border-gray-200" onerror="this.onerror=null;this.src='img/medicamento.png';" data-produto-id="${product.id}" loading="lazy" />
           </div>
           <div class="flex flex-col flex-1 justify-between mt-2">
-            ${product.codRed ? `<span class='inline-block mb-1 bg-blue-100 text-blue-800 text-[0.70rem] font-semibold px-2 py-0.5 rounded-full self-center'>Cod: ${product.codRed}</span>` : ''}
-            <h3 class="nome text-blue-900 font-bold text-base leading-tight truncate-2-lines cursor-pointer text-center mb-1" title="${product.nome}" data-produto-id="${product.id}">${product.nome}</h3>
-            <div class="flex flex-row items-end justify-end gap-2 my-0 w-full">
-              ${temDesconto ? `<span class='text-xs text-gray-400 line-through'>R$ ${precoOriginal}</span>` : ''}
-              <span class="text-lg font-bold text-green-700">R$ ${precoDesconto}</span>
+            ${product.codRed ? `<span class='inline-block mb-1 bg-blue-100 text-blue-800 text-[0.70rem] font-semibold px-2 py-0.5 rounded-full self-center' aria-label='Código de referência: ${product.codRed}'>Cod: ${product.codRed}</span>` : ''}
+            <h3 class="nome text-blue-900 font-bold text-base leading-tight truncate-2-lines cursor-pointer text-center mb-1" title="${product.nome}" data-produto-id="${product.id}" tabindex="0" role="link" aria-label="Ver detalhes de ${product.nome}">${product.nome}</h3>
+            <div class="flex flex-row items-end justify-end gap-2 my-0 w-full" aria-label="Preços do produto">
+              ${temDesconto ? `<span class='text-xs text-gray-400 line-through' aria-label='Preço original: R$ ${precoOriginal}'>R$ ${precoOriginal}</span>` : ''}
+              <span class="text-lg font-bold text-green-700" aria-label="Preço com desconto: R$ ${precoDesconto}">R$ ${precoDesconto}</span>
             </div>
             <div class="flex items-center justify-center gap-2 my-1">
-              <div class="relative flex items-center gap-0 mt-3.5">
-                <button type="button" class="qty-btn decrement flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">-</button>
-                <input type="number" min="1" value="1" class="input-qty w-7 h-6 text-center text-base font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none mx-1" style="appearance: textfield;" title="Quantidade" />
-                <button type="button" class="qty-btn increment flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">+</button>
+              <div class="relative flex items-center gap-0 mt-3.5" role="group" aria-label="Selecionar quantidade">
+                <button type="button" class="qty-btn decrement flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Diminuir quantidade">-</button>
+                <input type="number" min="1" value="1" class="input-qty w-7 h-6 text-center text-base font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none mx-1" style="appearance: textfield;" title="Quantidade" aria-label="Quantidade do produto" />
+                <button type="button" class="qty-btn increment flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Aumentar quantidade">+</button>
               </div>
-              <button class="btn-carrinho add-cart-btn flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-all duration-150 h-9">
-                <span class="cart-btn-text flex items-center gap-1 sm:inline hidden"><i class="fas fa-cart-plus"></i>  Adicionar</span>
-                <span class="cart-btn-text flex items-center gap-1 sm:hidden"><i class="fas fa-cart-plus"></i></span>
-                <span class="cart-btn-loading hidden"><i class='fas fa-spinner fa-spin'></i></span>
-                <span class="cart-btn-ok hidden"><i class='fas fa-check text-green-400'></i></span>
+              <button class="btn-carrinho add-cart-btn flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-all duration-150 h-9 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Adicionar ${product.nome} ao carrinho">
+                <span class="cart-btn-text flex items-center gap-1 sm:inline hidden"><i class="fas fa-cart-plus" aria-hidden="true"></i>  Adicionar</span>
+                <span class="cart-btn-text flex items-center gap-1 sm:hidden"><i class="fas fa-cart-plus" aria-hidden="true"></i></span>
+                <span class="cart-btn-loading hidden" aria-hidden="true"><i class='fas fa-spinner fa-spin'></i></span>
+                <span class="cart-btn-ok hidden" aria-hidden="true"><i class='fas fa-check text-green-400'></i></span>
               </button>
             </div>
           </div>
@@ -564,9 +630,17 @@
         const img = productElement.querySelector('img[data-produto-id]');
         const nome = productElement.querySelector('h3[data-produto-id]');
         [img, nome].forEach(el => {
-          if (el) el.addEventListener('click', () => {
-            window.location.href = `produto_detalhes.html?id=${product.id}`;
-          });
+          if (el) {
+            el.addEventListener('click', () => {
+              window.location.href = `produto_detalhes.html?id=${product.id}`;
+            });
+            el.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.location.href = `produto_detalhes.html?id=${product.id}`;
+              }
+            });
+          }
         });
         // Botão com feedback visual e integração com quantidade
         const btn = productElement.querySelector('.add-cart-btn');
