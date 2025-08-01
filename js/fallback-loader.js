@@ -112,8 +112,12 @@
             
             // Load demo products for offline mode
             loadDemoProducts();
+        } else {
+            // Firebase is available, but still load demo products as fallback
+            // This ensures demo products are available if Firebase database is empty
+            loadDemoProducts();
         }
-    }, 2000);
+    }, 1000);
     
     // Function to load demo products when Firebase is unavailable
     function loadDemoProducts() {
@@ -262,7 +266,7 @@
             if (typeof window.loadDemoProductsIntoPage === 'function') {
                 window.loadDemoProductsIntoPage();
             }
-        }, 500);
+        }, 100);
         
         console.log('Loaded demo products for offline mode');
     }

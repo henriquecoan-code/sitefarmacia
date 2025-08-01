@@ -419,6 +419,12 @@
         }
         loadingSkeleton.classList.add('hidden');
         if (!Array.isArray(produtos) || produtos.length === 0) {
+          // If Firebase is connected but returns no products, try demo products
+          if ((window.firebaseApp || window.firebase) && window.demoProducts && !currentSearch && !currentCategory && !currentSubcategory) {
+            console.log('Firebase connected but no products found, falling back to demo products');
+            loadDemoProductsIntoPage();
+            return;
+          }
           emptyState.classList.remove('hidden');
           renderPagination(0, 1, PRODUCTS_PER_PAGE);
           return;
@@ -431,6 +437,14 @@
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         loadingSkeleton.classList.add('hidden');
+        
+        // If Firebase fails, try demo products
+        if (window.demoProducts) {
+          console.log('Firebase error, falling back to demo products');
+          loadDemoProductsIntoPage();
+          return;
+        }
+        
         emptyState.classList.remove('hidden');
       } finally {
         isLoadingProducts = false;
@@ -598,9 +612,31 @@
       // Check if Firebase is available
       try {
         if (window.firebaseApp || window.firebase) {
+          // Try to get total count to test Firebase connectivity
           await updateTotalCount();
-          pageCursors = [null];
-          fetchProductsPaginated(1);
+          
+          // If we have products in Firebase, use them
+          if (totalProductsCount > 0) {
+            pageCursors = [null];
+            fetchProductsPaginated(1);
+          } else {
+            // Firebase is available but no products found, use demo products
+            console.log('Firebase available but no products found, using demo products');
+            if (window.demoProducts) {
+              loadDemoProductsIntoPage();
+            } else {
+              // Wait for demo products to load
+              setTimeout(function() {
+                if (window.demoProducts) {
+                  loadDemoProductsIntoPage();
+                } else {
+                  console.warn('No products available');
+                  loadingSkeleton.classList.add('hidden');
+                  emptyState.classList.remove('hidden');
+                }
+              }, 1000);
+            }
+          }
         } else {
           // Firebase not available, wait for demo products
           setTimeout(function() {
@@ -626,6 +662,9 @@
         setTimeout(function() {
           if (window.demoProducts) {
             loadDemoProductsIntoPage();
+          } else {
+            loadingSkeleton.classList.add('hidden');
+            emptyState.classList.remove('hidden');
           }
         }, 500);
       }
