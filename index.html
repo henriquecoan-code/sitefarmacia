@@ -235,6 +235,37 @@
     document.addEventListener('headerLoaded', () => {
       setupCadastroModalBtn();
     });
+    // Função global para abrir o modal de cadastro
+    window.openCadastroModal = async function() {
+      var cadastroPlaceholder = document.getElementById('cadastro-modal-placeholder');
+      if (cadastroPlaceholder && cadastroPlaceholder.innerHTML.trim() === '') {
+        const resp = await fetch('partials/cadastro-modal.html');
+        const html = await resp.text();
+        cadastroPlaceholder.innerHTML = html;
+      }
+      if (cadastroPlaceholder) {
+        cadastroPlaceholder.classList.remove('hidden');
+      }
+      // Garante que o script está carregado
+      if (typeof window.openCadastroModalImpl !== 'function') {
+        await new Promise(resolve => {
+          const script = document.createElement('script');
+          script.src = 'js/auth-modal.js';
+          script.onload = resolve;
+          document.body.appendChild(script);
+        });
+      }
+      if (typeof window.openCadastroModalImpl === 'function') {
+        window.openCadastroModalImpl();
+      }
+    }
+    // Binding do botão de cadastro do header (desktop)
+    document.body.addEventListener('click', function(e) {
+      if (e.target.id === 'openCadastroModalBtn' || (e.target.closest && e.target.closest('#openCadastroModalBtn'))) {
+        e.preventDefault();
+        window.openCadastroModal();
+      }
+    });
     // Garante que o auth-mobile.js é carregado após o header
     const scriptAuthMobile = document.createElement('script');
     scriptAuthMobile.src = 'js/auth-mobile.js';
@@ -828,33 +859,7 @@ window.addEventListener('mobileMenuOpened', function() {
     if (btnCadastro) {
       btnCadastro.onclick = function(e) {
         e.preventDefault();
-        // Garante que o modal de cadastro está carregado antes de abrir
-        async function openCadastro() {
-          // Carrega o HTML do modal se necessário
-          var cadastroPlaceholder = document.getElementById('cadastro-modal-placeholder');
-          if (cadastroPlaceholder && cadastroPlaceholder.innerHTML.trim() === '') {
-            const resp = await fetch('partials/cadastro-modal.html');
-            const html = await resp.text();
-            cadastroPlaceholder.innerHTML = html;
-          }
-          // Remove a classe 'hidden' do placeholder para garantir exibição
-          if (cadastroPlaceholder) {
-            cadastroPlaceholder.classList.remove('hidden');
-          }
-          // Carrega o script se necessário
-          if (typeof window.openCadastroModal !== 'function') {
-            await new Promise(resolve => {
-              const script = document.createElement('script');
-              script.src = '/js/auth-modal.js';
-              script.onload = resolve;
-              document.body.appendChild(script);
-            });
-          }
-          if (typeof window.openCadastroModal === 'function') {
-            window.openCadastroModal();
-          }
-        }
-        openCadastro();
+        window.openCadastroModal();
         // Fecha o menu mobile
         if (window.Alpine && window.Alpine.store && typeof window.Alpine.store === 'function') {
           try { window.Alpine.store('mobileMenuOpen', false); } catch(e) {}
@@ -872,7 +877,5 @@ window.addEventListener('mobileMenuOpened', function() {
     </script>
     <script type="module" src="./js/header-search-integration.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
-      <script src="js/auth-modal.js"></script>
-
 </body>
 </html>
