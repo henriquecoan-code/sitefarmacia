@@ -6,9 +6,12 @@
     <title>Farmácia Online - Produtos</title>
     <meta id="meta-description" name="description" content="Produtos de farmácia, medicamentos, perfumaria, genéricos, suplementos e mais. Entrega rápida e preço baixo.">
     <script id="ldjson-schema" type="application/ld+json"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- External dependencies with fallbacks -->
+    <script src="https://cdn.tailwindcss.com" onerror="console.warn('Tailwind CDN failed')"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer onerror="console.warn('Alpine CDN failed')"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" onerror="console.warn('FontAwesome CDN failed')">
+    <!-- Fallback dependencies -->
+    <script src="js/fallback-loader.js"></script>
     <link rel="stylesheet" href="css/estilo.css">
     <!-- Removidos scripts compat e inicialização duplicada do Firebase -->
     <style>
