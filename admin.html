@@ -50,9 +50,11 @@
     <div id="footer-container"></div>
     </main>
 </div>
+  <script src="vendor/js/firebase-minimal.js"></script>
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    // Use global Firebase object available from firebase-minimal.js
+    const { initializeApp, getFirestore, collection, query, where, getDocs } = window;
+    
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';

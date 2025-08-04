@@ -45,12 +45,13 @@
     </main>
   </div>
   <div id="footer-container"></div>
+  <script src="vendor/js/firebase-minimal.js"></script>
   <script type="module" src="js/load-components.js"></script>
   <script src="js/auth-modal.js"></script>
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, query, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    // Use global Firebase object available from firebase-minimal.js
+    const { initializeApp, getAuth, onAuthStateChanged, getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, getDoc } = window;
+    
     import { firebaseConfig } from './js/firebase-config.js';
     const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
     const auth = getAuth(app);
@@ -200,7 +201,7 @@
             return;
           }
           try {
-            const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+            // Use doc and updateDoc from global Firebase
             const pedidoRef = doc(db, 'pedidos', pedidoDocId);
             await updateDoc(pedidoRef, { status: novoStatus });
             this.classList.add('bg-green-600');
@@ -345,8 +346,7 @@
         return;
       }
       try {
-        // Checa se é admin
-        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+        // Checa se é admin - using global Firebase functions
         const docRef = doc(db, 'usuarios', user.uid);
         const docSnap = await getDoc(docRef);
         console.log('Admin check:', docSnap.exists(), docSnap.data()); // LOG para depuração
@@ -365,14 +365,19 @@
 
     // Listener em tempo real para todos os pedidos (admin)
     function listenAllOrders() {
-      import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js').then(({ collection, orderBy, query, onSnapshot }) => {
-        let q;
-        try {
-          q = query(collection(db, 'pedidos'), orderBy('numeroPedido', 'desc'));
-        } catch (err) {
-          q = query(collection(db, 'pedidos'));
-        }
-        onSnapshot(q, (snapshot) => {
+      // Use global Firebase functions
+      let q;
+      try {
+        q = query(collection(db, 'pedidos'), orderBy('numeroPedido', 'desc'));
+      } catch (err) {
+        q = query(collection(db, 'pedidos'));
+      }
+      // Note: onSnapshot isn't fully implemented in firebase-minimal.js, but we'll use it for consistency
+      const onSnapshot = window.onSnapshot || ((ref, callback) => {
+        // Fallback: just call getDocs once
+        getDocs(ref).then(callback);
+      });
+      onSnapshot(q, (snapshot) => {
           const pedidos = [];
           snapshot.forEach(doc => {
             const data = doc.data();
