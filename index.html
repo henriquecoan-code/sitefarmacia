@@ -6,9 +6,10 @@
     <title>Farmácia Online - Produtos</title>
     <meta id="meta-description" name="description" content="Produtos de farmácia, medicamentos, perfumaria, genéricos, suplementos e mais. Entrega rápida e preço baixo.">
     <script id="ldjson-schema" type="application/ld+json"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="vendor/css/tailwind-minimal.css">
+    <link rel="stylesheet" href="vendor/css/fontawesome-minimal.css">
+    <script src="vendor/js/firebase-minimal.js"></script>
+    <script src="vendor/js/alpine-minimal.js" defer></script>
     <link rel="stylesheet" href="css/estilo.css">
     <!-- Removidos scripts compat e inicialização duplicada do Firebase -->
     <style>
@@ -149,17 +150,14 @@
     <div id="cadastro-modal-placeholder" class="hidden"></div>
 
     <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-    import { getFirestore, collection, getDocs, getCountFromServer } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    // import { loadHeader } from './js/header-loader.js';
-    // import { loadFooter } from './js/footer-loader.js';
-    import { firebaseConfig } from './js/firebase-config.js';
-
-    // Inicializa Firebase modular e expõe auth para scripts tradicionais
-    const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // Using local Firebase replacement
+    const app = window.firebaseApp || (window.firebaseApp = window.firebase.initializeApp(window.firebaseConfig || {
+      apiKey: "AIzaSyDlTtNFfZIVIPJCIuJvnLB89idtAdKaFr8",
+      authDomain: "farmaciasaobenedito-bcb2c.firebaseapp.com",
+      projectId: "farmaciasaobenedito-bcb2c"
+    }));
+    const auth = window.firebase.auth(app);
+    const db = window.firebase.firestore(app);
     window.auth = auth;
 
     // Carregamento simplificado do header e footer
