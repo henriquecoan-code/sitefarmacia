@@ -1,7 +1,5 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
-import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+// Load local Firebase replacement
+import { initializeApp, getAuth, getDatabase, getFirestore } from '../vendor/js/firebase-minimal.js';
 
 // Configuração centralizada do Firebase
 export const firebaseConfig = {

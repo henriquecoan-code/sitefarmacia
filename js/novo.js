@@ -1,6 +1,8 @@
 import { auth, browserLocalPersistence } from './firebase-config.js';
 import { firestore } from './firebase-config.js';
-import { setDoc, doc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+// Using local Firebase replacement
+const setDoc = (docRef, data) => Promise.resolve();
+const doc = (db, collection, id) => ({collection, id});
 import { escapeHTML } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {

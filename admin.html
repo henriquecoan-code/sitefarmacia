@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administração - Farmácia São Benedito</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <link rel="stylesheet" href="vendor/css/tailwind-minimal.css">
+    <script src="vendor/js/alpine-minimal.js" defer></script>
     <link rel="stylesheet" href="css/estilo.css">
     <link rel="stylesheet" href="css/account-styles.css">
 </head>
@@ -50,9 +50,11 @@
     <div id="footer-container"></div>
     </main>
 </div>
+  <script src="vendor/js/firebase-minimal.js"></script>
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    // Use global Firebase object available from firebase-minimal.js
+    const { initializeApp, getFirestore, collection, query, where, getDocs } = window;
+    
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';

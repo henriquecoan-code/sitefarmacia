@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administração de Produtos</title>
   <link rel="stylesheet" href="css/estilo.css">
-        <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <link rel="stylesheet" href="vendor/css/tailwind-minimal.css">
+    <script src="vendor/js/alpine-minimal.js" defer></script>
     <link rel="stylesheet" href="css/estilo.css">
     <link rel="stylesheet" href="css/account-styles.css">
 </head>
@@ -127,13 +127,14 @@
     </div>
   </main>
   <div id="footer-container"></div>
+  <script src="vendor/js/firebase-minimal.js"></script>
   <script type="module" src="js/load-components.js"></script>
   <script src="js/auth-modal.js"></script>
   <script src="js/auth-mobile.js"></script>
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    // Use global Firebase object available from firebase-minimal.js  
+    const { initializeApp, getAuth, getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } = window;
+    
     import { loadHeader } from './js/header-loader.js';
     import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
@@ -377,9 +378,8 @@
         btn.addEventListener('click', async () => {
           if (!confirm('Tem certeza que deseja excluir este produto?')) return;
           try {
-            await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js').then(({ deleteDoc, doc }) =>
-              deleteDoc(doc(db, 'produtos', btn.dataset.id))
-            );
+            // Use deleteDoc from global Firebase
+            await deleteDoc(doc(db, 'produtos', btn.dataset.id));
             await carregarProdutos();
           } catch (err) {
             alert('Erro ao excluir: ' + err.message);

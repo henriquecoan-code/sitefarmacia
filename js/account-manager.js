@@ -1,5 +1,5 @@
 // Importar Firebase usando a versão compat para garantir compatibilidade com o resto do projeto
-import firebase from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js';
+// Using local Firebase replacement - removed firebase import
 import 'https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js';
 import { auth, firestore } from './firebase-config.js';
 import { escapeHTML } from './utils.js';

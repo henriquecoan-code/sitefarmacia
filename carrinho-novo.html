@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Carrinho Moderno</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="vendor/css/tailwind-minimal.css">
+    <link rel="stylesheet" href="vendor/css/fontawesome-minimal.css">
+    <script src="vendor/js/firebase-minimal.js"></script>
     <style>
         .skeleton { animation: pulse 2s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -47,10 +48,11 @@
     <div id="footer-container"></div>
     <div id="login-modal-placeholder"></div>
 
+    <script src="vendor/js/firebase-minimal.js"></script>
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+        // Use global Firebase object available from firebase-minimal.js
+        const { initializeApp, getAuth, getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc } = window;
+        
         import { loadHeader } from './js/header-loader.js';
         import { loadFooter } from './js/footer-loader.js';
         import { firebaseConfig } from './js/firebase-config.js';
@@ -186,7 +188,7 @@
         });
 
         document.getElementById('finalizar-compra').addEventListener('click', async () => {
-            const { collection, doc, getDoc, addDoc } = await import('https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js');
+            // Use Firebase functions from global object
             // Validação obrigatória da forma de pagamento
             const pagamento = document.getElementById('pagamento').value;
             if (!['Pix','Cartão','Dinheiro'].includes(pagamento)) {
