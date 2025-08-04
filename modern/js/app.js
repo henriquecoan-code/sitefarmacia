@@ -370,7 +370,7 @@ class PharmacyApp {
 
   handleSearch() {
     const searchInput = document.querySelector('.search-box__input');
-    const query = searchInput?.value.trim();
+    const query = searchInput ? searchInput.value.trim() : '';
     
     if (!query) {
       this.ui.showWarning('Digite algo para buscar');

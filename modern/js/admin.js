@@ -86,7 +86,7 @@ class AdminApp {
     const modal = document.getElementById('product-modal');
     const closeBtn = document.getElementById('product-modal-close');
     const cancelBtn = document.getElementById('product-cancel');
-    const backdrop = modal?.querySelector('.modal__backdrop');
+    const backdrop = modal && modal.querySelector('.modal__backdrop');
 
     const hideModal = () => {
       if (modal) {
@@ -222,7 +222,7 @@ class AdminApp {
         // Update local array
         const index = this.products.findIndex(p => p.id === this.editingProduct.id);
         if (index !== -1) {
-          this.products[index] = { ...this.editingProduct, ...product };
+          this.products[index] = Object.assign({}, this.editingProduct, product);
         }
         
         this.showNotification('Produto atualizado com sucesso!', 'success');
@@ -232,7 +232,7 @@ class AdminApp {
         const newId = await this.firebase.addProduct(product);
         
         // Add to local array
-        this.products.push({ id: newId, ...product });
+        this.products.push(Object.assign({ id: newId }, product));
         
         this.showNotification('Produto adicionado com sucesso!', 'success');
       }
@@ -312,8 +312,11 @@ class AdminApp {
   }
 
   filterProducts() {
-    const searchTerm = document.getElementById('products-search')?.value.toLowerCase() || '';
-    const categoryFilter = document.getElementById('category-filter')?.value || '';
+    const searchInput = document.getElementById('products-search');
+    const categoryFilterEl = document.getElementById('category-filter');
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const categoryFilter = categoryFilterEl ? categoryFilterEl.value : '';
     
     let filteredProducts = this.products;
     

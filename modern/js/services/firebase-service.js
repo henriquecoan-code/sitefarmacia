@@ -70,7 +70,7 @@ export class FirebaseService {
       
       const products = [];
       querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() });
+        products.push(Object.assign({ id: doc.id }, doc.data()));
       });
       
       return products;
@@ -89,7 +89,7 @@ export class FirebaseService {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() };
+        return Object.assign({ id: docSnap.id }, docSnap.data());
       } else {
         return null;
       }
@@ -148,7 +148,7 @@ export class FirebaseService {
       
       const clients = [];
       querySnapshot.forEach((doc) => {
-        clients.push({ id: doc.id, ...doc.data() });
+        clients.push(Object.assign({ id: doc.id }, doc.data()));
       });
       
       return clients;
@@ -167,7 +167,7 @@ export class FirebaseService {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() };
+        return Object.assign({ id: docSnap.id }, docSnap.data());
       } else {
         return null;
       }

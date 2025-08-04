@@ -55,7 +55,7 @@ export class AuthService {
     const title = document.getElementById('auth-modal-title');
     const submitBtn = document.querySelector('#auth-form button[type="submit"]');
     const authToggle = document.getElementById('auth-toggle');
-    const authSwitchText = authToggle?.parentElement;
+    const authSwitchText = authToggle && authToggle.parentElement;
 
     if (title && submitBtn && authToggle && authSwitchText) {
       if (this.isLoginMode) {
@@ -85,8 +85,11 @@ export class AuthService {
   async handleAuthSubmit(event) {
     event.preventDefault();
     
-    const email = document.getElementById('auth-email')?.value;
-    const password = document.getElementById('auth-password')?.value;
+    const emailEl = document.getElementById('auth-email');
+    const passwordEl = document.getElementById('auth-password');
+    
+    const email = emailEl ? emailEl.value : '';
+    const password = passwordEl ? passwordEl.value : '';
 
     if (!email || !password) {
       this.showError('Por favor, preencha todos os campos');
@@ -140,7 +143,7 @@ export class AuthService {
       // User is logged in
       userBtn.innerHTML = `
         <i class="fas fa-user-check"></i>
-        <span>${this.user.email?.split('@')[0] || 'Usuário'}</span>
+        <span>${(this.user.email && this.user.email.split('@')[0]) || 'Usuário'}</span>
       `;
       
       // Add dropdown menu
