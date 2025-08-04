@@ -1,17 +1,42 @@
 // Modern Admin Panel
+import { FirebaseService } from './services/firebase-service.js';
+
 class AdminApp {
   constructor() {
     this.currentSection = 'dashboard';
     this.products = [];
+    this.clients = [];
     this.editingProduct = null;
+    this.firebase = new FirebaseService();
     
     this.init();
   }
 
-  init() {
-    this.setupEventListeners();
-    this.loadSampleData();
-    this.renderProducts();
+  async init() {
+    try {
+      // Initialize Firebase
+      await this.firebase.init();
+      
+      // Initialize sample data if needed
+      await this.firebase.initializeSampleData();
+      
+      // Setup event listeners
+      this.setupEventListeners();
+      
+      // Load data from Firestore
+      await this.loadFirestoreData();
+      
+      // Render initial data
+      this.renderProducts();
+      this.updateDashboard();
+      
+      console.log('Admin app initialized successfully');
+    } catch (error) {
+      console.error('Error initializing admin app:', error);
+      this.showNotification('Erro ao inicializar aplicação. Usando dados locais.', 'warning');
+      this.loadSampleData();
+      this.renderProducts();
+    }
   }
 
   setupEventListeners() {
@@ -138,12 +163,47 @@ class AdminApp {
     this.editingProduct = null;
   }
 
-  handleProductSubmit(e) {
+  async loadFirestoreData() {
+    try {
+      // Load products from Firestore
+      this.products = await this.firebase.getProducts();
+      console.log('Loaded products from Firestore:', this.products.length);
+      
+      // Load clients from Firestore
+      this.clients = await this.firebase.getClients();
+      console.log('Loaded clients from Firestore:', this.clients.length);
+    } catch (error) {
+      console.error('Error loading Firestore data:', error);
+      throw error;
+    }
+  }
+
+  updateDashboard() {
+    // Update dashboard metrics
+    const totalSales = this.products.reduce((sum, product) => sum + (product.price * (50 - product.stock)), 0);
+    const totalOrders = Math.floor(Math.random() * 50) + 20;
+    const activeProducts = this.products.filter(p => p.status === 'active').length;
+    const totalClients = this.clients.length;
+
+    // Update dashboard elements
+    this.updateDashboardCard('sales-value', `R$ ${totalSales.toFixed(2).replace('.', ',')}`);
+    this.updateDashboardCard('orders-count', totalOrders);
+    this.updateDashboardCard('products-count', activeProducts);
+    this.updateDashboardCard('clients-count', totalClients);
+  }
+
+  updateDashboardCard(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = value;
+    }
+  }
+
+  async handleProductSubmit(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
     const product = {
-      id: this.editingProduct?.id || this.generateId(),
       name: formData.get('name'),
       category: formData.get('category'),
       price: parseFloat(formData.get('price')),
@@ -151,33 +211,49 @@ class AdminApp {
       description: formData.get('description'),
       status: formData.get('status'),
       featured: formData.has('featured'),
-      image: null, // Would handle file upload in real implementation
-      createdAt: this.editingProduct?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    if (this.editingProduct) {
-      // Update existing product
-      const index = this.products.findIndex(p => p.id === this.editingProduct.id);
-      if (index !== -1) {
-        this.products[index] = product;
+    try {
+      if (this.editingProduct) {
+        // Update existing product in Firestore
+        await this.firebase.updateProduct(this.editingProduct.id, product);
+        
+        // Update local array
+        const index = this.products.findIndex(p => p.id === this.editingProduct.id);
+        if (index !== -1) {
+          this.products[index] = { ...this.editingProduct, ...product };
+        }
+        
+        this.showNotification('Produto atualizado com sucesso!', 'success');
+      } else {
+        // Add new product to Firestore
+        product.createdAt = new Date().toISOString();
+        const newId = await this.firebase.addProduct(product);
+        
+        // Add to local array
+        this.products.push({ id: newId, ...product });
+        
+        this.showNotification('Produto adicionado com sucesso!', 'success');
       }
-      this.showNotification('Produto atualizado com sucesso!', 'success');
-    } else {
-      // Add new product
-      this.products.push(product);
-      this.showNotification('Produto adicionado com sucesso!', 'success');
-    }
 
-    this.saveToStorage();
-    this.renderProducts();
-    
-    // Hide modal
-    const modal = document.getElementById('product-modal');
-    if (modal) {
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
+      // Refresh data and UI
+      this.renderProducts();
+      this.updateDashboard();
+      
+      // Hide modal
+      const modal = document.getElementById('product-modal');
+      if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      
+      this.resetProductForm();
+    } catch (error) {
+      console.error('Error saving product:', error);
+      this.showNotification('Erro ao salvar produto. Tente novamente.', 'error');
     }
+  }
     
     this.resetProductForm();
   }
@@ -189,22 +265,49 @@ class AdminApp {
     }
   }
 
-  deleteProduct(productId) {
+  async deleteProduct(productId) {
     if (confirm('Tem certeza que deseja excluir este produto?')) {
-      this.products = this.products.filter(p => p.id !== productId);
-      this.saveToStorage();
-      this.renderProducts();
-      this.showNotification('Produto excluído com sucesso!', 'success');
+      try {
+        // Delete from Firestore
+        await this.firebase.deleteProduct(productId);
+        
+        // Remove from local array
+        this.products = this.products.filter(p => p.id !== productId);
+        
+        // Update UI
+        this.renderProducts();
+        this.updateDashboard();
+        this.showNotification('Produto excluído com sucesso!', 'success');
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        this.showNotification('Erro ao excluir produto. Tente novamente.', 'error');
+      }
     }
   }
 
-  toggleProductStatus(productId) {
+  async toggleProductStatus(productId) {
     const product = this.products.find(p => p.id === productId);
     if (product) {
-      product.status = product.status === 'active' ? 'inactive' : 'active';
-      this.saveToStorage();
-      this.renderProducts();
-      this.showNotification(`Produto ${product.status === 'active' ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+      try {
+        const newStatus = product.status === 'active' ? 'inactive' : 'active';
+        
+        // Update in Firestore
+        await this.firebase.updateProduct(productId, { 
+          status: newStatus, 
+          updatedAt: new Date().toISOString() 
+        });
+        
+        // Update local array
+        product.status = newStatus;
+        
+        // Update UI
+        this.renderProducts();
+        this.updateDashboard();
+        this.showNotification(`Produto ${newStatus === 'active' ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+      } catch (error) {
+        console.error('Error updating product status:', error);
+        this.showNotification('Erro ao atualizar status do produto. Tente novamente.', 'error');
+      }
     }
   }
 
@@ -307,18 +410,7 @@ class AdminApp {
   }
 
   loadSampleData() {
-    // Try to load from localStorage first
-    const stored = localStorage.getItem('admin_products');
-    if (stored) {
-      try {
-        this.products = JSON.parse(stored);
-        return;
-      } catch (error) {
-        console.error('Error parsing stored products:', error);
-      }
-    }
-
-    // Load sample data if no stored data
+    // Fallback sample data if Firebase fails
     this.products = [
       {
         id: '1',
@@ -382,15 +474,22 @@ class AdminApp {
       }
     ];
     
-    this.saveToStorage();
-  }
-
-  saveToStorage() {
-    try {
-      localStorage.setItem('admin_products', JSON.stringify(this.products));
-    } catch (error) {
-      console.error('Error saving products to storage:', error);
-    }
+    this.clients = [
+      {
+        id: '1',
+        name: 'Maria Silva',
+        email: 'maria.silva@email.com',
+        phone: '(11) 99999-1234',
+        createdAt: '2024-08-01T10:00:00Z'
+      },
+      {
+        id: '2',
+        name: 'João Santos',
+        email: 'joao.santos@email.com',
+        phone: '(11) 98888-5678',
+        createdAt: '2024-08-01T11:00:00Z'
+      }
+    ];
   }
 
   generateId() {

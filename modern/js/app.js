@@ -214,7 +214,77 @@ class PharmacyApp {
     const productsGrid = document.getElementById('products-grid');
     if (!productsGrid) return;
 
-    // Sample products - in a real app, this would come from Firebase
+    try {
+      // Load products from Firebase
+      const products = await this.firebase.getProducts();
+      const featuredProducts = products.filter(product => product.featured || products.length <= 4);
+      
+      // If no featured products, show first 4
+      const productsToShow = featuredProducts.length > 0 ? featuredProducts.slice(0, 4) : products.slice(0, 4);
+
+      if (productsToShow.length === 0) {
+        productsGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-8); color: var(--gray-500);">
+            <p>Nenhum produto encontrado.</p>
+            <p>Configure produtos no painel administrativo.</p>
+          </div>
+        `;
+        return;
+      }
+
+      productsGrid.innerHTML = productsToShow.map(product => `
+        <div class="card product-card" data-product-id="${product.id}">
+          <div class="card__image">
+            <i class="fas fa-prescription-bottle-alt"></i>
+          </div>
+          <div class="card__content">
+            <h3 class="card__title">${product.name}</h3>
+            <p class="card__text">${product.description}</p>
+            <div class="card__price">
+              R$ ${product.price.toFixed(2).replace('.', ',')}
+            </div>
+            <div class="card__actions">
+              <button class="btn btn--primary add-to-cart-btn" data-product='${JSON.stringify(product)}'>
+                <i class="fas fa-cart-plus"></i>
+                Adicionar
+              </button>
+              <button class="btn btn--secondary view-product-btn" data-product-id="${product.id}">
+                Ver Detalhes
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Add event listeners to product buttons
+      productsGrid.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const product = JSON.parse(btn.dataset.product);
+          this.cart.addItem(product);
+          this.ui.showSuccess(`${product.name} adicionado ao carrinho!`);
+        });
+      });
+
+      productsGrid.querySelectorAll('.view-product-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = btn.dataset.productId;
+          this.viewProductDetails(productId);
+        });
+      });
+    } catch (error) {
+      console.error('Error loading featured products:', error);
+      // Fallback to sample data
+      this.loadSampleProducts();
+    }
+  }
+
+  loadSampleProducts() {
+    const productsGrid = document.getElementById('products-grid');
+    if (!productsGrid) return;
+
+    // Sample products as fallback - same as before
     const products = [
       {
         id: '1',
