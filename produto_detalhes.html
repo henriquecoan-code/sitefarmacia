@@ -20,11 +20,13 @@
     </div>
   </main>
   <div id="footer-container"></div>
+  <script src="vendor/js/firebase-minimal.js"></script>
   <script type="module" src="js/load-components.js"></script>
   <script type="module" src="js/header-loader.js"></script>
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+    // Use global Firebase object available from firebase-minimal.js
+    const { initializeApp, getFirestore, doc, getDoc } = window;
+    
     import { firebaseConfig } from './js/firebase-config.js';
     const app = window.firebaseApp || (window.firebaseApp = initializeApp(firebaseConfig));
     const db = getFirestore(app);

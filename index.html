@@ -485,8 +485,9 @@
 
     // Atualiza a contagem total de produtos para filtros/busca
     async function updateTotalCount() {
-      const { getCountFromServer, query, where, collection: coll } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-      let queryRef = coll(db, 'produtos');
+      // Use global Firebase functions - note: getCountFromServer not implemented in minimal version
+      // This will work with basic getDocs instead
+      let queryRef = collection(db, 'produtos');
       let clauses = [];
       if (currentCategory) clauses.push(where('categoria', '==', currentCategory));
       if (currentSubcategory) clauses.push(where('subcategoria', '==', currentSubcategoria));
