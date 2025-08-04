@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Test No Firebase - Farmácia São Benedito</title>
+    <link rel="stylesheet" href="modern/css/modern-styles.css">
+    <link rel="stylesheet" href="modern/css/admin-styles.css">
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header__content">
+            <h1>🏥 Admin - Farmácia São Benedito</h1>
+            <div class="admin-header__user">
+                <span>Administrador</span>
+                <button class="btn btn--secondary btn--sm" id="admin-logout">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="container">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="admin-section admin-section--active">
+                <div class="section-header">
+                    <h2>Dashboard</h2>
+                    <p>Visão geral da farmácia</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card__icon">💰</div>
+                        <div class="stat-card__content">
+                            <h3>Vendas Hoje</h3>
+                            <div class="stat-card__value" id="sales-value">R$ 2.547,90</div>
+                            <div class="stat-card__change stat-card__change--positive">+12%</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__icon">📦</div>
+                        <div class="stat-card__content">
+                            <h3>Pedidos Hoje</h3>
+                            <div class="stat-card__value" id="orders-count">23</div>
+                            <div class="stat-card__change stat-card__change--positive">+8%</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__icon">💊</div>
+                        <div class="stat-card__content">
+                            <h3>Produtos Ativos</h3>
+                            <div class="stat-card__value" id="products-count">156</div>
+                            <div class="stat-card__change stat-card__change--neutral">—</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__icon">👥</div>
+                        <div class="stat-card__content">
+                            <h3>Clientes</h3>
+                            <div class="stat-card__value" id="clients-count">89</div>
+                            <div class="stat-card__change stat-card__change--positive">+5%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-charts">
+                    <div class="chart-card">
+                        <h3>Vendas dos Últimos 7 Dias</h3>
+                        <div class="chart-placeholder">
+                            📈 Gráfico de vendas (integração futura)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products-section" class="admin-section">
+                <div class="section-header">
+                    <h2>Gerenciar Produtos</h2>
+                    <button class="btn btn--primary" id="add-product-btn">➕ Adicionar Produto</button>
+                </div>
+
+                <div class="products-table-container">
+                    <table class="products-table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Preço</th>
+                                <th>Estoque</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <!-- Products will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Navigation -->
+    <nav class="admin-nav">
+        <div class="admin-nav__container">
+            <ul class="admin-nav__list">
+                <li class="admin-nav__item">
+                    <a href="#dashboard" class="admin-nav__link admin-nav__link--active" data-section="dashboard">📊 Dashboard</a>
+                </li>
+                <li class="admin-nav__item">
+                    <a href="#products" class="admin-nav__link" data-section="products">💊 Produtos</a>
+                </li>
+                <li class="admin-nav__item">
+                    <a href="#orders" class="admin-nav__link" data-section="orders">📦 Pedidos</a>
+                </li>
+                <li class="admin-nav__item">
+                    <a href="#customers" class="admin-nav__link" data-section="customers">👥 Clientes</a>
+                </li>
+                <li class="admin-nav__item">
+                    <a href="#reports" class="admin-nav__link" data-section="reports">📈 Relatórios</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Scripts -->
+    <script type="module" src="modern/js/admin-no-firebase.js"></script>
+</body>
+</html>
