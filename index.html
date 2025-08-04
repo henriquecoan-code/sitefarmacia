@@ -81,10 +81,10 @@
                                 <option value="">Todas as subcategorias</option>
                             </select>
                         </div>
-<!--                        <div class="relative w-full sm:w-auto">
+                        <div class="relative w-full sm:w-auto">
                             <input type="text" id="busca-produto" placeholder="Buscar por nome, descrição, tags, EAN, Cod-Red, laboratório, subcategoria ou DCB..." class="w-full rounded border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
--->                    </div>
+                    </div>
                 </div>
 
                 <!-- Loading Skeleton -->
@@ -152,8 +152,8 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
     import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
     import { getFirestore, collection, getDocs, getCountFromServer } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    import { loadHeader } from './js/header-loader.js';
-    import { loadFooter } from './js/footer-loader.js';
+    // import { loadHeader } from './js/header-loader.js';
+    // import { loadFooter } from './js/footer-loader.js';
     import { firebaseConfig } from './js/firebase-config.js';
 
     // Inicializa Firebase modular e expõe auth para scripts tradicionais
@@ -162,60 +162,53 @@
     const db = getFirestore(app);
     window.auth = auth;
 
-    await loadHeader('header-container', 'authContainerSecondary');
-    // Força Alpine a inicializar o header dinâmico
-    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-      window.Alpine.initTree(document.getElementById('header-container'));
-    } else {
-      setTimeout(() => {
-        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-          window.Alpine.initTree(document.getElementById('header-container'));
-        }
-      }, 100);
-    }
-    // Garante o binding do botão de cadastro após o header ser carregado
-    import { setupCadastroModalBtn } from './js/utils.js';
-    setupCadastroModalBtn();
-    // Se o header for recarregado dinamicamente, rebind também
-    document.addEventListener('headerLoaded', () => {
-      setupCadastroModalBtn();
-    });
-    // Função global para abrir o modal de cadastro
-    window.openCadastroModal = async function() {
-      var cadastroPlaceholder = document.getElementById('cadastro-modal-placeholder');
-      if (cadastroPlaceholder && cadastroPlaceholder.innerHTML.trim() === '') {
-        const resp = await fetch('partials/cadastro-modal.html');
+    // Carregamento simplificado do header e footer
+    async function loadHeaderSimple() {
+      try {
+        const resp = await fetch('partials/header.html');
         const html = await resp.text();
-        cadastroPlaceholder.innerHTML = html;
-      }
-      if (cadastroPlaceholder) {
-        cadastroPlaceholder.classList.remove('hidden');
-      }
-      // Garante que o script está carregado
-      if (typeof window.openCadastroModalImpl !== 'function') {
-        await new Promise(resolve => {
-          const script = document.createElement('script');
-          script.src = 'js/auth-modal.js';
-          script.onload = resolve;
-          document.body.appendChild(script);
-        });
-      }
-      if (typeof window.openCadastroModalImpl === 'function') {
-        window.openCadastroModalImpl();
+        document.getElementById('header-container').innerHTML = html;
+        console.log('Header carregado com sucesso');
+      } catch (error) {
+        console.error('Erro ao carregar header:', error);
+        // Header de fallback
+        document.getElementById('header-container').innerHTML = `
+          <header class="bg-white shadow-md">
+            <div class="container mx-auto px-4 py-2">
+              <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-blue-900">Farmácia São Benedito</h1>
+                <nav>
+                  <a href="index.html" class="text-blue-900 hover:text-blue-700 mx-2">Produtos</a>
+                  <a href="carrinho.html" class="text-blue-900 hover:text-blue-700 mx-2">Carrinho</a>
+                </nav>
+              </div>
+            </div>
+          </header>
+        `;
       }
     }
-    // Binding do botão de cadastro do header (desktop)
-    document.body.addEventListener('click', function(e) {
-      if (e.target.id === 'openCadastroModalBtn' || (e.target.closest && e.target.closest('#openCadastroModalBtn'))) {
-        e.preventDefault();
-        window.openCadastroModal();
+
+    async function loadFooterSimple() {
+      try {
+        const resp = await fetch('partials/footer.html');
+        const html = await resp.text();
+        document.getElementById('footer-container').innerHTML = html;
+        console.log('Footer carregado com sucesso');
+      } catch (error) {
+        console.error('Erro ao carregar footer:', error);
+        // Footer de fallback
+        document.getElementById('footer-container').innerHTML = `
+          <footer class="bg-gray-900 text-white py-4">
+            <div class="container mx-auto px-4 text-center">
+              <p>&copy; 2024 Farmácia São Benedito. Todos os direitos reservados.</p>
+            </div>
+          </footer>
+        `;
       }
-    });
-    // Garante que o auth-mobile.js é carregado após o header
-    const scriptAuthMobile = document.createElement('script');
-    scriptAuthMobile.src = 'js/auth-mobile.js';
-    document.body.appendChild(scriptAuthMobile);
-    await loadFooter('footer-container');
+    }
+
+    await loadHeaderSimple();
+    await loadFooterSimple();
 
     // Carrega o modal de login dinamicamente
     async function loadLoginModal() {
@@ -284,89 +277,81 @@
       isLoadingProducts = true;
       loadingSkeleton.classList.remove('hidden');
       productsContainer.innerHTML = '';
+      
       try {
-        if (!window.firestoreHelpers) {
-          window.firestoreHelpers = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        }
-        const { getDocs, query, collection, where, orderBy, limit, startAfter } = window.firestoreHelpers;
+        console.log('Buscando produtos...', { page, currentCategory, currentSubcategory, currentSearch });
+        
+        // Busca simples - carrega todos os produtos e filtra localmente
+        const querySnapshot = await getDocs(collection(db, 'produtos'));
         let produtos = [];
-        let searchUpper = currentSearch ? currentSearch.toUpperCase() : '';
-        let nomeDocs = [], dcbDocs = [];
-        let snapNome = null, snapDcb = null;
-        if (currentSearch && currentSearch.length >= 2) {
-          // Busca ampla: traz até 300 produtos para filtrar localmente
-          let qNome = query(collection(db, 'produtos'), orderBy('nome'), limit(300));
-          snapNome = await getDocs(qNome);
-          nomeDocs = snapNome.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
-          // Query por DCB (exato, case-insensitive)
-          let qDcb = query(collection(db, 'produtos'), where('dcb', '==', searchUpper), orderBy('nome'));
-          snapDcb = await getDocs(qDcb);
-          dcbDocs = snapDcb.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
-          // Junta e remove duplicados por id
-          let all = [...nomeDocs, ...dcbDocs];
-          const seen = new Set();
-          produtos = all.filter(p => {
-            if (seen.has(p.id)) return false;
-            seen.add(p.id);
-            return true;
-          });
-          // Filtro local: substring no nome ou DCB (case-insensitive)
-          const searchNorm = currentSearch.toLowerCase();
-          produtos = produtos.filter(p =>
-            (p.nome && p.nome.toLowerCase().includes(searchNorm)) ||
-            (p.dcb && p.dcb.toLowerCase().includes(searchNorm))
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          produtos.push({ id: doc.id, ...data });
+        });
+        
+        console.log('Total produtos carregados do Firestore:', produtos.length);
+        
+        // Aplica filtros localmente
+        let filtered = produtos.filter(p => p.ativo !== false); // Remove produtos inativos
+        
+        // Filtro por categoria
+        if (currentCategory) {
+          filtered = filtered.filter(p => 
+            normalize(p.categoria) === normalize(currentCategory)
           );
-          // Paginação manual sobre o resultado filtrado
-          totalProductsCount = produtos.length;
-          allProducts = produtos;
-          const startIdx = (page - 1) * PRODUCTS_PER_PAGE;
-          const endIdx = startIdx + PRODUCTS_PER_PAGE;
-          produtos = produtos.slice(startIdx, endIdx);
-        } else if (currentSearch) {
-          // Busca por prefixo (1 caractere): mantém busca Firestore
-          let qNome = buildProductQuery(page);
-          snapNome = await getDocs(qNome);
-          nomeDocs = snapNome.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
-          let qDcb = query(collection(db, 'produtos'), where('dcb', '==', searchUpper), orderBy('nome'));
-          snapDcb = await getDocs(qDcb);
-          dcbDocs = snapDcb.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
-          let all = [...nomeDocs, ...dcbDocs];
-          const seen = new Set();
-          produtos = all.filter(p => {
-            if (seen.has(p.id)) return false;
-            seen.add(p.id);
-            return true;
-          });
-          totalProductsCount = produtos.length;
-          allProducts = produtos;
-          const startIdx = (page - 1) * PRODUCTS_PER_PAGE;
-          const endIdx = startIdx + PRODUCTS_PER_PAGE;
-          produtos = produtos.slice(startIdx, endIdx);
-          if (nomeDocs.length > 0 && snapNome.docs.length > 0) {
-            pageCursors[page] = snapNome.docs[snapNome.docs.length - 1];
-          }
-        } else {
-          // Sem busca: só paginação normal por nome
-          let qNome = buildProductQuery(page);
-          snapNome = await getDocs(qNome);
-          nomeDocs = snapNome.docs.map(doc => { let data = doc.data(); data.id = doc.id; return data; });
-          produtos = nomeDocs;
-          if (snapNome.docs.length > 0) {
-            pageCursors[page] = snapNome.docs[snapNome.docs.length - 1];
-          }
-          allProducts = nomeDocs; // garante que allProducts é a lista completa sem paginação
         }
+        
+        // Filtro por subcategoria
+        if (currentSubcategory) {
+          filtered = filtered.filter(p => 
+            normalize(String(p.subcategoria || '')) === normalize(currentSubcategory)
+          );
+        }
+        
+        // Filtro por busca
+        if (currentSearch) {
+          const searchTerm = currentSearch.toLowerCase();
+          filtered = filtered.filter(p => 
+            (p.nome && p.nome.toLowerCase().includes(searchTerm)) ||
+            (p.dcb && p.dcb.toLowerCase().includes(searchTerm)) ||
+            (p.descricao && p.descricao.toLowerCase().includes(searchTerm)) ||
+            (p.codRed && p.codRed.toLowerCase().includes(searchTerm)) ||
+            (p.ean && p.ean.toLowerCase().includes(searchTerm)) ||
+            (p.laboratorio && p.laboratorio.toLowerCase().includes(searchTerm))
+          );
+        }
+        
+        // Ordena por nome
+        filtered.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        
+        console.log('Produtos filtrados:', filtered.length);
+        
+        // Atualiza variáveis globais
+        allProducts = filtered;
+        totalProductsCount = filtered.length;
+        
+        // Paginação local
+        const startIdx = (page - 1) * PRODUCTS_PER_PAGE;
+        const endIdx = startIdx + PRODUCTS_PER_PAGE;
+        const paginatedProducts = filtered.slice(startIdx, endIdx);
+        
+        console.log('Produtos paginados:', paginatedProducts.length);
+        
         loadingSkeleton.classList.add('hidden');
-        if (!Array.isArray(produtos) || produtos.length === 0) {
+        
+        if (filtered.length === 0) {
           emptyState.classList.remove('hidden');
           renderPagination(0, 1, PRODUCTS_PER_PAGE);
           return;
         }
+        
         emptyState.classList.add('hidden');
         currentPage = page;
         renderPagination(totalProductsCount, page, PRODUCTS_PER_PAGE);
-        renderProducts(produtos);
+        renderProducts(paginatedProducts);
         updateSubcategories();
+        
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         loadingSkeleton.classList.add('hidden');
@@ -517,15 +502,19 @@
 
     // Inicialização: busca total e carrega a primeira página
     async function initPaginatedProducts() {
-      await updateTotalCount();
-      pageCursors = [null];
-      fetchProductsPaginated(1);
+      currentPage = 1;
+      await fetchProductsPaginated(1);
     }
 
     // Função para renderizar produtos (substitua a função renderProducts existente)
     function renderProducts(produtos) {
       const productsContainer = document.getElementById('lista-produtos');
       productsContainer.innerHTML = '';
+      
+      if (!produtos || produtos.length === 0) {
+        return;
+      }
+      
       // SEO: Gera dados estruturados para os produtos listados
       if (produtos && produtos.length) {
         const schema = {
@@ -549,15 +538,29 @@
         };
         document.getElementById('ldjson-schema').textContent = JSON.stringify(schema, null, 2);
       }
-      produtos.filter(product => product.quantidade === undefined || product.quantidade > 0).forEach(product => {
+      
+      // Remove o filtro de quantidade que pode estar escondendo produtos
+      produtos.forEach(product => {
+        // Calcula preços
+        let precoFinal = 0;
+        if (product.valorComDesconto && !isNaN(product.valorComDesconto)) {
+          precoFinal = Number(product.valorComDesconto);
+        } else if (product.precoComDesconto && !isNaN(product.precoComDesconto)) {
+          precoFinal = Number(product.precoComDesconto);
+        } else if (product.precoMaximo && !isNaN(product.precoMaximo)) {
+          precoFinal = Number(product.precoMaximo);
+        }
+        
+        const temDesconto = product.desconto && product.desconto > 0;
+        const precoOriginal = Number(product.precoMaximo || 0).toFixed(2);
+        const precoDesconto = precoFinal.toFixed(2);
+        const descontoPercent = temDesconto ? Math.round(product.desconto * 100) : null;
+        
         let fotoSrc = 'img/medicamento.png';
         if (Array.isArray(product.fotos) && product.fotos.length > 0) {
           fotoSrc = product.fotos[0] || 'img/medicamento.png';
         }
-        const temDesconto = product.desconto && product.desconto > 0;
-        const precoOriginal = Number(product.precoMaximo).toFixed(2);
-        const precoDesconto = Number(product.valorComDesconto).toFixed(2);
-        const descontoPercent = temDesconto ? Math.round(product.desconto * 100) : null;
+        
         const productElement = document.createElement('div');
         productElement.className = 'card-produto bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col p-3 transition-transform hover:scale-[1.025] hover:shadow-2xl duration-150';
         productElement.innerHTML = `
@@ -579,7 +582,7 @@
                 <button type="button" class="qty-btn increment flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500">+</button>
               </div>
               <button class="btn-carrinho add-cart-btn flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-all duration-150 h-9">
-                <span class="cart-btn-text flex items-center gap-1 sm:inline hidden"><i class="fas fa-cart-plus"></i>  Adicionar</span>
+                <span class="cart-btn-text flex items-center gap-1 sm:inline hidden"><i class="fas fa-cart-plus"></i> Adicionar</span>
                 <span class="cart-btn-text flex items-center gap-1 sm:hidden"><i class="fas fa-cart-plus"></i></span>
                 <span class="cart-btn-loading hidden"><i class='fas fa-spinner fa-spin'></i></span>
                 <span class="cart-btn-ok hidden"><i class='fas fa-check text-green-400'></i></span>
@@ -587,8 +590,10 @@
             </div>
           </div>
         `;
+        
         productsContainer.appendChild(productElement);
-        // Clique na imagem ou nome leva para detalhes
+        
+        // Event listeners para clique na imagem/nome
         const img = productElement.querySelector('img[data-produto-id]');
         const nome = productElement.querySelector('h3[data-produto-id]');
         [img, nome].forEach(el => {
@@ -596,32 +601,41 @@
             window.location.href = `produto_detalhes.html?id=${product.id}`;
           });
         });
-        // Botão com feedback visual e integração com quantidade
+        
+        // Event listeners para botões de quantidade e adicionar ao carrinho
         const btn = productElement.querySelector('.add-cart-btn');
         const btnText = btn.querySelector('.cart-btn-text');
         const btnLoading = btn.querySelector('.cart-btn-loading');
         const btnOk = btn.querySelector('.cart-btn-ok');
         const inputQty = productElement.querySelector('.input-qty');
+        
         btn.addEventListener('click', async () => {
           let qty = parseInt(inputQty.value, 10);
           if (isNaN(qty) || qty < 1) qty = 1;
+          
           btnText.classList.add('hidden');
           btnLoading.classList.remove('hidden');
-          await new Promise(r => setTimeout(r, 400)); // Simula loading
+          
+          await new Promise(r => setTimeout(r, 400));
+          
           if (window.addToCart) {
             await window.addToCart(product, qty);
           }
+          
           btnLoading.classList.add('hidden');
           btnOk.classList.remove('hidden');
+          
           setTimeout(() => {
             btnOk.classList.add('hidden');
             btnText.classList.remove('hidden');
           }, 900);
         });
-        // Moderniza o input de quantidade com botões + e -
+        
+        // Botões de quantidade
         const qtyInput = productElement.querySelector('.input-qty');
         const btnDec = productElement.querySelector('.qty-btn.decrement');
         const btnInc = productElement.querySelector('.qty-btn.increment');
+        
         if (qtyInput && btnDec && btnInc) {
           btnDec.addEventListener('click', () => {
             let val = parseInt(qtyInput.value, 10) || 1;
@@ -635,10 +649,29 @@
       });
     }
 
+    // Função de debug para verificar produtos no Firestore
+    async function debugProducts() {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'produtos'));
+        console.log('Total de produtos no Firestore:', querySnapshot.size);
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log('Produto:', data.nome, 'Ativo:', data.ativo, 'Categoria:', data.categoria);
+        });
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+      }
+    }
+
     // Inicialização
     // Se houver busca na query string, aplica na busca
     currentSearch = '';
     if (searchInput) searchInput.value = '';
+    
+    // Debug desativado - remova esta linha se necessário debug:
+    // debugProducts();
+    
     initPaginatedProducts();
     // Botão para abrir o login-modal
     document.body.addEventListener('click', (e) => {

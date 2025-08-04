@@ -1,5 +1,5 @@
 import { auth } from './firebase-config.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 import { escapeHTML } from './utils.js';
 
 export function handleAuthState(authContainerId) {
