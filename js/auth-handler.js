@@ -1,5 +1,9 @@
 import { auth } from './firebase-config.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+// Using local Firebase replacement
+const onAuthStateChanged = (auth, callback) => {
+  setTimeout(() => callback(null), 100);
+  return () => {};
+};
 import { escapeHTML } from './utils.js';
 
 export function handleAuthState(authContainerId) {

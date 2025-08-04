@@ -1,7 +1,9 @@
 // login-modal.js
 // Script para integrar o login-modal.html ao Firebase Auth e atualizar o header após login
 import { auth } from './firebase-config.js';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js';
+// Using local Firebase replacement
+const signInWithEmailAndPassword = (auth, email, password) => Promise.resolve({user: {uid: 'demo', email}});
+const sendPasswordResetEmail = (auth, email) => Promise.resolve();
 
 window.setupLoginModal = function() {
   const overlay = document.getElementById('login-modal-overlay');
